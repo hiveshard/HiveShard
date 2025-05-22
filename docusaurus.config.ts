@@ -26,7 +26,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/hiveshard/hiveshard',
+            'https://github.com/hiveshard/hiveshard/blob/main',
         },
         // blog: {
         //   showReadingTime: true,
@@ -86,7 +86,7 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Hiveshard Discord',
+              label: 'Discord',
               href: 'https://discord.gg/qPTQ4Rhk75',
             },
           ],
