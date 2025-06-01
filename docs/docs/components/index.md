@@ -1,6 +1,39 @@
 # Components
 
-Hiveshard has many components.
+Hiveshard has many components. A simple example architecture 
+utilizing both hot and cold shards as well as included addons might look like this:
+```mermaid
+flowchart LR
+    client1[client 1]
+    client2[client 2]
+    client3[client 3]
+    
+    subgraph backend[managed backend]
+        ingress1[ingress 1]
+        ingress2[ingress 2]
+        nats[NATS]
+        hot1[hot runtime 1]
+        hot2[hot runtime 2]
+        kafka[Kafka]
+        cold1[cold runtime 1]
+        cold2[cold runtime 2]
+    end
+
+    client1 <--> ingress1
+    client2 <--> ingress2
+    client3 <--> ingress2
+    ingress1 <--> nats
+    ingress2 <--> nats
+    nats <--> hot1
+    nats <--> hot2
+    hot1 <--> kafka
+    hot2 <--> kafka
+    kafka <--> cold1
+    kafka <--> cold2
+```
+
+## Dependencies
+
 SDKs like `shard.hot` and `shard.cold` are the foundations for specialized **shards**.
 These can be hosted on **runtimes**.
 
@@ -13,18 +46,21 @@ natively on a standalone unity host.
 Some addons are open source, others are **not**. 
 However, closed source addons are provided free of charge as docker containers.
 
+A full dependency graph for the above portrayed example might look like this:
+
 ```mermaid
 flowchart LR
-    subgraph consumer[closed source consumer project]
+    subgraph consumer[closed source consumer]
         hot1[hot package 1]
         hot2[hot package 2]
-        cold1[cold package 2]
+        cold1[cold package 1]
         cold2[cold package 2]
         unity[unity standalone client]
     end
 
     subgraph generated[generated distributed backend]
-        c_hot[hot runtime]
+        c_hot1[hot runtime 1]
+        c_hot2[hot runtime 2]
         c_cold1[cold runtime 1]
         c_cold2[cold runtime 2]
     end
@@ -66,10 +102,13 @@ flowchart LR
     unity --> unity_navigation
     unity --> unity_physics
 
-    c_hot --> hot1
-    c_hot --> hot2
-    c_hot --> runtime.distributed
-    c_hot --> distributed_physics
+    c_hot1 --> hot1
+    c_hot1 --> hot2
+    c_hot1 --> runtime.distributed
+    c_hot1 --> distributed_physics
+    c_hot2 --> runtime.distributed
+    c_hot2 --> hot2
+    c_hot2 --> distributed_physics
     c_cold1 --> cold1
     c_cold1 --> runtime.distributed
     c_cold1 --> distributed_navigation
