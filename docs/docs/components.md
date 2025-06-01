@@ -14,7 +14,7 @@ Some addons are open source, others are **not**.
 However, closed source addons are provided free of charge as docker containers.
 
 ```mermaid
-flowchart TD
+flowchart LR
     subgraph consumer[closed source consumer project]
         hot1[hot package 1]
         hot2[hot package 2]
