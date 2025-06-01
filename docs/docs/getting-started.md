@@ -1,1 +1,4 @@
-# Getting started with hivemind
+---
+sidebar_position: 1
+---
+# Getting started
