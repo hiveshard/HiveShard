@@ -17,7 +17,7 @@ where T: XceptoScenario, new()
     [Test]
     public async Task EchoShardResponseWithNumber()
     {
-        await XceptoTest.Given(new T(), TimeSpan.FromSeconds(20), builder =>
+        await XceptoTest.Given(new T(), builder =>
         {
             var worker = builder.RegisterAdapter(new WorkerXceptoAdapter(new WorkerConfig(1)));
             var simpleFabric = builder.RegisterAdapter(new SimpleFabricXceptoAdapter());

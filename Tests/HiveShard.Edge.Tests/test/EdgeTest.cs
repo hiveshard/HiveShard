@@ -14,7 +14,7 @@ where T: XceptoScenario, new()
     [Test]
     public async Task ClientEdgeBinding()
     {
-        await XceptoTest.Given(new T(), TimeSpan.FromSeconds(5), builder =>
+        await XceptoTest.Given(new T(), builder =>
         {
             var credentials = new HiveShard.Data.Client("test");
             var edge = builder.RegisterAdapter(new EdgeServerAdapter());
@@ -43,7 +43,7 @@ where T: XceptoScenario, new()
     [Test]
     public async Task ClientEdgeMessageTunneling()
     {
-        await XceptoTest.Given(new T(), TimeSpan.FromSeconds(5), builder =>
+        await XceptoTest.Given(new T(), builder =>
         {
             var credentials = new HiveShard.Data.Client("test");
             var edge = builder.RegisterAdapter(new EdgeServerAdapter());
