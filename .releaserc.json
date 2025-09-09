@@ -15,6 +15,30 @@
       {
         "publishCmd": "./release.sh HiveShard.Client ${nextRelease.version}"
       }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh HiveShard.Edge ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh HiveShard.Shard ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh HiveShard.Ticker ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh HiveShard.Worker ${nextRelease.version}"
+      }
     ]
   ]
 }
