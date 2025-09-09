@@ -51,6 +51,7 @@ namespace HiveShard.Provider
 
         public void Span(SpanWithPayload spanWithPayload)
         {
+            throw new System.NotImplementedException();
         }
 
         public void Metric(WorkerMetrics workerMetrics)

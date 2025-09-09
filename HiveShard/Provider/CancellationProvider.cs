@@ -5,7 +5,7 @@ namespace HiveShard.Provider
 {
     public class CancellationProvider: ICancellationProvider
     {
-        private CancellationTokenSource _source = new CancellationTokenSource();
+        private readonly CancellationTokenSource _source = new();
         public CancellationToken GetToken() => _source.Token;
 
         public void RequestCancellation()
