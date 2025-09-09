@@ -17,7 +17,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Await Kafka
-        run: dotnet run --project .\Util\KafkaStartupAwaiter\KafkaStartupAwaiter.csproj
+        run: dotnet run --project ./Util/KafkaStartupAwaiter/KafkaStartupAwaiter.csproj
           
       - name: Run tests
         run: dotnet test
