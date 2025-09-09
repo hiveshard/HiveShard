@@ -7,8 +7,8 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "dotnet build -c Release -p:Version=${nextRelease.version}",
-        "publishCmd": "dotnet pack -c Release -p:Version=${nextRelease.version} -o ./nupkg && dotnet nuget push ./nupkg/*.nupkg --api-key ${process.env.NUGET_API_KEY} --source https://api.nuget.org/v3/index.json"
+        "prepareCmd": "dotnet build --project ./HiveShard/HiveShard.csproj -c Release -p:Version=${nextRelease.version}",
+        "publishCmd": "dotnet pack --project ./HiveShard/HiveShard.csproj -c Release -p:Version=${nextRelease.version} -o ./nupkg && dotnet nuget push ./nupkg/*.nupkg --api-key ${process.env.NUGET_API_KEY} --source https://api.nuget.org/v3/index.json"
       }
     ]
   ]
