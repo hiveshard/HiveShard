@@ -43,12 +43,15 @@ namespace HiveShard.Fabrics.Kafka
             {
                 BootstrapServers = _broker,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
-                GroupId = identityConfig.GetIdentityString()
+                GroupId = identityConfig.GetIdentityString(),
+                SocketTimeoutMs = 5000,
             };
             
             _producerConfig = new ProducerConfig
             {
-                BootstrapServers = _broker
+                BootstrapServers = _broker,
+                MessageTimeoutMs = 2000,
+                SocketTimeoutMs = 5000,
             };
         }
         
@@ -134,6 +137,7 @@ namespace HiveShard.Fabrics.Kafka
                     {
                         new() { Name = topic, NumPartitions = Chunk.MaxChunks, ReplicationFactor = 1 }
                     });
+                    _scopedLogger.LogDebug($"Created topic {topic} with partitions: 1-{Chunk.MaxChunks}");
                 }
             }, cancellationToken);
         }
@@ -150,9 +154,10 @@ namespace HiveShard.Fabrics.Kafka
                         producer = new ProducerBuilder<Null, string>(_producerConfig)
                             .SetLogHandler((_, logMessage) =>
                             {
-                                _scopedLogger.LogDebug($"{logMessage.Name}: {logMessage.Message}");
                                 if (logMessage.Level <= SyslogLevel.Error)
-                                    throw new Exception($"{logMessage.Level}: {logMessage.Name}, {logMessage.Message}");
+                                    _scopedLogger.LogException(new Exception($"{logMessage.Level}: {logMessage.Name}, {logMessage.Message}"));
+                                else
+                                    _scopedLogger.LogDebug($"{logMessage.Name}: {logMessage.Message}");
                             })
                             .Build();
                     }
@@ -183,9 +188,10 @@ namespace HiveShard.Fabrics.Kafka
                     consumer = new ConsumerBuilder<Ignore, string>(_consumerConfig)
                         .SetLogHandler((_, logMessage) =>
                         {
-                            _scopedLogger.LogDebug($"{logMessage.Name}: {logMessage.Message}");
                             if (logMessage.Level <= SyslogLevel.Error)
-                                throw new Exception($"{logMessage.Level}: {logMessage.Name}, {logMessage.Message}");
+                                _scopedLogger.LogException(new Exception($"{logMessage.Level}: {logMessage.Name}, {logMessage.Message}"));
+                            else
+                                _scopedLogger.LogDebug($"{logMessage.Name}: {logMessage.Message}");
                         })
                         .Build();
                     if (consumer is null)
