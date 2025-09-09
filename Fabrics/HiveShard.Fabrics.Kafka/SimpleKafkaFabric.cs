@@ -21,13 +21,13 @@ namespace HiveShard.Fabrics.Kafka
         private readonly ConsumerConfig _consumerConfig;
         private readonly ProducerConfig _producerConfig;
         private readonly string _broker;
-        private ISerializer _serializer;
-        private IScopedFabricLoggingProvider _scopedLogger;
-        private IEnvironmentConfig _environmentConfig;
-        private BlockingCollection<TopicPartition> _ensureTopics = new();
-        private ConcurrentQueue<KafkaRegistration> _kafkaRegistrations = new();
-        private ConcurrentQueue<TopicPartition> _newProducers = new();
-        private ConcurrentDictionary<TopicPartition, BlockingCollection<string>> _messagesToBeProduced = new();
+        private readonly ISerializer _serializer;
+        private readonly IScopedFabricLoggingProvider _scopedLogger;
+        private readonly IEnvironmentConfig _environmentConfig;
+        private readonly BlockingCollection<TopicPartition> _ensureTopics = new();
+        private readonly ConcurrentQueue<KafkaRegistration> _kafkaRegistrations = new();
+        private readonly ConcurrentQueue<TopicPartition> _newProducers = new();
+        private readonly ConcurrentDictionary<TopicPartition, BlockingCollection<string>> _messagesToBeProduced = new();
         public SimpleKafkaFabric(IIdentityConfig identityConfig, ICancellationProvider cancellationProvider, ISerializer serializer, IFabricLoggingProvider fabricLoggingProvider, IEnvironmentConfig environmentConfig)
         {
             _serializer = serializer;
