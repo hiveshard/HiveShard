@@ -7,15 +7,13 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "dotnet build ./HiveShard/HiveShard.csproj -c Release -p:Version=${nextRelease.version}",
-        "publishCmd": "dotnet pack ./HiveShard/HiveShard.csproj -c Release -p:Version=${nextRelease.version} -o ./nupkg && dotnet nuget push ./nupkg/*.nupkg --api-key ${process.env.NUGET_API_KEY} --source https://api.nuget.org/v3/index.json"
+        "publishCmd": "./release.sh HiveShard ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "dotnet build ./HiveShard.Client/HiveShard.Client.csproj -c Release -p:Version=${nextRelease.version}",
-        "publishCmd": "dotnet pack ./HiveShard.Client/HiveShard.Client.csproj -c Release -p:Version=${nextRelease.version} -o ./nupkg && dotnet nuget push ./nupkg/*.nupkg --api-key ${process.env.NUGET_API_KEY} --source https://api.nuget.org/v3/index.json"
+        "publishCmd": "./release.sh HiveShard.Client ${nextRelease.version}"
       }
     ]
   ]
