@@ -1,0 +1,37 @@
+name: Manual release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.3)'
+        required: true
+        default: '1.0.0'
+  
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        project:
+          - HiveShard/HiveShard.csproj
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+  
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+  
+      - name: Restore
+        run: dotnet restore ${{ matrix.project }}
+  
+      - name: Build
+        run: dotnet build ${{ matrix.project }} --configuration Release --no-restore -p:Version=${{ github.event.inputs.version }}
+  
+      - name: Pack
+        run: dotnet pack ${{ matrix.project }} --configuration Release --no-build --output ./nupkg -p:Version=${{ github.event.inputs.version }}
+  
+      - name: Push to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+          
