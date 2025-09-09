@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>9</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\HiveShard.Client\HiveShard.Client.csproj" />
+      <ProjectReference Include="..\..\HiveShard.Edge\HiveShard.Edge.csproj" />
+      <ProjectReference Include="..\..\HiveShard.Shard\HiveShard.Shard.csproj" />
+      <ProjectReference Include="..\..\HiveShard.Ticker\HiveShard.Ticker.csproj" />
+      <ProjectReference Include="..\..\HiveShard.Worker\HiveShard.Worker.csproj" />
+      <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Xcepto" Version="5.3.50" />
+    </ItemGroup>
+
+</Project>

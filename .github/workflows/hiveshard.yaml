@@ -1,0 +1,25 @@
+name: HiveShard CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: start services
+        run: |
+           docker compose -f docker-compose.ci.yaml up -d
+
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+          
+      - name: Run tests
+        run: dotnet test
+               
+      - name: stop services
+        run: |
+           docker compose -f docker-compose.ci.yaml down
+          

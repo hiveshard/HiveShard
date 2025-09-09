@@ -1,1 +1,7 @@
 .idea/
+
+# dotnet
+**/obj/
+**/bin/
+build/
+**.DotSettings.user

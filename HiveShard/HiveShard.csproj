@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>false</ImplicitUsings>
+        <LangVersion>9</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="Polly" Version="8.6.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Util\Resilience.cs.meta" />
+      <None Remove="Serializer\NewtonsoftSerializer.cs.meta" />
+      <None Remove="Interface\IUpdate.cs.meta" />
+      <None Remove="Interface\ISerializer.cs.meta" />
+      <None Remove="Interface\IIdentityProvider.cs.meta" />
+      <None Remove="Interface\IEvent.cs.meta" />
+      <None Remove="Interface\IDebugLoggingProvider.cs.meta" />
+      <None Remove="Interface\ICancellationProvider.cs.meta" />
+      <None Remove="Interface\IAddressProvider.cs.meta" />
+      <None Remove="Fabric\IFabric.cs.meta" />
+      <None Remove="Fabric\Edge\IEdgeTunnelServerEndpoint.cs.meta" />
+      <None Remove="Fabric\Edge.meta" />
+      <None Remove="Fabric\Client\IEdgeTunnelClientEndpoint.cs.meta" />
+      <None Remove="Fabric\Client.meta" />
+      <None Remove="Event\Tick.cs.meta" />
+      <None Remove="Event\CompletedTick.cs.meta" />
+      <None Remove="Data\Telemetry\WorkerMetrics.cs.meta" />
+      <None Remove="Data\Telemetry\SpanWithPayload.cs.meta" />
+      <None Remove="Data\Telemetry\LogOriginType.cs.meta" />
+      <None Remove="Data\Telemetry\LogOrigin.cs.meta" />
+      <None Remove="Data\Telemetry\LogMessage.cs.meta" />
+      <None Remove="Data\ConnectedClient.cs.meta" />
+      <None Remove="Data\Client.cs.meta" />
+      <None Remove="Data\Chunk.cs.meta" />
+    </ItemGroup>
+
+</Project>
