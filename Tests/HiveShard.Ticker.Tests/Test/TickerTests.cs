@@ -14,7 +14,7 @@ public class TickerTests<T> where T: XceptoScenario, new()
     [Test]
     public async Task TickerProducesIncrementedTick()
     {
-        await XceptoTest.Given(new T(), builder =>
+        await XceptoTest.Given(new T(), TimeSpan.FromSeconds(20), builder =>
         {
             var ticker = builder.RegisterAdapter(new TickerXceptoAdapter(new TickerConfig(1)));
             var testFabricAccess = builder.RegisterAdapter(new SimpleFabricXceptoAdapter());

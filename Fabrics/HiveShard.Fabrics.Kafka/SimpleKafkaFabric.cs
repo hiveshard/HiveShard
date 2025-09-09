@@ -44,14 +44,11 @@ namespace HiveShard.Fabrics.Kafka
                 BootstrapServers = _broker,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 GroupId = identityConfig.GetIdentityString(),
-                SocketTimeoutMs = 5000,
             };
             
             _producerConfig = new ProducerConfig
             {
                 BootstrapServers = _broker,
-                MessageTimeoutMs = 2000,
-                SocketTimeoutMs = 5000,
             };
         }
         
