@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
+using DotChaser.Client.Providers;
 
 namespace DotChaser.Client;
 
@@ -22,15 +23,21 @@ class Program
         });
 
         DateTime lastSimulationStep = DateTime.Now;
-        Game game = new Game(Height, Width);
+        var player = new Player(new Vector2(3, 3), new Vector2(0, 0), 1000);
+        Game game = new Game(Height, Width, [player], new ClientOutputProvider());
+        
         while (true)
         {
             if(DateTime.Now - lastSimulationStep > TimeSpan.FromSeconds(1))
             {
-                game.Simulate(_inputChanges);
+                foreach (var inputChange in _inputChanges)
+                {
+                    game.ChangePlayerDirection(inputChange);
+                }
+                game.Simulate();
                 lastSimulationStep = DateTime.Now;
             }
-            Render(game);
+            game.Render();
             await Task.Delay(100);
         }
     }
@@ -47,21 +54,5 @@ class Program
         if (input.Key == ConsoleKey.S)
             return new Vector2(0,-1);
         return new Vector2(0,0);
-    }
-    
-    private static void Render(Game game)
-    {
-        Console.Clear();
-        for (int y = Height - 1; y >= 0; y--)
-        {
-            for (int x = 0; x < Width; x++)
-            {
-                if (game.Players.Any(p => p.Position == new Vector2(x, y)))
-                    Console.Write(" O");
-                else
-                    Console.Write(" X");
-            }
-            Console.Write("\n");
-        }
     }
 }
