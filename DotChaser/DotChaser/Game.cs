@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using DotChaser.Interfaces;
+using DotChaser.Maps;
 
 namespace DotChaser
 {
@@ -10,30 +11,31 @@ namespace DotChaser
     {
         Dictionary<Vector2, int> grid = new();
         private readonly Dictionary<int, Player> _players = new();
-        private int _height;
-        private int _width;
         private IOutputProvider _outputProvider;
+        private readonly Map _map;
 
-        public Game(int height, int width, IEnumerable<Player> players, IOutputProvider outputProvider)
+        public Game(IEnumerable<Player> players, Map map, IOutputProvider outputProvider)
         {
+            _map = map;
             _outputProvider = outputProvider;
-            _width = width;
-            _height = height;
+            
+            for (int y = _map.Height - 1; y >= 0; y--)
+            {
+                for (int x = 0; x < _map.Width; x++)
+                {
+                    grid[new Vector2(x, y)] = _map.Grid[y * _map.Width + x];
+                }
+            }
+            
+            // players
             foreach (var player in players)
             {
+                var spawnPosition = player.Position;
+                if (spawnPosition.X < 0 || spawnPosition.X >= _map.Width || spawnPosition.Y < 0 ||
+                    spawnPosition.Y >= _map.Height)
+                    throw new Exception("Player out of bounds");
                 _players[player.ID] = player;
-                grid[player.Position] = player.ID;
-            }
-
-            for (int y = height - 1; y >= 0; y--)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    if (_players.Values.Any(p => p.Position == new Vector2(x, y)))
-                        grid[new Vector2(x, y)] = 1000;
-                    else
-                        grid[new Vector2(x, y)] = 0;
-                }
+                grid[spawnPosition] = player.ID;
             }
         }
 
@@ -43,7 +45,9 @@ namespace DotChaser
             foreach (var player in _players.Values)
             {
                 var newPosition = player.Position + player.Direction;
-                if(newPosition.X < 0 || newPosition.X >= _width || newPosition.Y < 0 || newPosition.Y >= _height)
+                if(newPosition.X < 0 || newPosition.X >= _map.Width || newPosition.Y < 0 || newPosition.Y >= _map.Height)
+                    continue;
+                if(grid[newPosition] == 1)
                     continue;
                 
                 grid[player.Position] = 0;
@@ -55,14 +59,23 @@ namespace DotChaser
         public void Render()
         {
             _outputProvider.Clear();
-            for (int y = _height - 1; y >= 0; y--)
+            for (int y = _map.Height - 1; y >= 0; y--)
             {
-                for (int x = 0; x < _width; x++)
+                for (int x = 0; x < _map.Width; x++)
                 {
-                    if (_players.Values.Any(p => p.Position == new Vector2(x, y)))
-                        _outputProvider.Print(" O");
-                    else
-                        _outputProvider.Print(" X");
+                    var location = new Vector2(x, y);
+                    switch (grid[location])
+                    {
+                        case >= 1000:
+                            _outputProvider.Print(" o");
+                            break;
+                        case 1:
+                            _outputProvider.Print(" #");
+                            break;
+                        default:
+                            _outputProvider.Print(" .");
+                            break;
+                    }
                 }
                 _outputProvider.NewLine();
             }
