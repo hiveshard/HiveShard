@@ -9,8 +9,9 @@ namespace DotChaser
 {
     public class Game
     {
-        Dictionary<Vector2, int> grid = new();
+        private readonly Dictionary<Vector2, int> _grid = new();
         private readonly Dictionary<int, Player> _players = new();
+        private readonly List<Monster> _monsters = new();
         private IOutputProvider _outputProvider;
         private readonly Map _map;
         private bool _allDead;
@@ -24,7 +25,13 @@ namespace DotChaser
             {
                 for (int x = 0; x < _map.Width; x++)
                 {
-                    grid[new Vector2(x, y)] = _map.Grid[y * _map.Width + x];
+                    var entity = _map.Grid[y * _map.Width + x];
+                    var position = new Vector2(x, y);
+                    _grid[position] = entity;
+                    if (entity == 3)
+                    {
+                        _monsters.Add(new Monster(position, RandomDirections().First()));
+                    }
                 }
             }
             
@@ -36,31 +43,90 @@ namespace DotChaser
                     spawnPosition.Y >= _map.Height)
                     throw new Exception("Player out of bounds");
                 _players[player.ID] = player;
-                grid[spawnPosition] = player.ID;
+                _grid[spawnPosition] = player.ID;
             }
         }
 
+        private static readonly Random Rng = new Random(123);
+        private List<Vector2> PossibleDirections => new()
+        {
+            new Vector2(1, 0),
+            new Vector2(-1, 0),
+            new Vector2(0, 1),
+            new Vector2(0, -1),
+        };
+
+        private List<Vector2> RandomDirections()
+        {
+            return PossibleDirections
+                .OrderBy(_ => Rng.Next())
+                .ToList();
+        }
 
         public void Simulate()
         {
             if(_allDead)
                 return;
+            
+            foreach (var monster in _monsters)
+            {
+                var oldPosition = monster.Position;
+                var newPosition = monster.Position;
+                List<Vector2> directionAttempts = new List<Vector2>();
+                var randomDirections = RandomDirections();
+                
+                // almost always remove inverted direction
+                if(Rng.Next(0,10) < 9)
+                    randomDirections.Remove(new Vector2(monster.Direction.X * -1, monster.Direction.Y * -1));
+                
+                // use current direction only sometimes
+                if(Rng.Next(0,10) > 5)
+                    directionAttempts.Add(monster.Direction);
+                
+                directionAttempts.AddRange(randomDirections);
+                foreach (var possibleDirection in directionAttempts)
+                {
+                    newPosition = monster.Position + possibleDirection;
+                    if(newPosition.X < 0 || newPosition.X >= _map.Width || newPosition.Y < 0 || newPosition.Y >= _map.Height)
+                        continue;
+                    if(_grid[newPosition] == 1)
+                        continue;
+                    
+                    monster.UpdateDirection(possibleDirection);
+                    break;
+                }
+
+                _grid[oldPosition] = 0;
+                _grid[newPosition] = 3;
+                monster.UpdatePosition(newPosition);
+                
+                var entityHit = _grid[monster.Position];
+                if (entityHit >= 1000)
+                {
+                    _players[entityHit].Died();
+                }
+
+            }
+            
             foreach (var player in _players.Values)
             {
+                if(!player.Alive)
+                    continue;
+                
                 var newPosition = player.Position + player.Direction;
                 if(newPosition.X < 0 || newPosition.X >= _map.Width || newPosition.Y < 0 || newPosition.Y >= _map.Height)
                     continue;
-                if(grid[newPosition] == 1)
+                if(_grid[newPosition] == 1)
                     continue;
 
-                if (grid[newPosition] == 2)
+                if (_grid[newPosition] == 2)
                     player.CollectDot();
                 
-                if (grid[newPosition] == 3)
+                if (_grid[newPosition] == 3)
                     player.Died();
                 
-                grid[player.Position] = 0;
-                grid[newPosition] = player.ID;
+                _grid[player.Position] = 0;
+                _grid[newPosition] = player.ID;
                 player.UpdatePosition(newPosition);
             }
 
@@ -86,7 +152,7 @@ namespace DotChaser
                 for (int x = 0; x < _map.Width; x++)
                 {
                     var location = new Vector2(x, y);
-                    switch (grid[location])
+                    switch (_grid[location])
                     {
                         case >= 1000:
                             _outputProvider.Print(" o");
@@ -117,7 +183,7 @@ namespace DotChaser
 
         public bool ValidatePosition(Vector2 vector2, int entity)
         {
-            return grid[vector2] == entity;
+            return _grid[vector2] == entity;
         }
     }
 }
