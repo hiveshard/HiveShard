@@ -49,6 +49,9 @@ namespace DotChaser
                     continue;
                 if(grid[newPosition] == 1)
                     continue;
+
+                if (grid[newPosition] == 2)
+                    player.CollectDot();
                 
                 grid[player.Position] = 0;
                 grid[newPosition] = player.ID;
@@ -59,6 +62,8 @@ namespace DotChaser
         public void Render()
         {
             _outputProvider.Clear();
+            _outputProvider.Print($"Dots: {_players[1000].Dots}");
+            _outputProvider.NewLine();
             for (int y = _map.Height - 1; y >= 0; y--)
             {
                 for (int x = 0; x < _map.Width; x++)
@@ -68,6 +73,9 @@ namespace DotChaser
                     {
                         case >= 1000:
                             _outputProvider.Print(" o");
+                            break;
+                        case 2:
+                            _outputProvider.Print(" *");
                             break;
                         case 1:
                             _outputProvider.Print(" #");

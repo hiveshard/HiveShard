@@ -14,6 +14,7 @@ namespace DotChaser
         public Vector2 Direction { get; private set; }
         public Vector2 Position { get; private set; }
         public int ID { get; }
+        public int Dots { get; private set; }
 
         public void ChangeDirection(Vector2 inputChange)
         {
@@ -23,6 +24,11 @@ namespace DotChaser
         public void UpdatePosition(Vector2 newPosition)
         {
             Position = newPosition;
+        }
+        
+        public void CollectDot()
+        {
+            Dots = Dots + 1;
         }
     }
 }
