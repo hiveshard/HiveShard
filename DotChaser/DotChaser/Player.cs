@@ -15,6 +15,7 @@ namespace DotChaser
         public Vector2 Position { get; private set; }
         public int ID { get; }
         public int Dots { get; private set; }
+        public bool Alive { get; private set; } = true;
 
         public void ChangeDirection(Vector2 inputChange)
         {
@@ -29,6 +30,11 @@ namespace DotChaser
         public void CollectDot()
         {
             Dots = Dots + 1;
+        }
+
+        public void Died()
+        {
+            Alive = false;
         }
     }
 }

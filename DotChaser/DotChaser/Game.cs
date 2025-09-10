@@ -13,6 +13,7 @@ namespace DotChaser
         private readonly Dictionary<int, Player> _players = new();
         private IOutputProvider _outputProvider;
         private readonly Map _map;
+        private bool _allDead;
 
         public Game(IEnumerable<Player> players, Map map, IOutputProvider outputProvider)
         {
@@ -42,6 +43,8 @@ namespace DotChaser
 
         public void Simulate()
         {
+            if(_allDead)
+                return;
             foreach (var player in _players.Values)
             {
                 var newPosition = player.Position + player.Direction;
@@ -53,17 +56,31 @@ namespace DotChaser
                 if (grid[newPosition] == 2)
                     player.CollectDot();
                 
+                if (grid[newPosition] == 3)
+                    player.Died();
+                
                 grid[player.Position] = 0;
                 grid[newPosition] = player.ID;
                 player.UpdatePosition(newPosition);
             }
+
+            _allDead = _players.Values.All(x=>!x.Alive);
         }
         
         public void Render()
         {
             _outputProvider.Clear();
-            _outputProvider.Print($"Dots: {_players[1000].Dots}");
-            _outputProvider.NewLine();
+            if(_allDead)
+            {
+                _outputProvider.Print($"Game Over! Dots: {_players[1000].Dots}");
+                _outputProvider.NewLine();
+            }
+            else
+            {
+                _outputProvider.Print($"Dots: {_players[1000].Dots}");
+                _outputProvider.NewLine();
+            }
+                
             for (int y = _map.Height - 1; y >= 0; y--)
             {
                 for (int x = 0; x < _map.Width; x++)
@@ -73,6 +90,9 @@ namespace DotChaser
                     {
                         case >= 1000:
                             _outputProvider.Print(" o");
+                            break;
+                        case 3:
+                            _outputProvider.Print(" ü");
                             break;
                         case 2:
                             _outputProvider.Print(" *");
