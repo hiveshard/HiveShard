@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections.Concurrent;
+using System.Numerics;
 
 namespace DotChaser.Client;
 
@@ -6,34 +7,56 @@ class Program
 {
     private const int Height = 5;
     private const int Width = 10;
-    
-    static void Main(string[] args)
+
+
+    private static ConcurrentQueue<Vector2> _inputChanges = new();
+    static async Task Main(string[] args)
     {
-        Vector2 playerPosition = new Vector2(3,3);
-        Render(playerPosition);
+        _ = Task.Run(() =>
+        {
+            while (true)
+            {
+                Vector2 direction = InputDirection();
+                _inputChanges.Enqueue(direction);
+            }
+        });
+
+        DateTime lastSimulationStep = DateTime.Now;
+        Game game = new Game(Height, Width);
         while (true)
         {
-            var input = Console.ReadKey();
-            if (input.Key == ConsoleKey.A)
-                playerPosition = new Vector2(Math.Clamp(playerPosition.X - 1, 0, Width - 1), playerPosition.Y);
-            if (input.Key == ConsoleKey.D)
-                playerPosition = new Vector2(Math.Clamp(playerPosition.X + 1, 0, Width - 1), playerPosition.Y);
-            if (input.Key == ConsoleKey.W)
-                playerPosition = new Vector2(playerPosition.X, Math.Clamp(playerPosition.Y + 1, 0, Height - 1));
-            if (input.Key == ConsoleKey.S)
-                playerPosition = new Vector2(playerPosition.X, Math.Clamp(playerPosition.Y - 1, 0, Height - 1));
-            Render(playerPosition);
+            if(DateTime.Now - lastSimulationStep > TimeSpan.FromSeconds(1))
+            {
+                game.Simulate(_inputChanges);
+                lastSimulationStep = DateTime.Now;
+            }
+            Render(game);
+            await Task.Delay(100);
         }
     }
     
-    private static void Render(Vector2 playerPosition)
+    private static Vector2 InputDirection()
+    {
+        var input = Console.ReadKey();
+        if (input.Key == ConsoleKey.A)
+            return new Vector2(-1,0);
+        if (input.Key == ConsoleKey.D)
+            return new Vector2(1,0);
+        if (input.Key == ConsoleKey.W)
+            return new Vector2(0,1);
+        if (input.Key == ConsoleKey.S)
+            return new Vector2(0,-1);
+        return new Vector2(0,0);
+    }
+    
+    private static void Render(Game game)
     {
         Console.Clear();
         for (int y = Height - 1; y >= 0; y--)
         {
             for (int x = 0; x < Width; x++)
             {
-                if(playerPosition == new Vector2(x,y))
+                if (game.Players.Any(p => p.Position == new Vector2(x, y)))
                     Console.Write(" O");
                 else
                     Console.Write(" X");
