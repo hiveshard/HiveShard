@@ -32,9 +32,6 @@ namespace Hiveshard.Services.Ticker
                 .BuildServiceProvider();
 
             var ticker = serviceProvider.GetRequiredService<HiveShard.Ticker.Ticker>();
-            var tasks = await ticker.Start();
-
-            await Task.WhenAll(tasks);
         }
     }
 }

@@ -16,8 +16,7 @@ namespace Xcepto.HiveShard.Adapters
         protected override Task Initialize(IServiceProvider serviceProvider)
         {
             var ticker = serviceProvider.GetRequiredService<Ticker>();
-            var starts = ticker.Start();
-            return Task.WhenAll(starts);
+            return Task.CompletedTask;
         }
 
         protected override Task AddServices(IServiceCollection serviceCollection)

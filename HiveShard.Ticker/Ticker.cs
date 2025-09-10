@@ -57,11 +57,6 @@ namespace HiveShard.Ticker
 
         private long _lastHandledTick;
         
-        public Task<IEnumerable<Task>> Start()
-        {
-            return Task.FromResult<IEnumerable<Task>>(ImmutableList<Task>.Empty);
-        }
-
         private void NextTick(long lastTick, DateTime lastTickTime)
         {
             var topicOffsets = _completedTicks
@@ -102,8 +97,8 @@ namespace HiveShard.Ticker
             if (_allShards.All(x => _completedTicks.ContainsKey(x)))
                 NextTick(obj.Message.Number, obj.Message.LastTickTime);
         }
-        
-        public static IEnumerable<Type> GetAllTypesImplementingInterface<TInterface>()
+
+        private static IEnumerable<Type> GetAllTypesImplementingInterface<TInterface>()
         {
             var interfaceType = typeof(TInterface);
             var assemblies = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x =>
