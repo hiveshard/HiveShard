@@ -65,8 +65,9 @@ namespace HiveShard.Ticker
             var maxOffsets = _allTopics.Select(topic =>
                 {
                     var keyValuePairs = topicOffsets as KeyValuePair<TopicPartition, long>[] ?? topicOffsets.ToArray();
-                    if (keyValuePairs.Length < 1 || !keyValuePairs.FirstOrDefault(x => x.Key.Equals(topic)).Key.Equals(topic))
+                    if (keyValuePairs.Length < 1 || !keyValuePairs.Any(x => x.Key.Equals(topic)))
                         return new KeyValuePair<TopicPartition, long>(topic, 0);
+                    
                     return keyValuePairs
                         .Where(topicOffset => topicOffset.Key.Equals(topic))
                         .OrderByDescending(topicOffset => topicOffset.Value)

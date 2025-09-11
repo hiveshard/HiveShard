@@ -11,6 +11,8 @@
       <ProjectReference Include="..\..\Fabrics\HiveShard.Fabrics.InMemory\HiveShard.Fabrics.InMemory.csproj" />
       <ProjectReference Include="..\..\HiveShard.Client\HiveShard.Client.csproj" />
       <ProjectReference Include="..\..\HiveShard.Ticker\HiveShard.Ticker.csproj" />
+      <ProjectReference Include="..\..\HiveShard.Worker\HiveShard.Worker.csproj" />
+      <ProjectReference Include="..\DotChaser\DotChaser.csproj" />
     </ItemGroup>
 
     <ItemGroup>
