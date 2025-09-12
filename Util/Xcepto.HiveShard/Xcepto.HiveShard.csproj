@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Fabrics\HiveShard.Fabrics.InMemory\HiveShard.Fabrics.InMemory.csproj" />
       <ProjectReference Include="..\..\HiveShard.Client\HiveShard.Client.csproj" />
       <ProjectReference Include="..\..\HiveShard.Edge\HiveShard.Edge.csproj" />
       <ProjectReference Include="..\..\HiveShard.Shard\HiveShard.Shard.csproj" />

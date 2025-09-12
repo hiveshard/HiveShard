@@ -46,6 +46,6 @@ class Program
         var ticker = serviceProvider.GetRequiredService<Ticker>();
         var initializer = serviceProvider.GetRequiredService<DotChaserInitializer>();
         var simpleFabric = serviceProvider.GetRequiredService<ISimpleFabric>();
-        await Task.WhenAll(initializer.Run(), simpleFabric.Start(tokenSource.Token), worker.Start());
+        await Task.WhenAll(initializer.Initialize(), simpleFabric.Start(tokenSource.Token), worker.Start());
     }
 }
