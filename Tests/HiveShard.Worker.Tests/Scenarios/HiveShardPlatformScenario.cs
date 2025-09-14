@@ -10,8 +10,12 @@ using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
 using HiveShard.Serializer;
+using HiveShard.Worker.Tests.Shards;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto;
+using Xcepto.HiveShard;
+using Xcepto.HiveShard.Adapters;
+using Xcepto.HiveShard.Builder;
 using Xcepto.HiveShard.Providers;
 using Xcepto.Interfaces;
 
@@ -19,35 +23,26 @@ namespace HiveShard.Worker.Tests.Scenarios;
 
 public class HiveShardPlatformScenario: XceptoScenario
 {
+    private HiveShardEnvironment _environment;
+    public HiveShardPlatformScenario()
+    {
+        _environment = new HiveShardBuilder(1, DeploymentType.HiveShardPlatform)
+            .AddShard<EchoHiveShard>()
+            .Build();
+    }
     public override Task<IServiceCollection> Setup()
     {
-        return Task.FromResult<IServiceCollection>(new ServiceCollection()
-            .AddSingleton<IEnvironmentConfig>(new EnvironmentConfig(Guid.NewGuid()))
-            .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))
-            .AddSingleton<IHiveShardSimpleLoggingProvider, LoggingProvider>()
-            .AddSingleton<ITelemetryProvider, SimpleTelemetryProvider>()
-            .AddSingleton<IFabricLoggingProvider, FabricLoggingProvider>()
-            .AddSingleton<IShardRepository, ShardRepository>()
-            .AddSingleton<ISerializer, NewtonsoftSerializer>()
-            .AddSingleton<ITickRepository, TickRepository>()
-            .AddSingleton<ICancellationProvider, CancellationProvider>()
-            .AddSingleton<IWorkerLoggingProvider, LoggingProvider>()
-            .AddSingleton<ILoggingProvider, LoggingProvider>()
-            .AddSingleton<ISimpleFabric, SimpleKafkaFabric>()
-        );
+        return Task.FromResult(_environment.GetServices());
     }
 
-    private CancellationTokenSource _cancellationTokenSource = new();
     public override Task Initialize(IServiceProvider serviceProvider)
     {
-        var simpleFabric = serviceProvider.GetRequiredService<ISimpleFabric>();
-        PropagateExceptions(simpleFabric.Start(_cancellationTokenSource.Token));
+        PropagateExceptions(_environment.Start());
         return Task.CompletedTask;
     }
 
     public override Task Cleanup(IServiceProvider serviceProvider)
     {
-        _cancellationTokenSource.Cancel();
         return Task.CompletedTask;
     }
 } 

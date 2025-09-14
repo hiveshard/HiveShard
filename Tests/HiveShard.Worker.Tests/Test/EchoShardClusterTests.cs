@@ -1,12 +1,8 @@
-using HiveShard.Data;
-using HiveShard.Event;
-using HiveShard.Worker.Data;
 using HiveShard.Worker.Tests.Events;
 using HiveShard.Worker.Tests.Scenarios;
 using HiveShard.Worker.Tests.Shards;
 using Xcepto;
 using Xcepto.HiveShard.Adapters;
-using Xcepto.HiveShard.Extensions;
 
 namespace HiveShard.Worker.Tests.Test;
 
@@ -16,19 +12,41 @@ namespace HiveShard.Worker.Tests.Test;
 public class EchoShardClusterTests<T>
 where T: XceptoScenario, new()
 {
-    [Test]
-    [Ignore("No consistency in failures")]
-    public async Task EchoShardResponseWithNumber()
-    {
-        await XceptoTest.Given(new T(), builder =>
-        {
-            var hiveShard = builder.RegisterHiveShard(x => x
-                .AddShard<EchoHiveShard>()
-                .SetGridSize(2)
-                .Build());
+    private T _scenario;
 
-            hiveShard.SendEdgeMessage();
-            hiveShard.SendShardMessage();
+    [OneTimeSetUp]
+    public void SetUp()
+    {
+        _scenario = new T();
+    }
+
+    [OneTimeTearDown]
+    public void TearDown()
+    {
+        
+    }
+    
+    
+    [Test]
+    public async Task FirstSendTestEvent()
+    {
+        await XceptoTest.Given(_scenario, builder =>
+        {
+            var hiveShard = builder.RegisterAdapter(new HiveShardAdapter());
+
+            hiveShard.SendEdgeMessage(new TestEvent(1));
+        });
+    }
+    
+    [Test]
+    public async Task ThenExpectResponseEvent()
+    {
+        await XceptoTest.Given(_scenario, builder =>
+        {
+            var hiveShard = builder.RegisterAdapter(new HiveShardAdapter());
+
+
+            hiveShard.ExpectEdgeMessage<TestEventResponse>(x => x.Number == 1);
         });
     }
 }
