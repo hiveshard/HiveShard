@@ -15,7 +15,7 @@ public static class HiveShardService
     }
 }
 
-public abstract class HiveShardServiceAdapter
+public abstract class HiveShardServiceSources
 {
     private DeploymentType _deploymentType;
     private DecentralizedHiveShardBuilder _builder;
@@ -30,7 +30,7 @@ public abstract class HiveShardServiceAdapter
 public class DecentralizedHiveShardBuilder
 {
     private DeploymentType _deploymentType;
-    private List<HiveShardServiceAdapter> _adapters = new();
+    private List<HiveShardServiceSources> _adapters = new();
     public DecentralizedHiveShardBuilder(DeploymentType deploymentType)
     {
         _deploymentType = deploymentType;
@@ -41,13 +41,18 @@ public class DecentralizedHiveShardBuilder
         throw new NotImplementedException();
     }
 
-    public TAdapter RegisterAdapter<TAdapter>()
-    where TAdapter: HiveShardServiceAdapter, new()
+    public TAdapter RegisterSources<TAdapter>()
+    where TAdapter: HiveShardServiceSources, new()
     {
         var adapter = new TAdapter();
         _adapters.Add(adapter);
         adapter.Initialize(_deploymentType, this);
         return adapter;
+    }
+
+    public void RegisterEnvironment(EdgeWorkerEnvironment environment)
+    {
+        throw new NotImplementedException();
     }
 }
 public class SpecialEdge1: BaseEdge { }

@@ -75,6 +75,11 @@ public class EdgeWorkerBuilder()
     {
         return new EdgeWorkerEnvironment();
     }
+
+    public EdgeWorkerEnvironment DynamicAssignment()
+    {
+        return new EdgeWorkerEnvironment();
+    }
 }
 public class EdgeWorkerEnvironment { }
 
