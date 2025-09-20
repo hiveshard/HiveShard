@@ -1,0 +1,15 @@
+using System;
+using System.Threading.Tasks;
+using HiveShard.Builder;
+using Xcepto.HiveShard.Scenario;
+
+namespace Xcepto.HiveShard
+{
+    public class HiveShardTest
+    {
+        public static async Task RunAsync(HiveShardEnvironment environment, Action<TransitionBuilder> xceptoBuilder)
+        {
+            await XceptoTest.Given(new GenericHiveShardScenario(environment), xceptoBuilder);
+        }
+    }
+}

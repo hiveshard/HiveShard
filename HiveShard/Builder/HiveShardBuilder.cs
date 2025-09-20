@@ -67,6 +67,7 @@ namespace Xcepto.HiveShard.Builder
     {
         InMemory,
         ExternalFabric,
-        HiveShardPlatform
+        HiveShardPlatform,
+        StandaloneService
     }
 }

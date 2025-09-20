@@ -1,4 +1,5 @@
 using System;
+using HiveShard.Builder;
 using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,8 +41,6 @@ public class TestShard: IHiveShard
         throw new NotImplementedException();
     }
 }
-
-public class BaseEdge { }
 
 public class HiveShardBuilderSketch
 {

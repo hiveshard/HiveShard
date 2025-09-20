@@ -9,6 +9,12 @@ namespace Xcepto.HiveShard.Adapters
 {
     public class HiveShardAdapter: XceptoAdapter
     {
+        protected override Task Initialize(IServiceProvider serviceProvider)
+        {
+            var environment = serviceProvider.GetRequiredService<HiveShardEnvironment>();
+            return Task.CompletedTask;
+        }
+
         public void SendEdgeMessage<T>(T message)
         where T: IEvent
         {

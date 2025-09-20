@@ -10,7 +10,7 @@ namespace Xcepto.HiveShard
         private DeploymentType _deploymentType;
         private IServiceCollection _serviceCollection;
 
-        public HiveShardEnvironment(int gridSize, DeploymentType deploymentType, IServiceCollection serviceCollection)
+        internal HiveShardEnvironment(int gridSize, DeploymentType deploymentType, IServiceCollection serviceCollection)
         {
             _serviceCollection = serviceCollection;
             _deploymentType = deploymentType;
