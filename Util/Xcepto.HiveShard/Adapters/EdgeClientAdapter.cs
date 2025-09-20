@@ -19,17 +19,6 @@ namespace Xcepto.HiveShard.Adapters
         {
             _client = client;
         }
-        protected override Task AddServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddSingleton<ILoggingProvider, LoggingProvider>();
-            serviceCollection.AddSingleton<IClientTunnel>(x =>
-            {
-                var _fabric = x.GetRequiredService<IEdgeTunnelClientEndpoint>();
-                var _cancellationProvider = x.GetRequiredService<ICancellationProvider>();
-                return new ClientTunnel(_fabric, _client, _cancellationProvider);
-            });
-            return Task.CompletedTask;
-        }
 
         protected override Task Initialize(IServiceProvider serviceProvider) => Task.CompletedTask;
 

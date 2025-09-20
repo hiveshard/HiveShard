@@ -30,18 +30,18 @@ public class HiveShardPlatformScenario: XceptoScenario
             .AddShard<EchoHiveShard>()
             .Build();
     }
-    public override Task<IServiceCollection> Setup()
+    protected override Task<IServiceCollection> Setup()
     {
         return Task.FromResult(_environment.GetServices());
     }
 
-    public override Task Initialize(IServiceProvider serviceProvider)
+    protected override Task Initialize(IServiceProvider serviceProvider)
     {
         PropagateExceptions(_environment.Start());
         return Task.CompletedTask;
     }
 
-    public override Task Cleanup(IServiceProvider serviceProvider)
+    protected override Task Cleanup(IServiceProvider serviceProvider)
     {
         return Task.CompletedTask;
     }

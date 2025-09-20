@@ -17,7 +17,7 @@ namespace HiveShard.Worker.Tests.Scenarios;
 
 public class InMemoryScenario: XceptoScenario
 {
-    public override Task<IServiceCollection> Setup()
+    protected override Task<IServiceCollection> Setup()
     {
         return Task.FromResult<IServiceCollection>(new ServiceCollection()
             .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))

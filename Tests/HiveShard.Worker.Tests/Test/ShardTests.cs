@@ -20,7 +20,7 @@ where T: XceptoScenario, new()
     {
         await XceptoTest.Given(new T(), builder =>
         {
-            var worker = builder.RegisterAdapter(new WorkerXceptoAdapter(new WorkerConfig(1)));
+            var worker = builder.RegisterAdapter(new WorkerXceptoAdapter());
             var simpleFabric = builder.RegisterAdapter(new SimpleFabricXceptoAdapter());
 
             // arrange

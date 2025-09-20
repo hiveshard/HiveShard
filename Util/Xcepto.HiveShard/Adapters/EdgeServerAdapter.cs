@@ -15,15 +15,6 @@ namespace Xcepto.HiveShard.Adapters
 {
     public class EdgeServerAdapter: XceptoAdapter
     {
-        protected override Task AddServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddSingleton<IEdgeTunnel, EdgeTunnel>()
-                .AddSingleton<ILoggingProvider, LoggingProvider>()
-                .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))
-                .AddSingleton<IAddressProvider, EdgeIdentityProvider>();
-            return Task.CompletedTask;
-        }
-    
         protected override Task Initialize(IServiceProvider serviceProvider) => Task.CompletedTask;
 
         protected override Task Cleanup(IServiceProvider serviceProvider)

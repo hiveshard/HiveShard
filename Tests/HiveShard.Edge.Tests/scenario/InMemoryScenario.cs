@@ -13,7 +13,7 @@ namespace HiveShard.Edge.Tests.scenario;
 
 public class InMemoryScenario: XceptoScenario
 {
-    public override Task<IServiceCollection> Setup() 
+    protected override Task<IServiceCollection> Setup() 
         => Task.FromResult<IServiceCollection>(
             new ServiceCollection()
                 .AddSingleton<ILoggingProvider, LoggingProvider>()

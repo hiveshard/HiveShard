@@ -17,7 +17,7 @@ namespace HiveShard.Ticker.Tests.Scenarios;
 
 public class KafkaScenario: XceptoScenario
 {
-    public override Task<IServiceCollection> Setup()
+    protected override Task<IServiceCollection> Setup()
     {
         return Task.FromResult<IServiceCollection>(new ServiceCollection()
             .AddSingleton<IShardRepository, ShardRepository>()
@@ -35,14 +35,14 @@ public class KafkaScenario: XceptoScenario
     }
 
     private CancellationTokenSource _source = new CancellationTokenSource();
-    public override Task Initialize(IServiceProvider serviceProvider)
+    protected override Task Initialize(IServiceProvider serviceProvider)
     {
         var fabric = serviceProvider.GetRequiredService<ISimpleFabric>();
         PropagateExceptions(fabric.Start(_source.Token));
         return Task.CompletedTask;
     }
 
-    public override Task Cleanup(IServiceProvider serviceProvider)
+    protected override Task Cleanup(IServiceProvider serviceProvider)
     {
         _source.Cancel();
         return Task.CompletedTask;

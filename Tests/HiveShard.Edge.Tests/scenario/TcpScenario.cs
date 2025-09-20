@@ -17,7 +17,7 @@ namespace HiveShard.Edge.Tests.scenario;
 
 public class TcpScenario: XceptoScenario
 {
-    public override Task<IServiceCollection> Setup()
+    protected override Task<IServiceCollection> Setup()
     {
         var collection = new ServiceCollection()
             .AddSingleton<ITickRepository, TickRepository>()

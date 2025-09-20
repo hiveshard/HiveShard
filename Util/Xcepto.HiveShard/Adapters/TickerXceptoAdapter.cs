@@ -19,12 +19,5 @@ namespace Xcepto.HiveShard.Adapters
             var starts = ticker.Start();
             return Task.WhenAll(starts);
         }
-
-        protected override Task AddServices(IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddSingleton<Ticker>();
-            serviceCollection.AddSingleton<TickerConfig>(_tickerConfig);
-            return Task.CompletedTask;
-        }
     }
 }
