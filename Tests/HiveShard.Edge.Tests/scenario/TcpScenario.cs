@@ -1,8 +1,12 @@
-﻿using HiveShard.Edge.Tests.provider;
+﻿using HiveShard.Client;
+using HiveShard.Client.Interface;
+using HiveShard.Config;
+using HiveShard.Edge.Tests.provider;
 using HiveShard.Fabric.Client;
 using HiveShard.Fabric.Edge;
 using HiveShard.Fabrics.Tcp;
 using HiveShard.Interface;
+using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
 using HiveShard.Provider;
 using HiveShard.Provider.Logging;
@@ -30,7 +34,13 @@ public class TcpScenario: XceptoScenario
             .AddSingleton<CancellationProvider>()
             .AddSingleton<ICancellationProvider>(x => x.GetRequiredService<CancellationProvider>())
             .AddSingleton<IEdgeTunnelClientEndpoint, ClientTcpFabric>()
-            .AddSingleton<IEdgeTunnelServerEndpoint, EdgeTcpFabric>();
+            .AddSingleton<IEdgeTunnelServerEndpoint, EdgeTcpFabric>()
+            .AddSingleton<ClientTunnel>()
+            .AddSingleton<IClientTunnel>(x => x.GetRequiredService<ClientTunnel>())
+            .AddSingleton<Data.Client>(new Data.Client("test client"))
+            .AddSingleton<IAddressProvider, EdgeIdentityProvider>()
+            .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test identity"))
+            .AddSingleton<IEdgeTunnel, EdgeTunnel>();
         return Task.FromResult(collection);
     }
 }
