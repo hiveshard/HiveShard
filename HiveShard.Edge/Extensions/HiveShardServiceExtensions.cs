@@ -1,23 +1,20 @@
 using System;
 using HiveShard.Builder;
-using Xcepto.HiveShard.Builder;
+using HiveShard.Edge.Builder;
+using HiveShard.Edge.Data;
 
 namespace HiveShard.Edge.Extensions;
 
 public static class HiveShardServiceExtensions
 {
     public static DecentralizedHiveShardBuilder EdgeWorker(
-        this DecentralizedHiveShardBuilder builder,
-        Func<EdgeWorkerBuilder, EdgeWorkerEnvironment> sourceBuilder
+        this DecentralizedHiveShardBuilder serviceBuilder,
+        Func<EdgeWorkerBuilder, EdgeWorkerBuilder> workerBuilder
         )
     {
-        var environment = sourceBuilder(new EdgeWorkerBuilder());
-        builder.RegisterEnvironment(environment);
-        return builder;
+        var builder = new EdgeWorkerBuilder();
+        workerBuilder(builder);
+        serviceBuilder.RegisterEnvironment(builder.Build());
+        return serviceBuilder;
     }
-}
-
-public class EdgeSourceBuilder
-{
-    
 }

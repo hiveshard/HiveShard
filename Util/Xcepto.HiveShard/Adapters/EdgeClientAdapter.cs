@@ -14,10 +14,10 @@ namespace Xcepto.HiveShard.Adapters
 {
     public class EdgeClientAdapter: XceptoAdapter
     {
-        private global::HiveShard.Data.Client _client;
-        public EdgeClientAdapter(global::HiveShard.Data.Client client)
+        private global::HiveShard.Data.HiveShardClient _hiveShardClient;
+        public EdgeClientAdapter(global::HiveShard.Data.HiveShardClient hiveShardClient)
         {
-            _client = client;
+            _hiveShardClient = hiveShardClient;
         }
 
         protected override Task Initialize(IServiceProvider serviceProvider) => Task.CompletedTask;

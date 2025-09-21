@@ -8,7 +8,7 @@ namespace HiveShard.Fabric.Client
         Task SendEvent(object message, Type messageType);
 
         void RegisterCallback(Action<object> callback, Type type);
-        void Disconnect(Data.Client client);
-        Task Connect(Data.Client client);
+        void Disconnect(Data.HiveShardClient hiveShardClient);
+        Task Connect(Data.HiveShardClient hiveShardClient);
     }
 }

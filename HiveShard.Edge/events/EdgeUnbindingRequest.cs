@@ -4,11 +4,11 @@ namespace HiveShard.Edge.events
 {
     public class EdgeUnbindingRequest
     {
-        public EdgeUnbindingRequest(Client client)
+        public EdgeUnbindingRequest(HiveShardClient hiveShardClient)
         {
-            Client = client;
+            HiveShardClient = hiveShardClient;
         }
 
-        public Client Client { get; }
+        public HiveShardClient HiveShardClient { get; }
     }
 }

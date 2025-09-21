@@ -1,6 +1,6 @@
+using HiveShard.Builder;
 using HiveShard.Fabric.Client;
 using Microsoft.Extensions.DependencyInjection;
-using Xcepto.HiveShard.Builder;
 
 namespace HiveShard.Fabrics.InMemory.Extension
 {

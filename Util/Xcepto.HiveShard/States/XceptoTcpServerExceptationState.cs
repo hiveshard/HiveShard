@@ -10,7 +10,7 @@ namespace Xcepto.HiveShard.States
     public class XceptoTcpServerExpectationState<T>: XceptoState
     {
         private ClientExpectationPredicate<T> _clientExpectationPredicate;
-        private ConcurrentQueue<(T, global::HiveShard.Data.Client)> _messages = new();
+        private ConcurrentQueue<(T, global::HiveShard.Data.HiveShardClient)> _messages = new();
     
         public XceptoTcpServerExpectationState(string name, ClientExpectationPredicate<T> clientExpectationPredicate) : base(name)
         {

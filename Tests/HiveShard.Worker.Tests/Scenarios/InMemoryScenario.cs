@@ -1,4 +1,6 @@
+using HiveShard.Builder;
 using HiveShard.Config;
+using HiveShard.Data;
 using HiveShard.Fabric.Ticker;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Interface;
@@ -11,7 +13,6 @@ using HiveShard.Serializer;
 using HiveShard.Worker.Tests.Shards;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto;
-using Xcepto.HiveShard.Builder;
 using Xcepto.HiveShard.Providers;
 using Xcepto.Interfaces;
 

@@ -1,4 +1,6 @@
+using HiveShard.Builder;
 using HiveShard.Config;
+using HiveShard.Data;
 using HiveShard.Fabric;
 using HiveShard.Fabric.Ticker;
 using HiveShard.Fabrics.InMemory;
@@ -15,7 +17,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Xcepto;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
-using Xcepto.HiveShard.Builder;
 using Xcepto.HiveShard.Providers;
 using Xcepto.Interfaces;
 
@@ -23,7 +24,7 @@ namespace HiveShard.Worker.Tests.Scenarios;
 
 public class HiveShardPlatformScenario: XceptoScenario
 {
-    private HiveShardEnvironment _environment;
+    private ServiceEnvironment _environment;
     public HiveShardPlatformScenario()
     {
         _environment = new HiveShardBuilder(1, DeploymentType.HiveShardPlatform)

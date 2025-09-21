@@ -11,6 +11,6 @@ namespace HiveShard.Client.Interface
         public void SendLocalEvent(Type messageType, object message);
         public Task SendHotPathEvent<TType>(TType message);
         public void SendLocalEvent<TType>(TType message);
-        public Task Connect(HiveShard.Data.Client client);
+        public Task Connect(HiveShard.Data.HiveShardClient hiveShardClient);
     }
 }

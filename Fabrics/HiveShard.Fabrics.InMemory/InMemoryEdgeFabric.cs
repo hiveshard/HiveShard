@@ -16,10 +16,10 @@ namespace HiveShard.Fabrics.InMemory
         private IDebugLoggingProvider _debugLoggingProvider;
         private IAddressProvider _addressProvider;
         private Dictionary<Type, Action<object>> _clientCallbacks = new Dictionary<Type, Action<object>>();
-        private Dictionary<Type, Action<object, Client>> _serverCallbacks = new Dictionary<Type, Action<object, Client>>();
+        private Dictionary<Type, Action<object, HiveShardClient>> _serverCallbacks = new Dictionary<Type, Action<object, HiveShardClient>>();
 
-        private Client _connectedClient = null;
-        private Action<Client> _clientConnectedCallback = client => { };
+        private HiveShardClient _connectedHiveShardClient = null;
+        private Action<HiveShardClient> _clientConnectedCallback = client => { };
 
         public InMemoryEdgeFabric(IDebugLoggingProvider debugLoggingProvider, IAddressProvider addressProvider)
         {
@@ -33,7 +33,7 @@ namespace HiveShard.Fabrics.InMemory
 
         public Task SendEvent(object message, Type messageType)
         {
-            _serverCallbacks[messageType](message, _connectedClient);
+            _serverCallbacks[messageType](message, _connectedHiveShardClient);
             return Task.CompletedTask;
         }
 
@@ -42,9 +42,9 @@ namespace HiveShard.Fabrics.InMemory
             _clientCallbacks[type] = callback;
         }
 
-        public void Disconnect(Client client)
+        public void Disconnect(HiveShardClient hiveShardClient)
         {
-            _connectedClient = null;
+            _connectedHiveShardClient = null;
             _debugLoggingProvider.LogDebug($"Client disconnected from edge");
         }
 
@@ -54,26 +54,26 @@ namespace HiveShard.Fabrics.InMemory
             return Task.CompletedTask;
         }
 
-        public Task Connect(Client client)
+        public Task Connect(HiveShardClient hiveShardClient)
         {
-            _connectedClient = client;
+            _connectedHiveShardClient = hiveShardClient;
             _debugLoggingProvider.LogDebug($"Client connected to edge");
-            _clientConnectedCallback(client);
-            SendEvent(new ConnectionSucceeded(_addressProvider.GetUri()), typeof(ConnectionSucceeded), client);
+            _clientConnectedCallback(hiveShardClient);
+            SendEvent(new ConnectionSucceeded(_addressProvider.GetUri()), typeof(ConnectionSucceeded), hiveShardClient);
             return Task.CompletedTask;
         }
 
-        public void SendEvent(object message, Type messageType, Client client)
+        public void SendEvent(object message, Type messageType, HiveShardClient hiveShardClient)
         {
             _clientCallbacks[messageType](message);
         }
 
-        public void RegisterCallback(Action<object, Client> callback, Type type)
+        public void RegisterCallback(Action<object, HiveShardClient> callback, Type type)
         {
             _serverCallbacks[type] = callback;
         }
 
-        public void RegisterClientConnectedCallback(Action<Client> handler)
+        public void RegisterClientConnectedCallback(Action<HiveShardClient> handler)
         {
             _clientConnectedCallback = handler;
         }

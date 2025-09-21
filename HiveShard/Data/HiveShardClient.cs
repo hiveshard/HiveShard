@@ -3,16 +3,16 @@
 namespace HiveShard.Data
 {
     [Serializable]
-    public class Client
+    public class HiveShardClient
     {
-        public Client(string username)
+        public HiveShardClient(string username)
         {
             Username = username;
         }
 
         public string Username { get; }
 
-        protected bool Equals(Client other)
+        protected bool Equals(HiveShardClient other)
         {
             return Username == other.Username;
         }
@@ -22,7 +22,7 @@ namespace HiveShard.Data
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((Client)obj);
+            return Equals((HiveShardClient)obj);
         }
 
         public override int GetHashCode()
@@ -30,12 +30,12 @@ namespace HiveShard.Data
             return (Username != null ? Username.GetHashCode() : 0);
         }
         
-        public static bool operator ==(Client a, Client b)
+        public static bool operator ==(HiveShardClient a, HiveShardClient b)
         {
             throw new InvalidOperationException("Use .Equals instead of ==.");
         }
 
-        public static bool operator !=(Client a, Client b)
+        public static bool operator !=(HiveShardClient a, HiveShardClient b)
         {
             throw new InvalidOperationException("Use .Equals instead of !=.");
         }

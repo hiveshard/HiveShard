@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using HiveShard.Fabric.Client;
+using HiveShard.Data;
 using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Xcepto.HiveShard.Builder
+namespace HiveShard.Builder
 {
     public class HiveShardBuilder
     {
@@ -18,9 +17,10 @@ namespace Xcepto.HiveShard.Builder
         {
             _deploymentType = deploymentType;
             _defaultGridSize = gridSize;
+            _serviceCollection = new ServiceCollection();
         }
 
-        public HiveShardBuilder(HiveShardEnvironment environment)
+        public HiveShardBuilder(ServiceEnvironment environment)
         {
             _serviceCollection = environment.GetServices();
         }
@@ -39,7 +39,7 @@ namespace Xcepto.HiveShard.Builder
             return this;
         }
 
-        public HiveShardEnvironment Build()
+        public ServiceEnvironment Build()
         {
             switch (_deploymentType)
             {
@@ -59,15 +59,7 @@ namespace Xcepto.HiveShard.Builder
                 _serviceCollection.AddSingleton(shard);
             }
             
-            return new HiveShardEnvironment(_defaultGridSize, _deploymentType, _serviceCollection);
+            return new ServiceEnvironment(_defaultGridSize, _deploymentType, _serviceCollection, []);
         }
-    }
-
-    public enum DeploymentType
-    {
-        InMemory,
-        ExternalFabric,
-        HiveShardPlatform,
-        StandaloneService
     }
 }

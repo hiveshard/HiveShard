@@ -11,11 +11,11 @@ namespace HiveShard.Client
     {
         private IEdgeTunnelClientEndpoint _edgeClient;
         private ICancellationProvider _cancellationProvider;
-        private Data.Client _client;
+        private Data.HiveShardClient _hiveShardClient;
 
-        public ClientTunnel(IEdgeTunnelClientEndpoint edgeClient, Data.Client client, ICancellationProvider cancellationProvider)
+        public ClientTunnel(IEdgeTunnelClientEndpoint edgeClient, Data.HiveShardClient hiveShardClient, ICancellationProvider cancellationProvider)
         {
-            _client = client;
+            _hiveShardClient = hiveShardClient;
             _cancellationProvider = cancellationProvider;
             _edgeClient = edgeClient;
         }
@@ -51,11 +51,11 @@ namespace HiveShard.Client
             throw new NotImplementedException();
         }
 
-        public async Task Connect(Data.Client client)
+        public async Task Connect(Data.HiveShardClient hiveShardClient)
         {
             await _edgeClient.Start(_cancellationProvider.GetToken());
             await _edgeClient.WaitForReady();
-            await _edgeClient.Connect(client);
+            await _edgeClient.Connect(hiveShardClient);
         }
 
         public bool TryConsume<T>(out T message)
@@ -65,7 +65,7 @@ namespace HiveShard.Client
 
         public void Disconnect()
         {
-            _edgeClient.Disconnect(_client);
+            _edgeClient.Disconnect(_hiveShardClient);
         }
     }
 }

@@ -29,7 +29,7 @@ public class InMemoryScenario: XceptoScenario
                 .AddSingleton<IEdgeTunnelServerEndpoint>(x => x.GetRequiredService<InMemoryEdgeFabric>())
                 .AddSingleton<ClientTunnel>()
                 .AddSingleton<IClientTunnel>(x => x.GetRequiredService<ClientTunnel>())
-                .AddSingleton<Data.Client>(new Data.Client("test client"))
+                .AddSingleton<HiveShard.Data.HiveShardClient>(new HiveShard.Data.HiveShardClient("test client"))
                 .AddSingleton<IAddressProvider, EdgeIdentityProvider>()
                 .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test identity"))
                 .AddSingleton<IEdgeTunnel, EdgeTunnel>()

@@ -1,17 +1,24 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using HiveShard.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Xcepto.HiveShard.Builder;
 
-namespace Xcepto.HiveShard
+namespace HiveShard.Data
 {
-    public class HiveShardEnvironment
+    public class ServiceEnvironment
     {
         private int _gridSize;
         private DeploymentType _deploymentType;
         private IServiceCollection _serviceCollection;
+        private IEnumerable<WorkerEnvironment> _workerEnvironments;
 
-        internal HiveShardEnvironment(int gridSize, DeploymentType deploymentType, IServiceCollection serviceCollection)
+        internal ServiceEnvironment(
+            int gridSize, 
+            DeploymentType deploymentType, 
+            IServiceCollection serviceCollection,
+            IEnumerable<WorkerEnvironment> workerEnvironments)
         {
+            _workerEnvironments = workerEnvironments;
             _serviceCollection = serviceCollection;
             _deploymentType = deploymentType;
             _gridSize = gridSize;

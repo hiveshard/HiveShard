@@ -1,4 +1,5 @@
 using HiveShard.Builder;
+using HiveShard.Data;
 using HiveShard.Edge.Tests.Events;
 using HiveShard.Fabric.Edge;
 

@@ -1,6 +1,7 @@
 ﻿using HiveShard.Client;
 using HiveShard.Client.Interface;
 using HiveShard.Config;
+using HiveShard.Data;
 using HiveShard.Edge.Tests.provider;
 using HiveShard.Fabric.Client;
 using HiveShard.Fabric.Edge;
@@ -37,7 +38,7 @@ public class TcpScenario: XceptoScenario
             .AddSingleton<IEdgeTunnelServerEndpoint, EdgeTcpFabric>()
             .AddSingleton<ClientTunnel>()
             .AddSingleton<IClientTunnel>(x => x.GetRequiredService<ClientTunnel>())
-            .AddSingleton<Data.Client>(new Data.Client("test client"))
+            .AddSingleton<HiveShardClient>(new HiveShardClient("test client"))
             .AddSingleton<IAddressProvider, EdgeIdentityProvider>()
             .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test identity"))
             .AddSingleton<IEdgeTunnel, EdgeTunnel>();

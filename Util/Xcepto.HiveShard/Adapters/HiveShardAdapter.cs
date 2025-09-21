@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HiveShard.Data;
 using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.HiveShard.States;
@@ -11,7 +12,7 @@ namespace Xcepto.HiveShard.Adapters
     {
         protected override Task Initialize(IServiceProvider serviceProvider)
         {
-            var environment = serviceProvider.GetRequiredService<HiveShardEnvironment>();
+            var environment = serviceProvider.GetRequiredService<ServiceEnvironment>();
             return Task.CompletedTask;
         }
 

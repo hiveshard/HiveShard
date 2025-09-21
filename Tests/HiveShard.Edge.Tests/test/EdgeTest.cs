@@ -16,7 +16,7 @@ where T: XceptoScenario, new()
     {
         await XceptoTest.Given(new T(), builder =>
         {
-            var credentials = new HiveShard.Data.Client("test");
+            var credentials = new HiveShard.Data.HiveShardClient("test");
             var edge = builder.RegisterAdapter(new EdgeServerAdapter());
             var client = builder.RegisterAdapter(new EdgeClientAdapter(credentials));
             
@@ -45,7 +45,7 @@ where T: XceptoScenario, new()
     {
         await XceptoTest.Given(new T(), builder =>
         {
-            var credentials = new HiveShard.Data.Client("test");
+            var credentials = new HiveShard.Data.HiveShardClient("test");
             var edge = builder.RegisterAdapter(new EdgeServerAdapter());
             var client = builder.RegisterAdapter(new EdgeClientAdapter(credentials));
             Uri? connectedEdge = null;
