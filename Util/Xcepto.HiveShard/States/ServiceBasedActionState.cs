@@ -5,13 +5,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Xcepto.HiveShard.States
 {
-    public class XceptoClientActionState: XceptoState
+    public class ServiceBasedActionState<T>: XceptoState
+    where T: class
     {
-        private Func<IClientTunnel, Task> _clientAction;
+        private readonly Func<T, Task> _action;
 
-        public XceptoClientActionState(string name, Func<IClientTunnel, Task> clientAction) : base(name)
+        public ServiceBasedActionState(string name, Func<T, Task> action) : base(name)
         {
-            _clientAction = clientAction;
+            this._action = action;
         }
 
         public override Task<bool> EvaluateConditionsForTransition(IServiceProvider serviceProvider)
@@ -19,8 +20,8 @@ namespace Xcepto.HiveShard.States
 
         public override async Task OnEnter(IServiceProvider serviceProvider)
         {
-            var magetownClient = serviceProvider.GetRequiredService<IClientTunnel>();
-            await _clientAction(magetownClient);
+            var service = serviceProvider.GetRequiredService<T>();
+            await _action(service);
         }
     }
 }

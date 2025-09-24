@@ -31,7 +31,7 @@ namespace Xcepto.HiveShard.Adapters
 
         public void Action(Func<IClientTunnel, Task> clientAction)
         {
-            AddStep(new XceptoClientActionState("Client Action", clientAction)); 
+            AddStep(new ServiceBasedActionState<IClientTunnel>("Client Action", clientAction)); 
         }
 
         public void Expect<T>(Predicate<T> expectation)
