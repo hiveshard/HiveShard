@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using HiveShard.Interface;
 using HiveShard.Shard;
-using HiveShard.Worker;
+using HiveShard.Workers.Shard;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Xcepto.HiveShard.States
@@ -19,7 +19,7 @@ namespace Xcepto.HiveShard.States
 
         public override Task OnEnter(IServiceProvider serviceProvider)
         {
-            var worker = serviceProvider.GetRequiredService<AllInOneWorker>();
+            var worker = serviceProvider.GetRequiredService<ShardWorker>();
             worker.AddHiveShard<T>();
             return Task.CompletedTask;
         }

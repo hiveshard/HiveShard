@@ -3,8 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Interface;
 using HiveShard.Shard;
-using HiveShard.Worker;
-using HiveShard.Worker.Data;
+using HiveShard.Workers.Shard;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.HiveShard.States;
 
@@ -14,7 +13,7 @@ namespace Xcepto.HiveShard.Adapters
     {
         protected override Task Initialize(IServiceProvider serviceProvider)
         {
-            PropagateExceptions(serviceProvider.GetRequiredService<AllInOneWorker>().Start());
+            PropagateExceptions(serviceProvider.GetRequiredService<ShardWorker>().Start());
             return Task.CompletedTask;
         }
 

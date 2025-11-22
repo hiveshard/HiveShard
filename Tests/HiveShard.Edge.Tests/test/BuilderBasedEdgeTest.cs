@@ -1,9 +1,10 @@
 using HiveShard.Builder;
 using HiveShard.Data;
 using HiveShard.Edge.events;
-using HiveShard.Edge.Extensions;
 using HiveShard.Edge.Tests.Edge;
 using HiveShard.Factory;
+using HiveShard.Workers.Edge.Extensions;
+using InMemory;
 using Xcepto;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
@@ -16,12 +17,10 @@ public class BuilderBasedEdgeTest
     [Test]
     public async Task TestEdgeBuilderBased()
     {
-        var environment = HiveShardFactory.Create(DeploymentType.InMemory, builder => builder
+        var environment = HiveShardFactory.Create<InMemoryDeployment>(builder => builder
             .EdgeWorker(x => x
                 .AddEdge<TestEdge>()
                 .AddEdge<TestEdge2>()
-            )
-            .EdgeWorker(x => x
                 .DynamicAssignment()
             )
         );

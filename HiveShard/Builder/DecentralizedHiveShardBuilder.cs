@@ -1,31 +1,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using HiveShard.Data;
+using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HiveShard.Builder;
 
 public class DecentralizedHiveShardBuilder
 {
-    private DeploymentType _deploymentType;
+    private IDeployment _deployment;
     private int _gridSize = 1;
-    private List<WorkerEnvironment> _workers = new();
+    private List<WorkerDefinition> _workers = new();
     private ServiceCollection _topLevelServices = new();
-    public DecentralizedHiveShardBuilder(DeploymentType deploymentType)
+    internal DecentralizedHiveShardBuilder(IDeployment deployment)
     {
-        _deploymentType = deploymentType;
+        _deployment = deployment;
     }
 
-    public void SetGridSize(int n)
+    internal IServiceCollection GetServiceCollection()
+    {
+        return _topLevelServices;
+    }
+
+    public DecentralizedHiveShardBuilder SetGridSize(int n)
     {
         _gridSize = n;
+        return this;
     }
     internal ServiceEnvironment Build()
     {
-        return new ServiceEnvironment(_gridSize, _deploymentType, _topLevelServices, _workers.AsEnumerable());
+        return _deployment.Build(_gridSize, _workers.AsEnumerable());
     }
 
-    public void RegisterEnvironment(WorkerEnvironment environment)
+    public void RegisterWorker(WorkerDefinition environment)
     {
         _workers.Add(environment);
     }

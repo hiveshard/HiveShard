@@ -8,23 +8,18 @@ namespace HiveShard.Data
     public class ServiceEnvironment
     {
         private int _gridSize;
-        private DeploymentType _deploymentType;
-        private IServiceCollection _serviceCollection;
-        private IEnumerable<WorkerEnvironment> _workerEnvironments;
+        public IServiceCollection Outer { get; }
+        public IEnumerable<WorkerEnvironment> Inner { get; }
 
-        internal ServiceEnvironment(
+        public ServiceEnvironment(
             int gridSize, 
-            DeploymentType deploymentType, 
             IServiceCollection serviceCollection,
-            IEnumerable<WorkerEnvironment> workerEnvironments)
+            IEnumerable<WorkerEnvironment> inner)
         {
-            _workerEnvironments = workerEnvironments;
-            _serviceCollection = serviceCollection;
-            _deploymentType = deploymentType;
+            Inner = inner;
+            Outer = serviceCollection;
             _gridSize = gridSize;
         }
-
-        public IServiceCollection GetServices() => _serviceCollection;
 
         public Task Start()
         {

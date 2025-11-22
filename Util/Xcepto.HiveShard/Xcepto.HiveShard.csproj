@@ -10,12 +10,12 @@
       <ProjectReference Include="..\..\HiveShard.Edge\HiveShard.Edge.csproj" />
       <ProjectReference Include="..\..\HiveShard.Shard\HiveShard.Shard.csproj" />
       <ProjectReference Include="..\..\HiveShard.Ticker\HiveShard.Ticker.csproj" />
-      <ProjectReference Include="..\..\HiveShard.Worker\HiveShard.Worker.csproj" />
       <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
+      <ProjectReference Include="..\..\Workers\HiveShard.Workers.Shard\HiveShard.Workers.Shard.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Xcepto" Version="6.0.0" />
+      <PackageReference Include="Xcepto" Version="6.2.0" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
@@ -6,7 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
-        <RootNamespace>HiveShard.Edge.Tests</RootNamespace>
+        <RootNamespace>HiveShard.Worker.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,12 +23,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Deployments\HiveShard.Deployments.InMemory\HiveShard.Deployments.InMemory.csproj" />
-      <ProjectReference Include="..\..\HiveShard.Client\HiveShard.Client.csproj" />
-      <ProjectReference Include="..\..\HiveShard.Edge\HiveShard.Edge.csproj" />
-      <ProjectReference Include="..\..\Fabrics\HiveShard.Fabrics.InMemory\HiveShard.Fabrics.InMemory.csproj" />
-      <ProjectReference Include="..\..\Fabrics\HiveShard.Fabrics.Tcp\HiveShard.Fabrics.Tcp.csproj" />
-      <ProjectReference Include="..\..\Util\Xcepto.HiveShard\Xcepto.HiveShard.csproj" />
+      <ProjectReference Include="..\..\..\Deployments\HiveShard.Deployments.DockerCompose\HiveShard.Deployments.DockerCompose.csproj" />
+      <ProjectReference Include="..\..\..\Deployments\HiveShard.Deployments.HiveShardPlatform\HiveShard.Deployments.HiveShardPlatform.csproj" />
+      <ProjectReference Include="..\..\..\Deployments\HiveShard.Deployments.InMemory\HiveShard.Deployments.InMemory.csproj" />
+      <ProjectReference Include="..\..\..\Fabrics\HiveShard.Fabrics.Kafka\HiveShard.Fabrics.Kafka.csproj" />
+      <ProjectReference Include="..\..\..\HiveShard\HiveShard.csproj" />
+      <ProjectReference Include="..\..\..\Util\Xcepto.HiveShard\Xcepto.HiveShard.csproj" />
     </ItemGroup>
 
 </Project>
