@@ -18,7 +18,7 @@ public class TickerTests<T> where T: XceptoScenario, new()
         await XceptoTest.Given(new T(), builder =>
         {
             var ticker = builder.RegisterAdapter(new TickerXceptoAdapter(new TickerConfig(1)));
-            var testFabricAccess = builder.RegisterAdapter(new SimpleFabricXceptoAdapter());
+            var testFabricAccess = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
 
             var shard = new HiveShardIdentity(new Chunk(0, 0), new ShardType("Navigation"));
 

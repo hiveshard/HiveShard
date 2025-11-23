@@ -23,7 +23,7 @@ where T: XceptoScenario, new()
         await XceptoTest.Given(new T(), builder =>
         {
             var worker = builder.RegisterAdapter(new WorkerXceptoAdapter());
-            var simpleFabric = builder.RegisterAdapter(new SimpleFabricXceptoAdapter());
+            var simpleFabric = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
 
             // arrange
             worker.AddHiveShardStep<EchoHiveShard>();

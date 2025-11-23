@@ -1,6 +1,7 @@
 ﻿using HiveShard;
 using HiveShard.Config;
 using HiveShard.Data;
+using HiveShard.Fabric.Client;
 using HiveShard.Fabric.Ticker;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Interface;
@@ -33,7 +34,8 @@ public class InMemoryDeployment: IDeployment
             .AddSingleton<ITickRepository, TickRepository>()
             .AddSingleton<ICancellationProvider, CancellationProvider>()
             .AddSingleton<IWorkerLoggingProvider, SimpleLoggingProvider>()
-            .AddSingleton<ISimpleFabric, InMemorySimpleFabric>();
+            .AddSingleton<ISimpleFabric, InMemorySimpleFabric>()
+            .AddSingleton<IEdgeTunnelClientEndpoint, InMemoryEdgeFabric>();
         
         
         foreach (var workerDefinition in workers)

@@ -1,24 +1,35 @@
 using HiveShard.Edge.events;
+using HiveShard.Edge.Tests.Edge;
 using HiveShard.Edge.Tests.Events;
 using HiveShard.Edge.Tests.scenario;
+using HiveShard.Factory;
+using HiveShard.Interface;
+using HiveShard.Workers.Edge.Extensions;
+using InMemory;
 using Xcepto;
+using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
 
 namespace HiveShard.Edge.Tests.test;
 
-[TestFixture(typeof(InMemoryScenario))]
-[TestFixture(typeof(TcpScenario))]
+[TestFixture(typeof(InMemoryDeployment))]
 public class EdgeTest<T>
-where T: XceptoScenario, new()
+where T: IDeployment, new()
 {
     [Test]
     public async Task ClientEdgeBinding()
     {
-        await XceptoTest.Given(new T(), builder =>
+        var environment = HiveShardFactory.Create<T>(builder => builder
+            .EdgeWorker(edgeBuilder => edgeBuilder
+                .AddEdge<TestEdge>()
+            )
+        );
+
+        await HiveShardTest.RunAsync(environment, builder =>
         {
             var credentials = new HiveShard.Data.HiveShardClient("test");
-            var edge = builder.RegisterAdapter(new EdgeServerAdapter());
-            var client = builder.RegisterAdapter(new EdgeClientAdapter(credentials));
+            var edge = builder.RegisterAdapter(new HiveShardEdgeServerAdapter<TestEdge>());
+            var client = builder.RegisterAdapter(new HiveShardClientAdapter(credentials.Username));
             
             Uri? connectedEdge = null;
 
@@ -43,11 +54,17 @@ where T: XceptoScenario, new()
     [Test]
     public async Task ClientEdgeMessageTunneling()
     {
-        await XceptoTest.Given(new T(), builder =>
+        var environment = HiveShardFactory.Create<T>(builder => builder
+            .EdgeWorker(edgeBuilder => edgeBuilder
+                .AddEdge<TestEdge>()
+            )
+        );
+        
+        await HiveShardTest.RunAsync(environment, builder =>
         {
             var credentials = new HiveShard.Data.HiveShardClient("test");
-            var edge = builder.RegisterAdapter(new EdgeServerAdapter());
-            var client = builder.RegisterAdapter(new EdgeClientAdapter(credentials));
+            var edge = builder.RegisterAdapter(new HiveShardEdgeServerAdapter<TestEdge>());
+            var client = builder.RegisterAdapter(new HiveShardClientAdapter(credentials.Username));
             Uri? connectedEdge = null;
             
             // Setup

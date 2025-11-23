@@ -7,7 +7,7 @@ using Xcepto.HiveShard.States;
 
 namespace Xcepto.HiveShard.Adapters
 {
-    public class SimpleFabricXceptoAdapter: XceptoAdapter
+    public class HiveShardFakeFabricAdapter: XceptoAdapter
     {
         public void FabricAction(Action<ISimpleFabric> action)
         {

@@ -3,23 +3,27 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using HiveShard.Client.Interface;
 using Microsoft.Extensions.DependencyInjection;
+using Xcepto.Repositories;
 
 namespace Xcepto.HiveShard.States
 {
-    public class XceptoClientExpectationState<T>: XceptoState
+    public class CompartmentalizedClientExpectationState<T>: XceptoState
     {
         private Predicate<T> _clientPredicate;
         private ConcurrentQueue<T?> _messages = new();
-    
-        public XceptoClientExpectationState(string name, Predicate<T> clientPredicate) : base(name)
+        private string _compartmentIdentifier;
+
+        public CompartmentalizedClientExpectationState(string name, string compartmentIdentifier, Predicate<T> clientPredicate) : base(name)
         {
+            _compartmentIdentifier = compartmentIdentifier;
             _clientPredicate = clientPredicate;
-        
         }
 
         public override Task Initialize(IServiceProvider serviceProvider)
         {
-            var clientTunnel = serviceProvider.GetRequiredService<IClientTunnel>();
+            var compartmentRepository = serviceProvider.GetRequiredService<CompartmentRepository>();
+            var compartment = compartmentRepository.GetCompartment(_compartmentIdentifier);
+            var clientTunnel = compartment.Services.GetRequiredService<IClientTunnel>();
             clientTunnel.RegisterHotPathEventHandler<T>(newValue =>
             {
                 _messages.Enqueue(newValue);

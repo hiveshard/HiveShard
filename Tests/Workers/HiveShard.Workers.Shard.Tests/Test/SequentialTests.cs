@@ -17,10 +17,12 @@ namespace HiveShard.Worker.Tests.Test;
 [TestFixture(typeof(InMemoryDeployment))]
 [TestFixture(typeof(DockerComposeDeployment))]
 [TestFixture(typeof(HiveShardPlatformDeployment))]
-public class EchoShardClusterTests<T>
+public class SequentialTests<T>
 where T: IDeployment, new()
 {
     private ServiceEnvironment _environment;
+    private ShardType _shardType;
+    private Chunk _chunk;
 
     [OneTimeSetUp]
     public void SetUp()
@@ -31,6 +33,8 @@ where T: IDeployment, new()
                 .AddShard<EchoHiveShard>()
             )
         );
+        _shardType = ShardType.From<EchoHiveShard>();
+        _chunk = new Chunk(0,0);
     }
 
     [OneTimeTearDown]
@@ -45,9 +49,9 @@ where T: IDeployment, new()
     {
         await HiveShardTest.RunAsync(_environment, builder =>
         {
-            var hiveShard = builder.RegisterAdapter(new HiveShardAdapter());
+            var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(_shardType, _chunk));
 
-            hiveShard.SendEdgeMessage(new TestEvent(1));
+            shardAdapter.Action(x=>x.Send(new TestEvent(1)));
         });
     }
     
@@ -56,10 +60,9 @@ where T: IDeployment, new()
     {
         await HiveShardTest.RunAsync(_environment, builder =>
         {
-            var hiveShard = builder.RegisterAdapter(new HiveShardAdapter());
+            var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(_shardType, _chunk));
 
-
-            hiveShard.ExpectEdgeMessage<TestEventResponse>(x => x.Number == 1);
+            shardAdapter.Expect<TestEventResponse>(x => x.Number == 1);
         });
     }
 }

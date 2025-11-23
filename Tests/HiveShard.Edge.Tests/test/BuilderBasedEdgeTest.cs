@@ -17,6 +17,7 @@ public class BuilderBasedEdgeTest
     [Test]
     public async Task TestEdgeBuilderBased()
     {
+        
         var environment = HiveShardFactory.Create<InMemoryDeployment>(builder => builder
             .EdgeWorker(x => x
                 .AddEdge<TestEdge>()
@@ -26,27 +27,25 @@ public class BuilderBasedEdgeTest
         );
         await HiveShardTest.RunAsync(environment, builder =>
         {
-            var hiveShard = builder.RegisterAdapter(new HiveShardAdapter());
-            var client = hiveShard.CreateClientModule();
-            var edge = hiveShard.CreateEdgeModule();
-            
             var credentials = new HiveShardClient("test");
+
+            var thisClient = builder.RegisterAdapter(new HiveShardClientAdapter(credentials.Username));
             
+
             Uri? connectedEdge = null;
             
-            client.Action(x => x.Connect(credentials));
-
+            thisClient.Action(x => x.Connect(credentials));
             
-            client.Expect<ConnectionSucceeded>(x =>
+            thisClient.Expect<ConnectionSucceeded>(x =>
             {
                 connectedEdge = x.Edge;
                 Console.WriteLine($"Connected to {x.Edge}");
                 return true;
             });
             
-            client.Action(x=> x.SendHotPathEvent(new EdgeBindingRequest(credentials)));
+            thisClient.Action(x=> x.SendHotPathEvent(new EdgeBindingRequest(credentials)));
             
-            client.Expect<EdgeBoundNotification>(x => x.Uri.Equals(connectedEdge));
+            thisClient.Expect<EdgeBoundNotification>(x => x.Uri.Equals(connectedEdge));
         });
     }
     

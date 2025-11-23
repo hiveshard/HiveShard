@@ -122,9 +122,9 @@ namespace HiveShard.Shard
             return Task.CompletedTask;
         }
 
-        public void Send<TEvent>(TEvent message)
+        public Task Send<TEvent>(TEvent message)
         {
-            _simpleFabric.Send(typeof(TEvent).FullName, _hiveShardIdentity.Chunk, message);
+            return _simpleFabric.Send(typeof(TEvent).FullName!, _hiveShardIdentity.Chunk, message);
         }
 
         public async Task WaitForReady()

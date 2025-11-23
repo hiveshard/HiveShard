@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
-using HiveShard.Config;
+using HiveShard.Data;
 using HiveShard.Edge;
 using HiveShard.Interface;
-using HiveShard.Interface.Config;
 using HiveShard.Provider;
 using Microsoft.Extensions.DependencyInjection;
-using Xcepto.HiveShard.Providers;
 using Xcepto.HiveShard.States;
 using Xcepto.HiveShard.Util;
-using Xcepto.Interfaces;
 
 namespace Xcepto.HiveShard.Adapters
 {
-    public class EdgeServerAdapter: XceptoAdapter
+    public class HiveShardEdgeServerAdapter<T>: XceptoAdapter
+    where T: BaseEdge
     {
         protected override Task Initialize(IServiceProvider serviceProvider) => Task.CompletedTask;
 
@@ -26,7 +24,11 @@ namespace Xcepto.HiveShard.Adapters
 
         public void Action(Action<IEdgeTunnel> clientAction)
         {
-            AddStep(new XceptoTcpServerActionState("Server Action", clientAction)); 
+            AddStep(new CompartmentalizedServiceBasedActionState<IEdgeTunnel>("Edge tunnel action", $"edge-{typeof(T).FullName}", x =>
+            {
+                clientAction(x);
+                return Task.CompletedTask;
+            })); 
         }
 
         public void Expect<T>(ClientExpectationPredicate<T> expectation)
