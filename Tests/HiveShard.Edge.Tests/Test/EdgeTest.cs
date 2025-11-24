@@ -1,3 +1,4 @@
+using HiveShard.Client.Extensions;
 using HiveShard.Data;
 using HiveShard.Edge.events;
 using HiveShard.Edge.Tests.Edge;
@@ -18,16 +19,22 @@ where T: IDeployment, new()
     [Test]
     public async Task ClientEdgeBinding()
     {
+        var credentials = new HiveShardClient("test");
+        string edgeWorker = "EW1";
+
         var environment = HiveShardFactory.Create<T>(builder => builder
             .EdgeWorker(edgeBuilder => edgeBuilder
+                .Identify(edgeWorker)
                 .AddEdge<TestEdge>()
+            )
+            .Client(x => x
+                .Identify(credentials.Username)
             )
         );
 
         await HiveShardTest.RunAsync(environment, builder =>
         {
-            var credentials = new HiveShardClient("test");
-            var edge = builder.RegisterAdapter(new HiveShardEdgeServerAdapter<TestEdge>());
+            var edge = builder.RegisterAdapter(new HiveShardEdgeServerAdapter<TestEdge>(edgeWorker));
             var client = builder.RegisterAdapter(new HiveShardClientAdapter(credentials.Username));
             
             Uri? connectedEdge = null;
@@ -53,16 +60,22 @@ where T: IDeployment, new()
     [Test]
     public async Task ClientEdgeMessageTunneling()
     {
+        string edgeWorker = "EW1";
+        var credentials = new HiveShardClient("test");
+
         var environment = HiveShardFactory.Create<T>(builder => builder
             .EdgeWorker(edgeBuilder => edgeBuilder
+                .Identify(edgeWorker)
                 .AddEdge<TestEdge>()
+            )
+            .Client(x => x
+                .Identify(credentials.Username)
             )
         );
         
         await HiveShardTest.RunAsync(environment, builder =>
         {
-            var credentials = new HiveShard.Data.HiveShardClient("test");
-            var edge = builder.RegisterAdapter(new HiveShardEdgeServerAdapter<TestEdge>());
+            var edge = builder.RegisterAdapter(new HiveShardEdgeServerAdapter<TestEdge>(edgeWorker));
             var client = builder.RegisterAdapter(new HiveShardClientAdapter(credentials.Username));
             Uri? connectedEdge = null;
             

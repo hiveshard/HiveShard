@@ -6,6 +6,7 @@ using HiveShard.Config;
 using HiveShard.Data;
 using HiveShard.Edge;
 using HiveShard.Fabric.Client;
+using HiveShard.Fabric.Edge;
 using HiveShard.Fabric.Ticker;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Interface;
@@ -29,6 +30,7 @@ public class InMemoryDeployment: IDeployment
 
     public ServiceEnvironment Build(int gridSize, IEnumerable<IsolatedEnvironment> workers)
     {
+        CancellationProvider cancellationProvider = new CancellationProvider();
         IServiceCollection topLevelServices = new ServiceCollection()
             .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))
             .AddSingleton<IHiveShardSimpleLoggingProvider, SimpleLoggingProvider>()
@@ -37,11 +39,14 @@ public class InMemoryDeployment: IDeployment
             .AddSingleton<IShardRepository, ShardRepository>()
             .AddSingleton<ISerializer, NewtonsoftSerializer>()
             .AddSingleton<ITickRepository, TickRepository>()
-            .AddSingleton<ICancellationProvider, CancellationProvider>()
+            .AddSingleton<ICancellationProvider>(cancellationProvider)
+            .AddSingleton<CancellationProvider>(cancellationProvider)
             .AddSingleton<IWorkerLoggingProvider, SimpleLoggingProvider>()
             .AddSingleton<ISimpleFabric, InMemorySimpleFabric>()
             .AddSingleton<IDebugLoggingProvider, SimpleLoggingProvider>()
-            .AddSingleton<IEdgeTunnelClientEndpoint, InMemoryEdgeFabric>()
+            .AddSingleton<InMemoryEdgeFabric>()
+            .AddSingleton<IEdgeTunnelClientEndpoint>(x => x.GetRequiredService<InMemoryEdgeFabric>())
+            .AddSingleton<IEdgeTunnelServerEndpoint>(x => x.GetRequiredService<InMemoryEdgeFabric>())
             .AddSingleton<IAddressProvider, EdgeIdentityProvider>();
         
         
@@ -61,11 +66,16 @@ public class InMemoryDeployment: IDeployment
         ServiceCollection serviceCollection = new ServiceCollection();
 
         serviceCollection.AddSingleton<EdgeWorker>();
+        serviceCollection.AddSingleton<IEdgeTunnel, EdgeTunnel>();
         var compartmentEnvironment = new CompartmentEnvironment(
             $"edge-{edgeWorkerIsolatedEnvironment.Identifier}", 
             serviceCollection, 
             new DependencyBuilder()
+                .Add<CancellationProvider>()
+                .Add<ICancellationProvider>()
+                .Add<IAddressProvider>()
                 .Add<IIdentityConfig>()
+                .Add<IEdgeTunnelServerEndpoint>()
                 .Build()
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
