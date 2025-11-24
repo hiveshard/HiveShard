@@ -9,12 +9,12 @@ namespace HiveShard.Data
     {
         private int _gridSize;
         public IServiceCollection Outer { get; }
-        public IEnumerable<WorkerEnvironment> Inner { get; }
+        public IEnumerable<CompartmentEnvironment> Inner { get; }
 
         public ServiceEnvironment(
             int gridSize, 
             IServiceCollection serviceCollection,
-            IEnumerable<WorkerEnvironment> inner)
+            IEnumerable<CompartmentEnvironment> inner)
         {
             Inner = inner;
             Outer = serviceCollection;

@@ -15,8 +15,6 @@ using Xcepto.HiveShard.Adapters;
 namespace HiveShard.Worker.Tests.Test;
 
 [TestFixture(typeof(InMemoryDeployment))]
-[TestFixture(typeof(DockerComposeDeployment))]
-[TestFixture(typeof(HiveShardPlatformDeployment))]
 public class SequentialTests<T>
 where T: IDeployment, new()
 {

@@ -3,7 +3,7 @@ using HiveShard.Interface.Logging;
 
 namespace InMemory.Providers;
 
-public class SimpleLoggingProvider: IWorkerLoggingProvider, IHiveShardSimpleLoggingProvider
+public class SimpleLoggingProvider: IWorkerLoggingProvider, IHiveShardSimpleLoggingProvider, IDebugLoggingProvider
 {
     public void LogDebug(string message, LogOrigin logOrigin)
     {

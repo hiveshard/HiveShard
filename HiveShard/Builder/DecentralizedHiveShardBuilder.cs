@@ -10,7 +10,7 @@ public class DecentralizedHiveShardBuilder
 {
     private IDeployment _deployment;
     private int _gridSize = 1;
-    private List<WorkerDefinition> _workers = new();
+    private List<IsolatedEnvironment> _workers = new();
     private ServiceCollection _topLevelServices = new();
     internal DecentralizedHiveShardBuilder(IDeployment deployment)
     {
@@ -32,7 +32,7 @@ public class DecentralizedHiveShardBuilder
         return _deployment.Build(_gridSize, _workers.AsEnumerable());
     }
 
-    public void RegisterWorker(WorkerDefinition environment)
+    public void RegisterWorker(IsolatedEnvironment environment)
     {
         _workers.Add(environment);
     }

@@ -13,7 +13,7 @@ using Xcepto;
 using Xcepto.HiveShard.Providers;
 using Xcepto.Interfaces;
 
-namespace HiveShard.Edge.Tests.scenario;
+namespace HiveShard.Edge.Tests.Scenario;
 
 public class InMemoryScenario: XceptoScenario
 {

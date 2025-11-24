@@ -8,6 +8,8 @@ public class EdgeWorkerBuilder()
 {
     private ServiceCollection _serviceCollection = new();
     private bool _dynamicEdgeAssignment = false;
+    private string _identifier;
+
     public EdgeWorkerBuilder AddEdge<T>()
         where T : BaseEdge
     {
@@ -15,9 +17,15 @@ public class EdgeWorkerBuilder()
         return this;
     }
 
-    internal EdgeWorkerDefinition Build()
+    public EdgeWorkerBuilder Identify(string identifier)
     {
-        return new EdgeWorkerDefinition(_dynamicEdgeAssignment);
+        _identifier = identifier;
+        return this;
+    }
+
+    internal EdgeWorkerIsolatedEnvironment Build()
+    {
+        return new EdgeWorkerIsolatedEnvironment(_dynamicEdgeAssignment, _identifier);
     }
 
     public EdgeWorkerBuilder DynamicAssignment()

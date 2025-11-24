@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HiveShard.Client.Interface;
+using HiveShard.Data;
 using HiveShard.Fabric;
 using HiveShard.Fabric.Client;
 using HiveShard.Interface;
@@ -11,9 +12,9 @@ namespace HiveShard.Client
     {
         private IEdgeTunnelClientEndpoint _edgeClient;
         private ICancellationProvider _cancellationProvider;
-        private Data.HiveShardClient _hiveShardClient;
+        private HiveShardClient _hiveShardClient;
 
-        public ClientTunnel(IEdgeTunnelClientEndpoint edgeClient, Data.HiveShardClient hiveShardClient, ICancellationProvider cancellationProvider)
+        public ClientTunnel(IEdgeTunnelClientEndpoint edgeClient, HiveShardClient hiveShardClient, ICancellationProvider cancellationProvider)
         {
             _hiveShardClient = hiveShardClient;
             _cancellationProvider = cancellationProvider;
@@ -51,7 +52,7 @@ namespace HiveShard.Client
             throw new NotImplementedException();
         }
 
-        public async Task Connect(Data.HiveShardClient hiveShardClient)
+        public async Task Connect(HiveShardClient hiveShardClient)
         {
             await _edgeClient.Start(_cancellationProvider.GetToken());
             await _edgeClient.WaitForReady();

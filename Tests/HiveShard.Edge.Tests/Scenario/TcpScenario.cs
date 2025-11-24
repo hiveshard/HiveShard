@@ -2,7 +2,7 @@
 using HiveShard.Client.Interface;
 using HiveShard.Config;
 using HiveShard.Data;
-using HiveShard.Edge.Tests.provider;
+using HiveShard.Edge.Tests.Provider;
 using HiveShard.Fabric.Client;
 using HiveShard.Fabric.Edge;
 using HiveShard.Fabrics.Tcp;
@@ -18,7 +18,7 @@ using Xcepto;
 using Xcepto.HiveShard.Providers;
 using Xcepto.Interfaces;
 
-namespace HiveShard.Edge.Tests.scenario;
+namespace HiveShard.Edge.Tests.Scenario;
 
 public class TcpScenario: XceptoScenario
 {

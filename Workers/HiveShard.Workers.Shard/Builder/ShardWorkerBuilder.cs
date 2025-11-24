@@ -15,8 +15,8 @@ public class ShardWorkerBuilder
         return this;
     }
     
-    internal ShardWorkerDefinition Build()
+    internal ShardIsolatedEnvironment Build()
     {
-        return new ShardWorkerDefinition();
+        return new ShardIsolatedEnvironment();
     }
 }

@@ -33,14 +33,16 @@ namespace Xcepto.HiveShard.Scenario
             foreach (var serviceDescriptor in sharedServices)
             {
                 compartmentBuilder.ExposeService(serviceDescriptor.ServiceType);
+                compartmentBuilder.Identify("outer");
             }
             compartments.Add(compartmentBuilder.Build());
             
             
-            foreach (var workerEnvironment in _environment.Inner)
+            foreach (var compartmentEnvironment in _environment.Inner)
             {
-                var innerCompartmentBuilder = Compartment.From(workerEnvironment.Services);
-                foreach (var dependency in workerEnvironment.Dependencies)
+                var innerCompartmentBuilder = Compartment.From(compartmentEnvironment.Services);
+                innerCompartmentBuilder.Identify(compartmentEnvironment.Identifier);
+                foreach (var dependency in compartmentEnvironment.Dependencies)
                 {
                     innerCompartmentBuilder.DependsOn(dependency);
                 }

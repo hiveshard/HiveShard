@@ -5,7 +5,7 @@ namespace HiveShard.Deployments.DockerCompose;
 
 public class DockerComposeDeployment: IDeployment
 {
-    public ServiceEnvironment Build(int gridSize, IEnumerable<WorkerDefinition> workers)
+    public ServiceEnvironment Build(int gridSize, IEnumerable<IsolatedEnvironment> workers)
     {
         throw new NotImplementedException();
     }

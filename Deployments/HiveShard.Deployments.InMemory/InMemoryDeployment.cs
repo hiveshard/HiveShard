@@ -1,6 +1,10 @@
 ﻿using HiveShard;
+using HiveShard.Client;
+using HiveShard.Client.Data;
+using HiveShard.Client.Interface;
 using HiveShard.Config;
 using HiveShard.Data;
+using HiveShard.Edge;
 using HiveShard.Fabric.Client;
 using HiveShard.Fabric.Ticker;
 using HiveShard.Fabrics.InMemory;
@@ -11,6 +15,7 @@ using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
 using HiveShard.Serializer;
+using HiveShard.Util;
 using HiveShard.Workers.Edge;
 using HiveShard.Workers.Edge.Data;
 using InMemory.Providers;
@@ -20,10 +25,10 @@ namespace InMemory;
 
 public class InMemoryDeployment: IDeployment
 {
-    public ServiceEnvironment Build(int gridSize, IEnumerable<WorkerDefinition> workers)
-    {
-        List<WorkerEnvironment> workerEnvironments = new List<WorkerEnvironment>();
+    private List<CompartmentEnvironment> _isolatedEnvironments = new();
 
+    public ServiceEnvironment Build(int gridSize, IEnumerable<IsolatedEnvironment> workers)
+    {
         IServiceCollection topLevelServices = new ServiceCollection()
             .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))
             .AddSingleton<IHiveShardSimpleLoggingProvider, SimpleLoggingProvider>()
@@ -35,25 +40,53 @@ public class InMemoryDeployment: IDeployment
             .AddSingleton<ICancellationProvider, CancellationProvider>()
             .AddSingleton<IWorkerLoggingProvider, SimpleLoggingProvider>()
             .AddSingleton<ISimpleFabric, InMemorySimpleFabric>()
-            .AddSingleton<IEdgeTunnelClientEndpoint, InMemoryEdgeFabric>();
+            .AddSingleton<IDebugLoggingProvider, SimpleLoggingProvider>()
+            .AddSingleton<IEdgeTunnelClientEndpoint, InMemoryEdgeFabric>()
+            .AddSingleton<IAddressProvider, EdgeIdentityProvider>();
         
         
-        foreach (var workerDefinition in workers)
+        foreach (var isolatedEnvironment in workers)
         {
-            if (workerDefinition is EdgeWorkerDefinition edgeWorkerEnvironment)
-            {
-                workerEnvironments.Add(BuildEdgeWorker(edgeWorkerEnvironment));
-            }
+            if (isolatedEnvironment is EdgeWorkerIsolatedEnvironment edgeWorkerEnvironment)
+                BuildEdgeWorker(edgeWorkerEnvironment);
+            if(isolatedEnvironment is ClientIsolatedEnvironment clientIsolatedEnvironment)
+                BuildClient(clientIsolatedEnvironment);
         }
 
-        return new ServiceEnvironment(gridSize, topLevelServices, workerEnvironments);
+        return new ServiceEnvironment(gridSize, topLevelServices, _isolatedEnvironments);
     }
 
-    private WorkerEnvironment BuildEdgeWorker(EdgeWorkerDefinition edgeWorkerDefinition)
+    private void BuildEdgeWorker(EdgeWorkerIsolatedEnvironment edgeWorkerIsolatedEnvironment)
     {
         ServiceCollection serviceCollection = new ServiceCollection();
 
         serviceCollection.AddSingleton<EdgeWorker>();
-        return new WorkerEnvironment(serviceCollection, [typeof(IIdentityConfig)]);
+        var compartmentEnvironment = new CompartmentEnvironment(
+            $"edge-{edgeWorkerIsolatedEnvironment.Identifier}", 
+            serviceCollection, 
+            new DependencyBuilder()
+                .Add<IIdentityConfig>()
+                .Build()
+        );
+        _isolatedEnvironments.Add(compartmentEnvironment);
     }
+
+    private void BuildClient(ClientIsolatedEnvironment clientIsolatedEnvironment)
+    {
+        ServiceCollection serviceCollection = new ServiceCollection();
+
+        serviceCollection.AddSingleton<IClientTunnel, ClientTunnel>();
+        serviceCollection.AddSingleton<HiveShardClient>(new HiveShardClient(clientIsolatedEnvironment.Username));
+        var compartmentEnvironment = new CompartmentEnvironment(
+            $"client-{clientIsolatedEnvironment.Username}", 
+            serviceCollection, 
+            new DependencyBuilder()
+                .Add<IEdgeTunnelClientEndpoint>()
+                .Add<ICancellationProvider>()
+                .Add<IDebugLoggingProvider>()
+                .Build()
+        );
+        _isolatedEnvironments.Add(compartmentEnvironment);
+    }
+
 }

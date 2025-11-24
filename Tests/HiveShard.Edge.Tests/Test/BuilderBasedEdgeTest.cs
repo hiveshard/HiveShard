@@ -1,40 +1,45 @@
-using HiveShard.Builder;
+using HiveShard.Client.Extensions;
 using HiveShard.Data;
 using HiveShard.Edge.events;
 using HiveShard.Edge.Tests.Edge;
 using HiveShard.Factory;
+using HiveShard.Interface;
 using HiveShard.Workers.Edge.Extensions;
 using InMemory;
-using Xcepto;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
 
-namespace HiveShard.Edge.Tests.test;
+namespace HiveShard.Edge.Tests.Test;
 
-[TestFixture]
-public class BuilderBasedEdgeTest
+[TestFixture(typeof(InMemoryDeployment))]
+public class BuilderBasedEdgeTest<T>
+where T: class, IDeployment, new()
 {
     [Test]
-    public async Task TestEdgeBuilderBased()
+    public async Task ClientEdgeConnection()
     {
+        var clientCredentials = new HiveShardClient("test");
         
-        var environment = HiveShardFactory.Create<InMemoryDeployment>(builder => builder
+        var environment = HiveShardFactory.Create<T>(builder => builder
             .EdgeWorker(x => x
                 .AddEdge<TestEdge>()
                 .AddEdge<TestEdge2>()
                 .DynamicAssignment()
+                .Identify("EW1")
+            )
+            .Client(x => x
+                .Identify(clientCredentials.Username)
             )
         );
         await HiveShardTest.RunAsync(environment, builder =>
         {
-            var credentials = new HiveShardClient("test");
 
-            var thisClient = builder.RegisterAdapter(new HiveShardClientAdapter(credentials.Username));
+            var thisClient = builder.RegisterAdapter(new HiveShardClientAdapter(clientCredentials.Username));
             
 
             Uri? connectedEdge = null;
             
-            thisClient.Action(x => x.Connect(credentials));
+            thisClient.Action(x => x.Connect(clientCredentials));
             
             thisClient.Expect<ConnectionSucceeded>(x =>
             {
@@ -43,7 +48,7 @@ public class BuilderBasedEdgeTest
                 return true;
             });
             
-            thisClient.Action(x=> x.SendHotPathEvent(new EdgeBindingRequest(credentials)));
+            thisClient.Action(x=> x.SendHotPathEvent(new EdgeBindingRequest(clientCredentials)));
             
             thisClient.Expect<EdgeBoundNotification>(x => x.Uri.Equals(connectedEdge));
         });

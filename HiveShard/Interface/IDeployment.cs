@@ -5,5 +5,5 @@ namespace HiveShard.Interface;
 
 public interface IDeployment
 {
-    ServiceEnvironment Build(int gridSize, IEnumerable<WorkerDefinition> workers);
+    ServiceEnvironment Build(int gridSize, IEnumerable<IsolatedEnvironment> workers);
 }

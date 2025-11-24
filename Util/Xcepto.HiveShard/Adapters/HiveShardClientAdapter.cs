@@ -8,22 +8,22 @@ namespace Xcepto.HiveShard.Adapters
 {
     public class HiveShardClientAdapter: XceptoAdapter
     {
-        private string _username;
+        private string _compartmentIdentifier;
 
         public HiveShardClientAdapter(String username)
         {
-            _username = username;
+            _compartmentIdentifier = $"client-{username}";
         }
 
         public void Action(Func<IClientTunnel, Task> clientAction)
         {
-            AddStep(new CompartmentalizedServiceBasedActionState<IClientTunnel>("Client Action", _username, clientAction)); 
+            AddStep(new CompartmentalizedServiceBasedActionState<IClientTunnel>("Client Action", _compartmentIdentifier, clientAction)); 
         }
 
         public void Expect<T>(Predicate<T> expectation)
             where T: IEvent
         {
-            AddStep(new CompartmentalizedClientExpectationState<T>($"Client Expectation of {typeof(T)}", _username, expectation));
+            AddStep(new CompartmentalizedClientExpectationState<T>($"Client Expectation of {typeof(T)}", _compartmentIdentifier, expectation));
         }
     }
 }

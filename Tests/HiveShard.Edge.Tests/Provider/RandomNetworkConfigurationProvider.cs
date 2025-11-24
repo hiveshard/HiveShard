@@ -1,6 +1,6 @@
 using HiveShard.Interface;
 
-namespace HiveShard.Edge.Tests.provider;
+namespace HiveShard.Edge.Tests.Provider;
 
 public class RandomNetworkConfigurationProvider: INetworkConfiguration
 {

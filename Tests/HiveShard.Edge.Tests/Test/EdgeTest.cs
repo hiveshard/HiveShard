@@ -1,16 +1,15 @@
+using HiveShard.Data;
 using HiveShard.Edge.events;
 using HiveShard.Edge.Tests.Edge;
 using HiveShard.Edge.Tests.Events;
-using HiveShard.Edge.Tests.scenario;
 using HiveShard.Factory;
 using HiveShard.Interface;
 using HiveShard.Workers.Edge.Extensions;
 using InMemory;
-using Xcepto;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
 
-namespace HiveShard.Edge.Tests.test;
+namespace HiveShard.Edge.Tests.Test;
 
 [TestFixture(typeof(InMemoryDeployment))]
 public class EdgeTest<T>
@@ -27,7 +26,7 @@ where T: IDeployment, new()
 
         await HiveShardTest.RunAsync(environment, builder =>
         {
-            var credentials = new HiveShard.Data.HiveShardClient("test");
+            var credentials = new HiveShardClient("test");
             var edge = builder.RegisterAdapter(new HiveShardEdgeServerAdapter<TestEdge>());
             var client = builder.RegisterAdapter(new HiveShardClientAdapter(credentials.Username));
             
