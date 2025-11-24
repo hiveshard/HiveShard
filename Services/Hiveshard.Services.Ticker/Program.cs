@@ -17,7 +17,7 @@ namespace Hiveshard.Services.Ticker
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             IServiceProvider serviceProvider = new ServiceCollection()
                 .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "ticker"))
@@ -28,13 +28,10 @@ namespace Hiveshard.Services.Ticker
                 .AddSingleton<ISimpleFabric, SimpleKafkaFabric>()
                 .AddSingleton<ITickRepository, TickRepository>()
                 .AddSingleton<TickerConfig>(new TickerConfig(3))
-                .AddSingleton<HiveShard.Ticker.Ticker>()
+                .AddSingleton<HiveShard.Ticker.EventTicker>()
                 .BuildServiceProvider();
 
-            var ticker = serviceProvider.GetRequiredService<HiveShard.Ticker.Ticker>();
-            var tasks = await ticker.Start();
-
-            await Task.WhenAll(tasks);
+            var ticker = serviceProvider.GetRequiredService<HiveShard.Ticker.EventTicker>();
         }
     }
 }

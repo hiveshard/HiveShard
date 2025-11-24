@@ -45,7 +45,7 @@ where T: IDeployment, new()
     [Test]
     public async Task FirstSendTestEvent()
     {
-        await HiveShardTest.RunAsync(_environment, builder =>
+        await HiveShardTest.Given(_environment, builder =>
         {
             var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(_shardType, _chunk));
 
@@ -56,7 +56,7 @@ where T: IDeployment, new()
     [Test]
     public async Task ThenExpectResponseEvent()
     {
-        await HiveShardTest.RunAsync(_environment, builder =>
+        await HiveShardTest.Given(_environment, builder =>
         {
             var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(_shardType, _chunk));
 

@@ -19,6 +19,8 @@ using HiveShard.Serializer;
 using HiveShard.Util;
 using HiveShard.Workers.Edge;
 using HiveShard.Workers.Edge.Data;
+using HiveShard.Workers.Ticker;
+using HiveShard.Workers.Ticker.Data;
 using InMemory.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,6 +29,13 @@ namespace InMemory;
 public class InMemoryDeployment: IDeployment
 {
     private List<CompartmentEnvironment> _isolatedEnvironments = new();
+    private List<(string, Type)> _entryPointLocations = new();
+
+    private void AddEntryPoint<T>(string compartment)
+    where T: class
+    {
+        _entryPointLocations.Add((compartment, typeof(T)));
+    }
 
     public ServiceEnvironment Build(int gridSize, IEnumerable<IsolatedEnvironment> workers)
     {
@@ -56,6 +65,8 @@ public class InMemoryDeployment: IDeployment
                 BuildEdgeWorker(edgeWorkerEnvironment);
             if(isolatedEnvironment is ClientIsolatedEnvironment clientIsolatedEnvironment)
                 BuildClient(clientIsolatedEnvironment);
+            if (isolatedEnvironment is TickerWorkerIsolatedEnvironment tickerWorkerIsolatedEnvironment)
+                BuildTickerWorker(tickerWorkerIsolatedEnvironment);
         }
 
         return new ServiceEnvironment(gridSize, topLevelServices, _isolatedEnvironments);
@@ -68,7 +79,7 @@ public class InMemoryDeployment: IDeployment
         serviceCollection.AddSingleton<EdgeWorker>();
         serviceCollection.AddSingleton<IEdgeTunnel, EdgeTunnel>();
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"edge-{edgeWorkerIsolatedEnvironment.Identifier}", 
+            $"edgeWorker-{edgeWorkerIsolatedEnvironment.Identifier}", 
             serviceCollection, 
             new DependencyBuilder()
                 .Add<CancellationProvider>()
@@ -99,4 +110,19 @@ public class InMemoryDeployment: IDeployment
         _isolatedEnvironments.Add(compartmentEnvironment);
     }
 
+    private void BuildTickerWorker(TickerWorkerIsolatedEnvironment tickerWorkerIsolatedEnvironment)
+    {
+        ServiceCollection serviceCollection = new();
+
+        serviceCollection.AddSingleton<TickerWorker>();
+        AddEntryPoint<TickerWorker>(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier);
+
+        var compartmentEnvironment = new CompartmentEnvironment(
+            $"tickerWorker-{tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier}",
+            serviceCollection,
+            new DependencyBuilder()
+                .Build()
+        );
+        _isolatedEnvironments.Add(compartmentEnvironment);
+    }
 }

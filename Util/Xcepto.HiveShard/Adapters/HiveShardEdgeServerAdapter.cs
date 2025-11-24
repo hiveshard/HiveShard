@@ -18,7 +18,7 @@ namespace Xcepto.HiveShard.Adapters
 
         public HiveShardEdgeServerAdapter(string edgeWorkerName)
         {
-            _compartmentIdentifier = $"edge-{edgeWorkerName}";
+            _compartmentIdentifier = $"edgeWorker-{edgeWorkerName}";
         }
         protected override Task Initialize(IServiceProvider serviceProvider) => Task.CompletedTask;
 

@@ -10,4 +10,5 @@ public class EdgeWorkerIsolatedEnvironment : IsolatedEnvironment
         Identifier = identifier;
         DynamicEdgeAssignment = dynamicEdgeAssignment;
     }
+
 }

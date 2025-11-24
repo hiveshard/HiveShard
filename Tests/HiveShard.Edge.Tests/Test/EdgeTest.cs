@@ -32,7 +32,7 @@ where T: IDeployment, new()
             )
         );
 
-        await HiveShardTest.RunAsync(environment, builder =>
+        await HiveShardTest.Given(environment, builder =>
         {
             var edge = builder.RegisterAdapter(new HiveShardEdgeServerAdapter<TestEdge>(edgeWorker));
             var client = builder.RegisterAdapter(new HiveShardClientAdapter(credentials.Username));
@@ -73,7 +73,7 @@ where T: IDeployment, new()
             )
         );
         
-        await HiveShardTest.RunAsync(environment, builder =>
+        await HiveShardTest.Given(environment, builder =>
         {
             var edge = builder.RegisterAdapter(new HiveShardEdgeServerAdapter<TestEdge>(edgeWorker));
             var client = builder.RegisterAdapter(new HiveShardClientAdapter(credentials.Username));

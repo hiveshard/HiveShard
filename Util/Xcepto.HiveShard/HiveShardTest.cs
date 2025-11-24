@@ -8,7 +8,7 @@ namespace Xcepto.HiveShard
 {
     public class HiveShardTest
     {
-        public static async Task RunAsync(ServiceEnvironment environment, Action<TransitionBuilder> xceptoBuilder)
+        public static async Task Given(ServiceEnvironment environment, Action<TransitionBuilder> xceptoBuilder)
         {
             await XceptoTest.Given(new HiveShardScenario(environment), xceptoBuilder);
         }

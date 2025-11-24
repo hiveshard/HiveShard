@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>9</LangVersion>
+        <LangVersion>10</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -12,6 +12,7 @@
       <ProjectReference Include="..\..\HiveShard.Ticker\HiveShard.Ticker.csproj" />
       <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
       <ProjectReference Include="..\..\Workers\HiveShard.Workers.Shard\HiveShard.Workers.Shard.csproj" />
+      <ProjectReference Include="..\..\Workers\HiveShard.Workers.Ticker\HiveShard.Workers.Ticker.csproj" />
     </ItemGroup>
 
     <ItemGroup>

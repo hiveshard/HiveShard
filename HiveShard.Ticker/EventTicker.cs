@@ -14,9 +14,9 @@ using HiveShard.Interface.Logging;
 
 namespace HiveShard.Ticker
 {
-    public class Ticker
+    public class EventTicker
     {
-        public Ticker(ISimpleFabric simpleFabric, TickerConfig config, IWorkerLoggingProvider loggingProvider, IShardRepository shardRepository)
+        public EventTicker(ISimpleFabric simpleFabric, TickerConfig config, IWorkerLoggingProvider loggingProvider, IShardRepository shardRepository)
         {
             _loggingProvider = loggingProvider;
             _simpleFabric = simpleFabric;
@@ -57,11 +57,6 @@ namespace HiveShard.Ticker
 
         private long _lastHandledTick;
         
-        public Task<IEnumerable<Task>> Start()
-        {
-            return Task.FromResult<IEnumerable<Task>>(ImmutableList<Task>.Empty);
-        }
-
         private void NextTick(long lastTick, DateTime lastTickTime)
         {
             var topicOffsets = _completedTicks

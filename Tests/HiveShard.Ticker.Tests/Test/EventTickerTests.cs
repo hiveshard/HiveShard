@@ -1,23 +1,35 @@
 ﻿using HiveShard.Data;
 using HiveShard.Event;
+using HiveShard.Factory;
+using HiveShard.Interface;
 using HiveShard.Ticker.Tests.Events;
 using HiveShard.Ticker.Tests.Scenarios;
+using HiveShard.Workers.Ticker.Extensions;
+using InMemory;
 using Xcepto;
+using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
 
 namespace HiveShard.Ticker.Tests.Test;
 
-[TestFixture(typeof(InMemoryScenario))]
-[TestFixture(typeof(KafkaScenario))]
-public class TickerTests<T> where T: XceptoScenario, new()
+[TestFixture(typeof(InMemoryDeployment))]
+public class EventTickerTests<T> 
+    where T: class, IDeployment, new()
 {
     [Test]
-    [Ignore("No consistency in failures")]
     public async Task TickerProducesIncrementedTick()
     {
-        await XceptoTest.Given(new T(), builder =>
+        string tickerIdentifier = "TW1";
+        
+        var environment = HiveShardFactory.Create<T>(builder => builder
+            .TickerWorker(tickerWorkerBuilder => tickerWorkerBuilder
+                .Identify(tickerIdentifier)
+                .Ticker<TestEvent>()
+            )
+        );
+        await HiveShardTest.Given(environment, builder =>
         {
-            var ticker = builder.RegisterAdapter(new TickerXceptoAdapter(new TickerConfig(1)));
+            var ticker = builder.RegisterAdapter(new HiveShardTickerWorkerAdapter(new TickerConfig(1), tickerIdentifier));
             var testFabricAccess = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
 
             var shard = new HiveShardIdentity(new Chunk(0, 0), new ShardType("Navigation"));
