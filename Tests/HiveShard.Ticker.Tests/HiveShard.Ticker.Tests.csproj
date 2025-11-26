@@ -15,7 +15,7 @@
         <PackageReference Include="NUnit.Analyzers" Version="4.4.0"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.6.0"/>
         <PackageReference Include="TestCentric.Metadata" Version="3.0.2" />
-        <PackageReference Include="Xcepto" Version="6.3.0" />
+        <PackageReference Include="Xcepto" Version="6.4.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -29,6 +29,10 @@
       <ProjectReference Include="..\..\HiveShard.Ticker\HiveShard.Ticker.csproj" />
       <ProjectReference Include="..\..\Util\Xcepto.HiveShard\Xcepto.HiveShard.csproj" />
       <ProjectReference Include="..\..\Workers\HiveShard.Workers.Ticker\HiveShard.Workers.Ticker.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Scenarios\" />
     </ItemGroup>
 
 </Project>

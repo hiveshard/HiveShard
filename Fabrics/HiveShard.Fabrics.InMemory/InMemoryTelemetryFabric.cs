@@ -16,8 +16,6 @@ namespace HiveShard.Fabrics.InMemory
         {
         }
 
-        public new Task Start(CancellationToken cancellationToken) => base.Start(cancellationToken);
-        public new Task WaitForReady() => base.WaitForReady();
         public new void Register<T>(string topic, Action<Consumption<T>> action) => 
             base.Register<T>(topic, action);
 

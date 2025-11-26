@@ -54,8 +54,6 @@ namespace HiveShard.Client
 
         public async Task Connect(HiveShardClient hiveShardClient)
         {
-            await _edgeClient.Start(_cancellationProvider.GetToken());
-            await _edgeClient.WaitForReady();
             await _edgeClient.Connect(hiveShardClient);
         }
 

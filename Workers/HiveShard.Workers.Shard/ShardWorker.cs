@@ -12,7 +12,7 @@ namespace HiveShard.Workers.Shard
 {
     public class ShardWorker
     {
-        private readonly ConcurrentBag<Task> _ticks = new ConcurrentBag<Task>();
+        private readonly ConcurrentBag<Task> _ticks = new();
         
         private int _nChunks;
         private IWorkerLoggingProvider _loggingProvider;
@@ -59,8 +59,6 @@ namespace HiveShard.Workers.Shard
                     var hiveShard = shardServiceProvider.GetRequiredService<T>();
                     hiveShard.Initialize();
                     tunnel.Initialize(hiveShard);
-                    
-                    _ticks.Add(tunnel.Start(_cancellationProvider.GetToken()));
                 }
             }
         }

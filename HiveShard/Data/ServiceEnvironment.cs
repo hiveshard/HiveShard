@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using HiveShard.Builder;
@@ -7,18 +8,19 @@ namespace HiveShard.Data
 {
     public class ServiceEnvironment
     {
-        private int _gridSize;
+        public int GridSize { get; }
+        public IEnumerable<(string, Type, string)> EntryPointLocations { get; }
         public IServiceCollection Outer { get; }
         public IEnumerable<CompartmentEnvironment> Inner { get; }
 
-        public ServiceEnvironment(
-            int gridSize, 
+        public ServiceEnvironment(int gridSize,
             IServiceCollection serviceCollection,
-            IEnumerable<CompartmentEnvironment> inner)
+            IEnumerable<CompartmentEnvironment> inner, IEnumerable<(string, Type, string)> entryPointLocations)
         {
+            EntryPointLocations = entryPointLocations;
             Inner = inner;
             Outer = serviceCollection;
-            _gridSize = gridSize;
+            GridSize = gridSize;
         }
 
         public Task Start()

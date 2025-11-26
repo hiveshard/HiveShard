@@ -39,8 +39,6 @@ where T: IDeployment, new()
             
             Uri? connectedEdge = null;
 
-            edge.Action(x=>x.Start());
-            
             client.Action(x => x.Connect(credentials));
 
             
@@ -84,8 +82,6 @@ where T: IDeployment, new()
             {
                 x.SendEdgeEventToClient(e, c);
             }));
-
-            edge.Action(x=>x.Start());
 
             client.Action(x => x.Connect(credentials));
             client.Expect<ConnectionSucceeded>(x =>

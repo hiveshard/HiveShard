@@ -16,11 +16,13 @@ using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
 using HiveShard.Serializer;
+using HiveShard.Ticker;
 using HiveShard.Util;
 using HiveShard.Workers.Edge;
 using HiveShard.Workers.Edge.Data;
 using HiveShard.Workers.Ticker;
 using HiveShard.Workers.Ticker.Data;
+using HiveShard.Workers.Ticker.Repository;
 using InMemory.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,17 +30,19 @@ namespace InMemory;
 
 public class InMemoryDeployment: IDeployment
 {
-    private List<CompartmentEnvironment> _isolatedEnvironments = new();
-    private List<(string, Type)> _entryPointLocations = new();
+    private readonly List<CompartmentEnvironment> _isolatedEnvironments = new();
+    private readonly List<(string, Type, string)> _entryPointLocations = new();
+    private int _gridSize;
 
-    private void AddEntryPoint<T>(string compartment)
+    private void AddEntryPoint<T>(string compartment, string compartmentType)
     where T: class
     {
-        _entryPointLocations.Add((compartment, typeof(T)));
+        _entryPointLocations.Add((compartment, typeof(T), compartmentType));
     }
 
     public ServiceEnvironment Build(int gridSize, IEnumerable<IsolatedEnvironment> workers)
     {
+        _gridSize = gridSize;
         CancellationProvider cancellationProvider = new CancellationProvider();
         IServiceCollection topLevelServices = new ServiceCollection()
             .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))
@@ -69,7 +73,7 @@ public class InMemoryDeployment: IDeployment
                 BuildTickerWorker(tickerWorkerIsolatedEnvironment);
         }
 
-        return new ServiceEnvironment(gridSize, topLevelServices, _isolatedEnvironments);
+        return new ServiceEnvironment(gridSize, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable());
     }
 
     private void BuildEdgeWorker(EdgeWorkerIsolatedEnvironment edgeWorkerIsolatedEnvironment)
@@ -87,7 +91,8 @@ public class InMemoryDeployment: IDeployment
                 .Add<IAddressProvider>()
                 .Add<IIdentityConfig>()
                 .Add<IEdgeTunnelServerEndpoint>()
-                .Build()
+                .Build(),
+            null
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }
@@ -105,7 +110,8 @@ public class InMemoryDeployment: IDeployment
                 .Add<IEdgeTunnelClientEndpoint>()
                 .Add<ICancellationProvider>()
                 .Add<IDebugLoggingProvider>()
-                .Build()
+                .Build(),
+            null
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }
@@ -115,13 +121,21 @@ public class InMemoryDeployment: IDeployment
         ServiceCollection serviceCollection = new();
 
         serviceCollection.AddSingleton<TickerWorker>();
-        AddEntryPoint<TickerWorker>(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier);
+        serviceCollection.AddSingleton<TickerRepository>();
+        serviceCollection.AddSingleton<TickerAdditionRepository>();
+        serviceCollection.AddSingleton<TickerConfig>(new TickerConfig(_gridSize));
+        AddEntryPoint<TickerWorker>(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, "tickerWorker");
 
         var compartmentEnvironment = new CompartmentEnvironment(
             $"tickerWorker-{tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier}",
             serviceCollection,
             new DependencyBuilder()
-                .Build()
+                .Add<ICancellationProvider>()
+                .Add<ISimpleFabric>()
+                .Add<IWorkerLoggingProvider>()
+                .Add<IShardRepository>()
+                .Build(),
+            typeof(TickerWorker)
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }

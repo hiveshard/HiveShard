@@ -6,7 +6,7 @@ using HiveShard.Workers.Ticker.Repository;
 
 namespace HiveShard.Workers.Ticker;
 
-public class TickerWorker: IEntryPoint
+public class TickerWorker: IIsolatedEntryPoint
 {
     private TickerRepository _tickerRepository;
     private TickerAdditionRepository _tickerAdditionRepository;
@@ -34,7 +34,7 @@ public class TickerWorker: IEntryPoint
         _cancellationProvider = cancellationProvider;
     }
 
-    public void Start()
+    public async Task Start()
     {
         while (!_cancellationProvider.GetToken().IsCancellationRequested)
         {
@@ -43,6 +43,9 @@ public class TickerWorker: IEntryPoint
                 var eventTicker = new EventTicker(_simpleFabric, _tickerConfig, _workerLoggingProvider, _shardRepository);
                 _tickerRepository.AddTicker(eventType, eventTicker);
             }
+            
+            
+            await Task.Delay(100);
         }
     }
 }

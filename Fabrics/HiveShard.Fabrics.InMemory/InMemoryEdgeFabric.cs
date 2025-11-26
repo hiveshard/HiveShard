@@ -48,12 +48,6 @@ namespace HiveShard.Fabrics.InMemory
             _debugLoggingProvider.LogDebug($"Client disconnected from edge");
         }
 
-        public Task Start(CancellationToken cancellationToken)
-        {
-            _debugLoggingProvider.LogDebug($"{nameof(InMemoryEdgeFabric)} started");
-            return Task.CompletedTask;
-        }
-
         public Task Connect(HiveShardClient hiveShardClient)
         {
             _connectedHiveShardClient = hiveShardClient;
@@ -77,7 +71,5 @@ namespace HiveShard.Fabrics.InMemory
         {
             _clientConnectedCallback = handler;
         }
-
-        public Task WaitForReady() => Task.CompletedTask;
     }
 }

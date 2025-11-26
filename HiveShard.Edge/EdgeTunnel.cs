@@ -32,11 +32,5 @@ namespace HiveShard.Edge
         {
             _edgeTunnel.RegisterClientConnectedCallback(handler);
         }
-
-        public async Task Start()
-        {
-            _ = _edgeTunnel.Start(_cancellationProvider.GetToken());
-            await _edgeTunnel.WaitForReady();
-        }
     }
 }

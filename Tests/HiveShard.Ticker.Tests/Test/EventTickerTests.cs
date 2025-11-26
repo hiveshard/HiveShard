@@ -3,7 +3,6 @@ using HiveShard.Event;
 using HiveShard.Factory;
 using HiveShard.Interface;
 using HiveShard.Ticker.Tests.Events;
-using HiveShard.Ticker.Tests.Scenarios;
 using HiveShard.Workers.Ticker.Extensions;
 using InMemory;
 using Xcepto;

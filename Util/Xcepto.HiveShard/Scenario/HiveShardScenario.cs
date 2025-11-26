@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HiveShard.Data;
+using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.Data;
 using Xcepto.HiveShard.Util;
@@ -13,7 +15,7 @@ namespace Xcepto.HiveShard.Scenario
 {
     public class HiveShardScenario: CompartmentalizedXceptoScenario
     {
-        private ServiceEnvironment _environment;
+        private readonly ServiceEnvironment _environment;
 
         public HiveShardScenario(ServiceEnvironment environment)
         {
@@ -22,7 +24,7 @@ namespace Xcepto.HiveShard.Scenario
 
         protected override Task<IEnumerable<Compartment>> Setup()
         {
-            List<Compartment> compartments = new List<Compartment>();
+            Dictionary<string, Compartment> compartments = new Dictionary<string, Compartment>();
             
             
             var sharedServices = _environment.Outer
@@ -30,26 +32,51 @@ namespace Xcepto.HiveShard.Scenario
                 .AddSingleton<ILoggingProvider, XceptoBasicLoggingProvider>();
             
             var compartmentBuilder = Compartment.From(sharedServices);
+            string outerIdentification = "outer";
             foreach (var serviceDescriptor in sharedServices)
             {
                 compartmentBuilder.ExposeService(serviceDescriptor.ServiceType);
-                compartmentBuilder.Identify("outer");
+                compartmentBuilder.Identify(outerIdentification);
             }
-            compartments.Add(compartmentBuilder.Build());
+            compartments.Add(outerIdentification, compartmentBuilder.Build());
             
             
             foreach (var compartmentEnvironment in _environment.Inner)
             {
-                var innerCompartmentBuilder = Compartment.From(compartmentEnvironment.Services);
+                var innerServiceCollection = compartmentEnvironment.Services;
+                GenericEntryPoint genericEntryPoint = null;
+                if(compartmentEnvironment.EntryPointType is not null)
+                {
+                    genericEntryPoint = new GenericEntryPoint();
+                    innerServiceCollection.AddSingleton<GenericEntryPoint>(genericEntryPoint);
+                }
+
+                var innerCompartmentBuilder = Compartment.From(innerServiceCollection);
                 innerCompartmentBuilder.Identify(compartmentEnvironment.Identifier);
                 foreach (var dependency in compartmentEnvironment.Dependencies)
                 {
                     innerCompartmentBuilder.DependsOn(dependency);
                 }
-                compartments.Add(innerCompartmentBuilder.Build());
+
+                var compartment = innerCompartmentBuilder.Build();
+                if(compartmentEnvironment.EntryPointType is not null && genericEntryPoint is not null)
+                {
+                    Func<IIsolatedEntryPoint> isolatedEntryPointProvider = () =>
+                    {
+                        var requiredService =
+                            compartment.Services.GetRequiredService(compartmentEnvironment.EntryPointType);
+                        if (requiredService is not IIsolatedEntryPoint isolatedEntryPoint)
+                            throw new Exception("Incorrectly registered entryPoint");
+                        return isolatedEntryPoint;
+                    };
+                    
+                    genericEntryPoint.UpdateStartMethod(isolatedEntryPointProvider);
+                    innerCompartmentBuilder.SetEntryPoint(typeof(GenericEntryPoint));
+                }
+                compartments.Add(compartmentEnvironment.Identifier, compartment);
             }
             
-            return Task.FromResult(compartments.AsEnumerable());
+            return Task.FromResult(compartments.Values.AsEnumerable());
         }
     }
 }

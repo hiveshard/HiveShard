@@ -61,9 +61,5 @@ namespace HiveShard.Fabrics.InMemory
             _offsets[index] = newOffset;
             return Task.CompletedTask;
         }
-
-        public Task Start(CancellationToken cancellationToken) => Task.CompletedTask;
-
-        public Task WaitForReady() => Task.CompletedTask;
     }
 }
