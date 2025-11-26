@@ -58,6 +58,7 @@ namespace Xcepto.HiveShard.Scenario
                     innerCompartmentBuilder.DependsOn(dependency);
                 }
 
+                innerCompartmentBuilder.SetEntryPoint(typeof(GenericEntryPoint));
                 var compartment = innerCompartmentBuilder.Build();
                 if(compartmentEnvironment.EntryPointType is not null && genericEntryPoint is not null)
                 {
@@ -71,7 +72,6 @@ namespace Xcepto.HiveShard.Scenario
                     };
                     
                     genericEntryPoint.UpdateStartMethod(isolatedEntryPointProvider);
-                    innerCompartmentBuilder.SetEntryPoint(typeof(GenericEntryPoint));
                 }
                 compartments.Add(compartmentEnvironment.Identifier, compartment);
             }
