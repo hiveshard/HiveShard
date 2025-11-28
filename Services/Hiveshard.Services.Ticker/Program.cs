@@ -27,7 +27,6 @@ namespace Hiveshard.Services.Ticker
                 .AddSingleton<IWorkerLoggingProvider, WorkerLoggingProvider>()
                 .AddSingleton<ISimpleFabric, SimpleKafkaFabric>()
                 .AddSingleton<ITickRepository, TickRepository>()
-                .AddSingleton<TickerConfig>(new TickerConfig(3))
                 .AddSingleton<HiveShard.Ticker.EventTicker>()
                 .BuildServiceProvider();
 

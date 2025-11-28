@@ -20,28 +20,21 @@ namespace HiveShard.Ticker
         {
             _loggingProvider = loggingProvider;
             _simpleFabric = simpleFabric;
-            var eventTypes = GetAllTypesImplementingInterface<IEvent>();
             var topicPartitions = new List<TopicPartition>();
-            var chunks = new List<Chunk>();
             var shards = new List<HiveShardIdentity>();
             for (int i = 0; i < config.N; i++)
             {
                 for (int j = 0; j < config.N; j++)
                 {
                     var chunk = new Chunk(i, j);
-                    chunks.Add(chunk);
                     foreach (ShardType shardType in shardRepository.GetShardTypes())
                     {
                         shards.Add(new HiveShardIdentity(chunk, shardType));
                     }
-                    foreach (var eventType in eventTypes)
-                    {
-                        topicPartitions.Add(new TopicPartition(eventType.FullName, chunk));
-                    }
+                    topicPartitions.Add(new TopicPartition(config.EventType.FullName!, chunk));
                 }
             }
 
-            _allChunks = chunks.ToImmutableArray();
             _allTopics = topicPartitions.ToImmutableArray();
             _allShards = shards.ToImmutableArray();
             
@@ -50,7 +43,6 @@ namespace HiveShard.Ticker
 
         private readonly ISimpleFabric _simpleFabric;
         private readonly IImmutableList<HiveShardIdentity> _allShards;
-        private readonly IImmutableList<Chunk> _allChunks;
         private readonly IImmutableList<TopicPartition> _allTopics;
         private readonly Dictionary<HiveShardIdentity, CompletedTick> _completedTicks = new();
         private readonly IWorkerLoggingProvider _loggingProvider;
@@ -137,6 +129,11 @@ namespace HiveShard.Ticker
             }
 
             return uniqueTypes;
+        }
+
+        public void Start()
+        {
+            throw new NotImplementedException();
         }
     }
 }

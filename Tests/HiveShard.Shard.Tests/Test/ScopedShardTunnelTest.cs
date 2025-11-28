@@ -3,6 +3,7 @@ using HiveShard.Config;
 using HiveShard.Data;
 using HiveShard.Event;
 using HiveShard.Fabrics.InMemory;
+using HiveShard.Interface;
 using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
@@ -26,7 +27,8 @@ public class ScopedShardTunnelTest
         var simpleTelemetryProvider = new SimpleTelemetryProvider(loggingProvider);
         var workerLoggingProvider = new WorkerLoggingProvider(simpleTelemetryProvider, tickRepository, identityConfig);
         var fabricLoggingProvider = new FabricLoggingProvider(simpleTelemetryProvider, tickRepository);
-        var inMemorySimpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig);
+        ICancellationProvider cancellationProvider = new CancellationProvider();
+        var inMemorySimpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, cancellationProvider);
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         ScopedShardTunnel tunnel = new ScopedShardTunnel(shardIdentity, workerLoggingProvider, inMemorySimpleFabric, tickRepository);
         tunnel.Initialize(new TestShard(tunnel));
@@ -34,7 +36,7 @@ public class ScopedShardTunnelTest
         // Arrange
         BlockingCollection<TestEventResponse> responses = new BlockingCollection<TestEventResponse>();
         inMemorySimpleFabric.Register<CompletedTick>("completed-ticks", x => { }); // ignore not consumed yet
-        inMemorySimpleFabric.Register<TestEventResponse>(typeof(TestEventResponse).FullName, e =>
+        inMemorySimpleFabric.Register<TestEventResponse>(typeof(TestEventResponse).FullName!, e =>
         {
             Console.WriteLine("received response");
             responses.Add(e.Message);
@@ -43,7 +45,7 @@ public class ScopedShardTunnelTest
         await tunnel.WaitForReady();
         
         // Act
-        var testEventPartition = new TopicPartition(typeof(TestEvent).FullName, new Chunk(0, 0));
+        var testEventPartition = new TopicPartition(typeof(TestEvent).FullName!, new Chunk(0, 0));
         await inMemorySimpleFabric.Send(testEventPartition.Topic, testEventPartition.Chunk , new TestEvent(7));
         await inMemorySimpleFabric.Send("ticks", new Tick(1, 0, [new TopicPartitionOffset(testEventPartition.Topic, testEventPartition.Chunk, 1)], DateTime.Now));
 

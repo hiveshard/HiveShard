@@ -1,7 +1,9 @@
-﻿using HiveShard.Fabric.Ticker;
+﻿using HiveShard.Data;
+using HiveShard.Fabric.Ticker;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
 using HiveShard.Ticker;
+using HiveShard.Workers.Ticker.Data;
 using HiveShard.Workers.Ticker.Repository;
 
 namespace HiveShard.Workers.Ticker;
@@ -12,22 +14,21 @@ public class TickerWorker: IIsolatedEntryPoint
     private TickerAdditionRepository _tickerAdditionRepository;
     private ICancellationProvider _cancellationProvider;
     private ISimpleFabric _simpleFabric;
-    private TickerConfig _tickerConfig;
     private IWorkerLoggingProvider _workerLoggingProvider;
     private IShardRepository _shardRepository;
+    private ServiceEnvironment _serviceEnvironment;
 
     public TickerWorker(
         TickerRepository tickerRepository, 
         TickerAdditionRepository tickerAdditionRepository, 
         ICancellationProvider cancellationProvider,
         ISimpleFabric simpleFabric,
-        TickerConfig tickerConfig,
         IWorkerLoggingProvider workerLoggingProvider,
-        IShardRepository shardRepository)
+        IShardRepository shardRepository, ServiceEnvironment serviceEnvironment)
     {
         _shardRepository = shardRepository;
+        _serviceEnvironment = serviceEnvironment;
         _workerLoggingProvider = workerLoggingProvider;
-        _tickerConfig = tickerConfig;
         _simpleFabric = simpleFabric;
         _tickerRepository = tickerRepository;
         _tickerAdditionRepository = tickerAdditionRepository;
@@ -40,8 +41,9 @@ public class TickerWorker: IIsolatedEntryPoint
         {
             while (_tickerAdditionRepository.TryConsumeRequest(out Type eventType))
             {
-                var eventTicker = new EventTicker(_simpleFabric, _tickerConfig, _workerLoggingProvider, _shardRepository);
-                _tickerRepository.AddTicker(eventType, eventTicker);
+                var eventTicker = new EventTicker(_simpleFabric, new TickerConfig(_serviceEnvironment.GridSize, eventType), _workerLoggingProvider, _shardRepository);
+                var task = Task.Run(() => eventTicker.Start());
+                _tickerRepository.AddTicker(eventType, new EventTickerInstance(eventTicker, task));
             }
             
             

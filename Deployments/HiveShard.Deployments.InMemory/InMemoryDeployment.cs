@@ -119,11 +119,14 @@ public class InMemoryDeployment: IDeployment
     private void BuildTickerWorker(TickerWorkerIsolatedEnvironment tickerWorkerIsolatedEnvironment)
     {
         ServiceCollection serviceCollection = new();
-
         serviceCollection.AddSingleton<TickerWorker>();
         serviceCollection.AddSingleton<TickerRepository>();
-        serviceCollection.AddSingleton<TickerAdditionRepository>();
-        serviceCollection.AddSingleton<TickerConfig>(new TickerConfig(_gridSize));
+        var tickerAdditionRepository = new TickerAdditionRepository();
+        serviceCollection.AddSingleton<TickerAdditionRepository>(tickerAdditionRepository);
+        foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers)
+        {
+            tickerAdditionRepository.RequestAddition(tickerIsolatedEnvironment.EventType);
+        }
         AddEntryPoint<TickerWorker>(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, "tickerWorker");
 
         var compartmentEnvironment = new CompartmentEnvironment(
@@ -134,6 +137,7 @@ public class InMemoryDeployment: IDeployment
                 .Add<ISimpleFabric>()
                 .Add<IWorkerLoggingProvider>()
                 .Add<IShardRepository>()
+                .Add<ServiceEnvironment>()
                 .Build(),
             typeof(TickerWorker)
         );

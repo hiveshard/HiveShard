@@ -28,7 +28,7 @@ public class EventTickerTests<T>
         );
         await HiveShardTest.Given(environment, builder =>
         {
-            var ticker = builder.RegisterAdapter(new HiveShardTickerWorkerAdapter(new TickerConfig(1), tickerIdentifier));
+            var ticker = builder.RegisterAdapter(new HiveShardTickerWorkerAdapter(tickerIdentifier));
             var testFabricAccess = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
 
             var shard = new HiveShardIdentity(new Chunk(0, 0), new ShardType("Navigation"));
