@@ -8,7 +8,7 @@ using HiveShard.Interface;
 
 namespace HiveShard.Client
 {
-    public class ClientTunnel: IClientTunnel
+    public class ClientTunnel: IClientTunnel, IIsolatedEntryPoint
     {
         private IEdgeTunnelClientEndpoint _edgeClient;
         private ICancellationProvider _cancellationProvider;
@@ -66,5 +66,7 @@ namespace HiveShard.Client
         {
             _edgeClient.Disconnect(_hiveShardClient);
         }
+
+        public Task Start() => Task.CompletedTask;
     }
 }

@@ -44,12 +44,8 @@ namespace Xcepto.HiveShard.Scenario
             foreach (var compartmentEnvironment in _environment.Inner)
             {
                 var innerServiceCollection = compartmentEnvironment.Services;
-                GenericEntryPoint genericEntryPoint = null;
-                if(compartmentEnvironment.EntryPointType is not null)
-                {
-                    genericEntryPoint = new GenericEntryPoint();
-                    innerServiceCollection.AddSingleton<GenericEntryPoint>(genericEntryPoint);
-                }
+                GenericEntryPoint genericEntryPoint = new GenericEntryPoint();
+                innerServiceCollection.AddSingleton<GenericEntryPoint>(genericEntryPoint);
 
                 var innerCompartmentBuilder = Compartment.From(innerServiceCollection);
                 innerCompartmentBuilder.Identify(compartmentEnvironment.Identifier);
@@ -60,19 +56,14 @@ namespace Xcepto.HiveShard.Scenario
 
                 innerCompartmentBuilder.SetEntryPoint(typeof(GenericEntryPoint));
                 var compartment = innerCompartmentBuilder.Build();
-                if(compartmentEnvironment.EntryPointType is not null && genericEntryPoint is not null)
+                genericEntryPoint.UpdateStartMethod(() =>
                 {
-                    Func<IIsolatedEntryPoint> isolatedEntryPointProvider = () =>
-                    {
-                        var requiredService =
-                            compartment.Services.GetRequiredService(compartmentEnvironment.EntryPointType);
-                        if (requiredService is not IIsolatedEntryPoint isolatedEntryPoint)
-                            throw new Exception("Incorrectly registered entryPoint");
-                        return isolatedEntryPoint;
-                    };
-                    
-                    genericEntryPoint.UpdateStartMethod(isolatedEntryPointProvider);
-                }
+                    var requiredService =
+                        compartment.Services.GetRequiredService(compartmentEnvironment.EntryPointType);
+                    if (requiredService is not IIsolatedEntryPoint isolatedEntryPoint)
+                        throw new Exception("Incorrectly registered entryPoint");
+                    return isolatedEntryPoint;
+                });
                 compartments.Add(compartmentEnvironment.Identifier, compartment);
             }
             

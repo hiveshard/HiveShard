@@ -92,7 +92,7 @@ public class InMemoryDeployment: IDeployment
                 .Add<IIdentityConfig>()
                 .Add<IEdgeTunnelServerEndpoint>()
                 .Build(),
-            null
+            typeof(EdgeWorker)
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }
@@ -101,7 +101,8 @@ public class InMemoryDeployment: IDeployment
     {
         ServiceCollection serviceCollection = new ServiceCollection();
 
-        serviceCollection.AddSingleton<IClientTunnel, ClientTunnel>();
+        serviceCollection.AddSingleton<ClientTunnel>();
+        serviceCollection.AddSingleton<IClientTunnel, ClientTunnel>(x => x.GetRequiredService<ClientTunnel>());
         serviceCollection.AddSingleton<HiveShardClient>(new HiveShardClient(clientIsolatedEnvironment.Username));
         var compartmentEnvironment = new CompartmentEnvironment(
             $"client-{clientIsolatedEnvironment.Username}", 
@@ -111,7 +112,7 @@ public class InMemoryDeployment: IDeployment
                 .Add<ICancellationProvider>()
                 .Add<IDebugLoggingProvider>()
                 .Build(),
-            null
+            typeof(ClientTunnel)
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }
