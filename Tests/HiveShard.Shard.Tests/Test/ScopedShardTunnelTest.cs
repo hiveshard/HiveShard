@@ -20,7 +20,7 @@ public class ScopedShardTunnelTest
     [Test]
     public async Task Test()
     {
-        var shardIdentity = new HiveShardIdentity(new Chunk(0, 0), new ShardType("test"));
+        var shardIdentity = new HiveShardIdentity(new Chunk(0, 0), ShardType.From<TestShard>(), Guid.NewGuid());
         var loggingProvider = new LoggingProvider();
         var identityConfig = new IdentityConfig(Guid.NewGuid(), "test");
         var tickRepository = new TickRepository();

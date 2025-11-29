@@ -1,30 +1,29 @@
 using System;
 using System.Threading.Tasks;
-using HiveShard.Client.Interface;
 using HiveShard.Data;
 using HiveShard.Interface;
 using Xcepto.HiveShard.States;
 
-namespace Xcepto.HiveShard.Adapters
-{
-    public class HiveShardShardAdapter:XceptoAdapter
-    {
-        private string _compartmentIdentifier;
+namespace Xcepto.HiveShard.Adapters;
 
-        public HiveShardShardAdapter(ShardType shardType, Chunk chunk)
-        {
-            _compartmentIdentifier = $"shard-{shardType.Name}-{chunk}";
-        }
+public class HiveShardShardAdapter: XceptoAdapter
+{
+    private HiveShardIdentity _hiveShardIdentity;
+    private string _compartmentIdentifier;
+    public HiveShardShardAdapter(string worker, HiveShardIdentity hiveShardIdentity)
+    {
+        _compartmentIdentifier = $"shardWorker-{worker}";
+        _hiveShardIdentity = hiveShardIdentity;
+    }
+    
+    public void Action<TService>(Action<TService> clientAction)
+    {
+        AddStep(new ShardOnWorkerActionState<TService>($"HiveShard {_compartmentIdentifier} action", _compartmentIdentifier, _hiveShardIdentity, clientAction)); 
+    }
         
-        public void Action(Func<IScopedShardTunnel, Task> clientAction)
-        {
-            AddStep(new CompartmentalizedServiceBasedActionState<IScopedShardTunnel>($"HiveShard {_compartmentIdentifier} action", _compartmentIdentifier, clientAction)); 
-        }
-        
-        public void Expect<T>(Predicate<T> expectation)
-            where T: IEvent
-        {
-            AddStep(new CompartmentalizedClientExpectationState<T>($"HiveShard {_compartmentIdentifier} expectation of type {typeof(T)}", _compartmentIdentifier, expectation));
-        }
+    public void ExpectEvent<TEvent>(Predicate<TEvent> expectation)
+        where TEvent: IEvent
+    {
+        AddStep(new ShardOnWorkerFabricExpectationState<TEvent>($"HiveShard {_compartmentIdentifier} expectation of type {typeof(TEvent)}", _compartmentIdentifier, _hiveShardIdentity, expectation));
     }
 }

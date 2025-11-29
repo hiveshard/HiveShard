@@ -31,8 +31,4 @@
       <ProjectReference Include="..\..\Workers\HiveShard.Workers.Ticker\HiveShard.Workers.Ticker.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Scenarios\" />
-    </ItemGroup>
-
 </Project>

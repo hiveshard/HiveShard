@@ -2,29 +2,38 @@ using HiveShard.Data;
 using HiveShard.Deployments.DockerCompose;
 using HiveShard.Deployments.HiveShardPlatform;
 using HiveShard.Event;
+using HiveShard.Factory;
+using HiveShard.Interface;
 using HiveShard.ShardWorker.Tests.Events;
 using HiveShard.ShardWorker.Tests.Shards;
+using HiveShard.Workers.Shard.Extensions;
 using InMemory;
 using Xcepto;
+using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
 
 namespace HiveShard.Worker.Tests.Test;
 
 [TestFixture(typeof(InMemoryDeployment))]
 public class ShardTests<T>
-where T: XceptoScenario, new()
+where T: IDeployment, new()
 {
     [Test]
     public async Task EchoShardResponseWithNumber()
     {
-        await XceptoTest.Given(new T(), builder =>
+        var chunk = new Chunk(0, 0);
+        var environment = HiveShardFactory.Create<T>(builder => builder
+            .SetGridSize(1)
+            .ShardWorker(x => x
+                .AddShard<EchoHiveShard>(chunk, Guid.NewGuid())
+            )
+        );
+        await HiveShardTest.Given(environment, builder =>
         {
-            var worker = builder.RegisterAdapter(new WorkerXceptoAdapter());
             var simpleFabric = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
 
             // arrange
-            worker.AddHiveShardStep<EchoHiveShard>();
-            TopicPartition topicPartition = new TopicPartition(typeof(TestEvent).FullName, new Chunk(0, 0));
+            TopicPartition topicPartition = new TopicPartition(typeof(TestEvent).FullName!, chunk);
             
             // act
             simpleFabric.FabricAction(x => x.Register<CompletedTick>("completed-ticks", e => { }));

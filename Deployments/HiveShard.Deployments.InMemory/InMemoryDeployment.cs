@@ -20,6 +20,9 @@ using HiveShard.Ticker;
 using HiveShard.Util;
 using HiveShard.Workers.Edge;
 using HiveShard.Workers.Edge.Data;
+using HiveShard.Workers.Shard;
+using HiveShard.Workers.Shard.Data;
+using HiveShard.Workers.Shard.Repositories;
 using HiveShard.Workers.Ticker;
 using HiveShard.Workers.Ticker.Data;
 using HiveShard.Workers.Ticker.Repository;
@@ -53,7 +56,7 @@ public class InMemoryDeployment: IDeployment
             .AddSingleton<ISerializer, NewtonsoftSerializer>()
             .AddSingleton<ITickRepository, TickRepository>()
             .AddSingleton<ICancellationProvider>(cancellationProvider)
-            .AddSingleton<CancellationProvider>(cancellationProvider)
+            .AddSingleton(cancellationProvider)
             .AddSingleton<IWorkerLoggingProvider, SimpleLoggingProvider>()
             .AddSingleton<ISimpleFabric, InMemorySimpleFabric>()
             .AddSingleton<IDebugLoggingProvider, SimpleLoggingProvider>()
@@ -67,15 +70,49 @@ public class InMemoryDeployment: IDeployment
         {
             if (isolatedEnvironment is EdgeWorkerIsolatedEnvironment edgeWorkerEnvironment)
                 BuildEdgeWorker(edgeWorkerEnvironment);
-            if(isolatedEnvironment is ClientIsolatedEnvironment clientIsolatedEnvironment)
+            else if(isolatedEnvironment is ClientIsolatedEnvironment clientIsolatedEnvironment)
                 BuildClient(clientIsolatedEnvironment);
-            if (isolatedEnvironment is TickerWorkerIsolatedEnvironment tickerWorkerIsolatedEnvironment)
+            else if (isolatedEnvironment is TickerWorkerIsolatedEnvironment tickerWorkerIsolatedEnvironment)
                 BuildTickerWorker(tickerWorkerIsolatedEnvironment);
+            else if (isolatedEnvironment is ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment)
+                BuildShardWorker(shardWorkerIsolatedEnvironment);
+            else
+                throw new NotImplementedException(
+                    $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
         }
 
         return new ServiceEnvironment(gridSize, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable());
     }
 
+    private void BuildShardWorker(ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment)
+    {
+        ServiceCollection serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton<ShardWorker>();
+        serviceCollection.AddSingleton<WorkerConfig>(new WorkerConfig(_gridSize));
+        serviceCollection.AddSingleton<ITickRepository, TickRepository>();
+        serviceCollection.AddSingleton<HiveShardRepository>();
+        ShardAdditionRepository repository = new ShardAdditionRepository();
+        serviceCollection.AddSingleton<ShardAdditionRepository>(repository);
+        
+        foreach (var hiveShardIdentity in shardWorkerIsolatedEnvironment.HiveShards)
+        {
+            repository.Add(new ShardAdditionRequest(hiveShardIdentity));
+        }
+        
+        var compartmentEnvironment = new CompartmentEnvironment(
+            $"shardWorker-{shardWorkerIsolatedEnvironment.Identifier}", 
+            serviceCollection, 
+            new DependencyBuilder()
+                .Add<ISimpleFabric>()
+                .Add<IWorkerLoggingProvider>()
+                .Add<ICancellationProvider>()
+                .Add<ISerializer>()
+                .Build(),
+            typeof(ShardWorker)
+        );
+        _isolatedEnvironments.Add(compartmentEnvironment);
+    }
+    
     private void BuildEdgeWorker(EdgeWorkerIsolatedEnvironment edgeWorkerIsolatedEnvironment)
     {
         ServiceCollection serviceCollection = new ServiceCollection();

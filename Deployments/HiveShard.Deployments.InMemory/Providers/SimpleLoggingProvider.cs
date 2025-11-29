@@ -39,4 +39,9 @@ public class SimpleLoggingProvider: IWorkerLoggingProvider, IHiveShardSimpleLogg
     {
         Console.WriteLine(exception.Message);
     }
+
+    public void LogWarning(string warning, string name = "")
+    {
+        LogWarning(warning);
+    }
 }

@@ -12,5 +12,10 @@ namespace Xcepto.HiveShard
         {
             await XceptoTest.Given(new HiveShardScenario(environment), xceptoBuilder);
         }
+        
+        public static async Task GivenSequential(HiveShardScenario scenario, Action<TransitionBuilder> xceptoBuilder)
+        {
+            await XceptoTest.Given(scenario, xceptoBuilder);
+        }
     }
 }

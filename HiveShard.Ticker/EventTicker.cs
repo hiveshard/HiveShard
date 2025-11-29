@@ -29,7 +29,7 @@ namespace HiveShard.Ticker
                     var chunk = new Chunk(i, j);
                     foreach (ShardType shardType in shardRepository.GetShardTypes())
                     {
-                        shards.Add(new HiveShardIdentity(chunk, shardType));
+                        shards.Add(new HiveShardIdentity(chunk, shardType, Guid.NewGuid()));
                     }
                     topicPartitions.Add(new TopicPartition(config.EventType.FullName!, chunk));
                 }

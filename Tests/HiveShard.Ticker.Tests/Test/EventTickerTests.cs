@@ -3,6 +3,7 @@ using HiveShard.Event;
 using HiveShard.Factory;
 using HiveShard.Interface;
 using HiveShard.Ticker.Tests.Events;
+using HiveShard.Ticker.Tests.Shards;
 using HiveShard.Workers.Ticker.Extensions;
 using InMemory;
 using Xcepto;
@@ -28,10 +29,9 @@ public class EventTickerTests<T>
         );
         await HiveShardTest.Given(environment, builder =>
         {
-            var ticker = builder.RegisterAdapter(new HiveShardTickerWorkerAdapter(tickerIdentifier));
             var testFabricAccess = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
 
-            var shard = new HiveShardIdentity(new Chunk(0, 0), new ShardType("Navigation"));
+            var shard = new HiveShardIdentity(new Chunk(0, 0), ShardType.From<NavigationShard>(), Guid.NewGuid());
 
             testFabricAccess.FabricAction(x => x.Send("completed-ticks",
                 new CompletedTick(shard,1,  ArraySegment<TopicPartitionOffset>.Empty, DateTime.MinValue)));

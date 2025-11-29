@@ -11,6 +11,7 @@ using InMemory;
 using Xcepto;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
+using Xcepto.HiveShard.Scenario;
 
 namespace HiveShard.Worker.Tests.Test;
 
@@ -18,49 +19,44 @@ namespace HiveShard.Worker.Tests.Test;
 public class SequentialTests<T>
 where T: IDeployment, new()
 {
-    private ServiceEnvironment _environment;
-    private ShardType _shardType;
-    private Chunk _chunk;
+    private HiveShardIdentity _hiveShardIdentity;
+    private string _hiveShardWorker;
+    private HiveShardScenario _hiveShardScenario;
 
     [OneTimeSetUp]
     public void SetUp()
     {
-        _environment = HiveShardFactory.Create<T>(builder => builder
+        _hiveShardWorker = "SW1";
+        _hiveShardIdentity = new HiveShardIdentity(new Chunk(0, 0), ShardType.From<EchoHiveShard>(), Guid.NewGuid());
+        ServiceEnvironment environment = HiveShardFactory.Create<T>(builder => builder
             .SetGridSize(1)
             .ShardWorker(workerBuilder => workerBuilder
-                .AddShard<EchoHiveShard>()
+                .AddShard<EchoHiveShard>(_hiveShardIdentity.Chunk, _hiveShardIdentity.Id)
+                .Identify(_hiveShardWorker)
             )
         );
-        _shardType = ShardType.From<EchoHiveShard>();
-        _chunk = new Chunk(0,0);
+        _hiveShardScenario = new HiveShardScenario(environment);
     }
-
-    [OneTimeTearDown]
-    public void TearDown()
-    {
-        
-    }
-    
     
     [Test]
     public async Task FirstSendTestEvent()
     {
-        await HiveShardTest.Given(_environment, builder =>
+        await HiveShardTest.GivenSequential(_hiveShardScenario, builder =>
         {
-            var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(_shardType, _chunk));
+            var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(_hiveShardWorker, _hiveShardIdentity));
 
-            shardAdapter.Action(x=>x.Send(new TestEvent(1)));
+            shardAdapter.Action<IScopedShardTunnel>(x=>x.Send(new TestEvent(1)));
         });
     }
     
     [Test]
     public async Task ThenExpectResponseEvent()
     {
-        await HiveShardTest.Given(_environment, builder =>
+        await HiveShardTest.GivenSequential(_hiveShardScenario, builder =>
         {
-            var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(_shardType, _chunk));
+            var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(_hiveShardWorker, _hiveShardIdentity));
 
-            shardAdapter.Expect<TestEventResponse>(x => x.Number == 1);
+            shardAdapter.ExpectEvent<TestEventResponse>(x => x.Number == 1);
         });
     }
 }
