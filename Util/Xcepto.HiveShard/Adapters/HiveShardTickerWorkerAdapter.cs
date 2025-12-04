@@ -1,4 +1,6 @@
-﻿namespace Xcepto.HiveShard.Adapters;
+﻿using Xcepto.Adapters;
+
+namespace Xcepto.HiveShard.Adapters;
 public class HiveShardTickerWorkerAdapter: XceptoAdapter
 {
     private string _compartmentIdentifier;

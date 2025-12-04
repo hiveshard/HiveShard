@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using HiveShard.Builder;
 using HiveShard.Data;
+using Xcepto.Builder;
 using Xcepto.HiveShard.Scenario;
 
 namespace Xcepto.HiveShard

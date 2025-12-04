@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using HiveShard.Fabric.Ticker;
 using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
+using Xcepto.Adapters;
 using Xcepto.HiveShard.States;
 
 namespace Xcepto.HiveShard.Adapters

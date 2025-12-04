@@ -8,6 +8,7 @@ using HiveShard.Interface.Logging;
 using HiveShard.Util;
 using HiveShard.Workers.Shard.Repositories;
 using Microsoft.Extensions.DependencyInjection;
+using Xcepto.States;
 using Xcepto.Util;
 
 namespace Xcepto.HiveShard.States;

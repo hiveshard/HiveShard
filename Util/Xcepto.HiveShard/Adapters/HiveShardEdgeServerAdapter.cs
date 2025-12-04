@@ -4,6 +4,7 @@ using HiveShard.Data;
 using HiveShard.Edge;
 using HiveShard.Provider;
 using Microsoft.Extensions.DependencyInjection;
+using Xcepto.Adapters;
 using Xcepto.HiveShard.States;
 using Xcepto.Repositories;
 
