@@ -49,7 +49,6 @@ where TEvent: IEvent
         {
             var hiveShardRepository =
                 serviceProvider.GetCompartmentalizedService<HiveShardRepository>(_compartmentIdentifier);
-            var hashCode = RuntimeHelpers.GetHashCode(hiveShardRepository);
             if (!hiveShardRepository.TryGetHiveShard(_hiveShardIdentity, out var provider))
                 throw new Exception($"HiveShard {_hiveShardIdentity.ShardType.GetShardType().Name} " +
                                     $"not found on {_compartmentIdentifier}");

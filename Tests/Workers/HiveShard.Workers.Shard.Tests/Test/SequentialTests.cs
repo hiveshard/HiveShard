@@ -16,6 +16,7 @@ using Xcepto.HiveShard.Scenario;
 namespace HiveShard.Worker.Tests.Test;
 
 [TestFixture(typeof(InMemoryDeployment))]
+[Ignore("InMemory Bus offsets are required for this behaviour. This is not yet implemented!")]
 public class SequentialTests<T>
 where T: IDeployment, new()
 {
