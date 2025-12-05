@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>InMemory</RootNamespace>
+        <PackageId>HiveShard.Deployments.InMemory</PackageId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Fabrics\HiveShard.Fabrics.InMemory\HiveShard.Fabrics.InMemory.csproj" />
+      <ProjectReference Include="..\..\HiveShard.Client\HiveShard.Client.csproj" />
+      <ProjectReference Include="..\..\HiveShard.Edge\HiveShard.Edge.csproj" />
+      <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
+      <ProjectReference Include="..\..\Workers\HiveShard.Workers.Edge\HiveShard.Workers.Edge.csproj" />
+      <ProjectReference Include="..\..\Workers\HiveShard.Workers.Shard\HiveShard.Workers.Shard.csproj" />
+      <ProjectReference Include="..\..\Workers\HiveShard.Workers.Ticker\HiveShard.Workers.Ticker.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.8" />
+    </ItemGroup>
+
+</Project>

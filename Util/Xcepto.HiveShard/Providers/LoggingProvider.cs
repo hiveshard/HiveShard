@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using HiveShard.Data.Telemetry;
 using HiveShard.Interface.Logging;
 using Xcepto.Interfaces;
@@ -28,5 +29,9 @@ namespace Xcepto.HiveShard.Providers
 
         public void LogError(string message, LogOrigin logOrigin) => LogError(message);
         public void LogError(Exception exception, LogOrigin logOrigin) => LogError(exception.ToString());
+        public void LogWarning(string warning, [CallerMemberName] string name = "")
+        {
+            LogWarning(warning);
+        }
     }
 }

@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>9</LangVersion>
+        <LangVersion>10</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -10,12 +10,13 @@
       <ProjectReference Include="..\..\HiveShard.Edge\HiveShard.Edge.csproj" />
       <ProjectReference Include="..\..\HiveShard.Shard\HiveShard.Shard.csproj" />
       <ProjectReference Include="..\..\HiveShard.Ticker\HiveShard.Ticker.csproj" />
-      <ProjectReference Include="..\..\HiveShard.Worker\HiveShard.Worker.csproj" />
       <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
+      <ProjectReference Include="..\..\Workers\HiveShard.Workers.Shard\HiveShard.Workers.Shard.csproj" />
+      <ProjectReference Include="..\..\Workers\HiveShard.Workers.Ticker\HiveShard.Workers.Ticker.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Xcepto" Version="5.3.51" />
+      <PackageReference Include="Xcepto" Version="7.0.1" />
     </ItemGroup>
 
 </Project>

@@ -17,12 +17,12 @@ namespace HiveShard.Fabrics.Tcp
     public class EdgeTcpFabric: IEdgeTunnelServerEndpoint
     {
         private TcpListener _tcpListener;
-        private ConcurrentDictionary<HiveShard.Data.Client, ConnectedClient> _boundClients = new ConcurrentDictionary<HiveShard.Data.Client, ConnectedClient>();
+        private ConcurrentDictionary<HiveShard.Data.HiveShardClient, ConnectedClient> _boundClients = new ConcurrentDictionary<HiveShard.Data.HiveShardClient, ConnectedClient>();
         private ConcurrentDictionary<TcpClient, ConnectedClient> _unboundClients = new ConcurrentDictionary<TcpClient, ConnectedClient>();
-        private Dictionary<string, Action<string, HiveShard.Data.Client>> _eventRegistrations = new();
+        private Dictionary<string, Action<string, HiveShard.Data.HiveShardClient>> _eventRegistrations = new();
         private IAddressProvider _edgeIdentityProvider;
         private ISerializer _serializer;
-        private Action<Client> _clientConnectedCallback = client => { };
+        private Action<HiveShardClient> _clientConnectedCallback = client => { };
         private volatile int _ready;
 
         public EdgeTcpFabric(IAddressProvider edgeIdentityProvider, ISerializer serializer, INetworkConfiguration networkConfiguration)
@@ -99,7 +99,7 @@ namespace HiveShard.Fabrics.Tcp
         {
             _ = Task.Run(async () =>
             {
-                HiveShard.Data.Client client = null;
+                HiveShard.Data.HiveShardClient hiveShardClient = null;
                 var tcpClient = connectedClient.TcpClient;
                 var stream = connectedClient.Stream;
                 try
@@ -109,8 +109,8 @@ namespace HiveShard.Fabrics.Tcp
 
                     var clientLoginTcpMessage = await ConsumeTcpStream(stream);
                     var tryBindToEdge = clientLoginTcpMessage.GetExpectedPayload<EdgeBindingRequest>(_serializer);
-                    client = tryBindToEdge.Client;
-                    _boundClients.AddOrUpdate(client, _ => connectedClient, (_, _) => connectedClient);
+                    hiveShardClient = tryBindToEdge.HiveShardClient;
+                    _boundClients.AddOrUpdate(hiveShardClient, _ => connectedClient, (_, _) => connectedClient);
                     _unboundClients.TryRemove(tcpClient, out _);
 
                     var edgeBoundNotification = new EdgeBoundNotification(_edgeIdentityProvider.GetUri());
@@ -123,52 +123,52 @@ namespace HiveShard.Fabrics.Tcp
                         if(tcpMessage.TypeFullName() == typeof(EdgeUnbindingRequest).FullName)
                             break;
                         
-                        _eventRegistrations[tcpMessage.TypeFullName()](tcpMessage.Payload, client);
+                        _eventRegistrations[tcpMessage.TypeFullName()](tcpMessage.Payload, hiveShardClient);
                     }
                 }
                 catch (Exception e)
                 {
                     Exception exception;
-                    if(client is null)
+                    if(hiveShardClient is null)
                     {
                         exception = new Exception("Failure with unknown client", e);
                         Console.WriteLine(exception);
                         throw exception;
                     }
-                    exception = new Exception($"Failure with client: {client.Username}", e);
+                    exception = new Exception($"Failure with client: {hiveShardClient.Username}", e);
                     Console.WriteLine(exception);
                     throw exception;
                 }
                 finally
                 {
-                    if(client is not null)
-                        _boundClients.TryRemove(client, out _);
+                    if(hiveShardClient is not null)
+                        _boundClients.TryRemove(hiveShardClient, out _);
                     _unboundClients.TryRemove(tcpClient, out _);
                     
                     var remoteEndPoint = (IPEndPoint)tcpClient.Client.RemoteEndPoint;
                     tcpClient.Client.Shutdown(SocketShutdown.Send);
                     tcpClient.Close();
-                    if(client is null)
+                    if(hiveShardClient is null)
                     {
                         Console.WriteLine($"Unknown client disconnected: {remoteEndPoint.Address}:{remoteEndPoint.Port}");
                     }
                     else
                     {
-                        Console.WriteLine($"Client disconnected: {client.Username}, {remoteEndPoint.Address}:{remoteEndPoint.Port}");
+                        Console.WriteLine($"Client disconnected: {hiveShardClient.Username}, {remoteEndPoint.Address}:{remoteEndPoint.Port}");
                     }
                 }
             }, token);
         }
 
-        public void SendEvent(object message, Type messageType, Client client)
+        public void SendEvent(object message, Type messageType, HiveShardClient hiveShardClient)
         {
-            if (!_boundClients.TryGetValue(client, out ConnectedClient connectedClient))
+            if (!_boundClients.TryGetValue(hiveShardClient, out ConnectedClient connectedClient))
                 throw new Exception("client was not bound yet");
 
             SendTcpMessage(message, messageType, connectedClient.Stream);
         }
 
-        public void RegisterCallback(Action<object, Client> callback, Type type)
+        public void RegisterCallback(Action<object, HiveShardClient> callback, Type type)
         {
             var typeFullName = type.FullName;
             if (typeFullName is null)
@@ -182,7 +182,7 @@ namespace HiveShard.Fabrics.Tcp
             };
         }
 
-        public void RegisterClientConnectedCallback(Action<Client> handler)
+        public void RegisterClientConnectedCallback(Action<HiveShardClient> handler)
         {
             _clientConnectedCallback = handler;
         }

@@ -11,6 +11,7 @@ using HiveShard.Fabric.Ticker;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
 using HiveShard.Shard.Data;
+using HiveShard.Util;
 
 namespace HiveShard.Shard
 {
@@ -19,6 +20,7 @@ namespace HiveShard.Shard
         private readonly HiveShardIdentity _hiveShardIdentity;
         private readonly ISimpleFabric _simpleFabric;
         private readonly IWorkerLoggingProvider _loggingProvider;
+        private readonly ICancellationProvider _cancellationProvider;
         private readonly Dictionary<TopicPartition, BlockingCollection<Caster>> _events = new();
         private readonly BlockingCollection<Consumption<Tick>> _ticks = new(50);
         private readonly Dictionary<TopicPartition, long> _eventQueueOffsets = new();private ITickRepository _tickRepository;
@@ -27,10 +29,11 @@ namespace HiveShard.Shard
         private volatile int _ready;
         private IHiveShard? _hiveShard;
         
-        public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IWorkerLoggingProvider loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository)
+        public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IWorkerLoggingProvider loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository, ICancellationProvider cancellationProvider)
         {
             _simpleFabric = simpleFabric;
             _tickRepository = tickRepository;
+            _cancellationProvider = cancellationProvider;
             _hiveShardIdentity = hiveShardIdentity;
             _loggingProvider = loggingProvider;
             
@@ -45,11 +48,12 @@ namespace HiveShard.Shard
         {
             _hiveShard = hiveShard;
             _hiveShard.Initialize();
+            
         }
 
 
 
-        public Task Start(CancellationToken cancellationToken)
+        public Task Start()
         {
             if (_hiveShard is null)
                 throw new Exception("Not initialized with HiveShard yet");
@@ -122,9 +126,16 @@ namespace HiveShard.Shard
             return Task.CompletedTask;
         }
 
-        public void Send<TEvent>(TEvent message)
+        public Task Send<TEvent>(TEvent message)
         {
-            _simpleFabric.Send(typeof(TEvent).FullName, _hiveShardIdentity.Chunk, message);
+            return Resilience.Retry(_ =>
+            {
+                if (_ready < 1)
+                    throw new Exception($"{nameof(ScopedShardTunnel)} is not ready yet");
+                return _simpleFabric.Send(typeof(TEvent).FullName!, _hiveShardIdentity.Chunk, message);
+            }, 
+            $"{nameof(ScopedShardTunnel)} from {_hiveShardIdentity}", _cancellationProvider.GetToken(), _loggingProvider);
+
         }
 
         public async Task WaitForReady()

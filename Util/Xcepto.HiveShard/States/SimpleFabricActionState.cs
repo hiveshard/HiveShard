@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using HiveShard.Fabric.Ticker;
 using Microsoft.Extensions.DependencyInjection;
+using Xcepto.States;
 
 namespace Xcepto.HiveShard.States
 {

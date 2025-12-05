@@ -90,9 +90,9 @@ namespace HiveShard.Fabrics.Tcp
             await stream.WriteAsync(messageBytes, 0, messageBytes.Length);
         }
 
-        public void Disconnect(Client client)
+        public void Disconnect(HiveShardClient hiveShardClient)
         {
-            var edgeUnbindingRequest = new EdgeUnbindingRequest(client);
+            var edgeUnbindingRequest = new EdgeUnbindingRequest(hiveShardClient);
             if (_networkStream is not null)
             {
                 SendTcpMessage(edgeUnbindingRequest, typeof(EdgeUnbindingRequest), _networkStream)
@@ -131,7 +131,7 @@ namespace HiveShard.Fabrics.Tcp
             var receivedText = Encoding.UTF8.GetString(buffer, 0, totalRead);
             return _serializer.Deserialize<TcpMessage>(receivedText);
         } 
-        public async Task Connect(HiveShard.Data.Client client)
+        public async Task Connect(HiveShard.Data.HiveShardClient hiveShardClient)
         {
             await Resilience.Retry(async token =>
             {

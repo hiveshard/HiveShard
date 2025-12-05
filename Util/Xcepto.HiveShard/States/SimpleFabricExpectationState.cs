@@ -5,6 +5,7 @@ using HiveShard.Data;
 using HiveShard.Fabric.Ticker;
 using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
+using Xcepto.States;
 
 namespace Xcepto.HiveShard.States
 {

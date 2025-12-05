@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Fabric.Telemetry;
 using HiveShard.Fabric.Ticker;
+using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
 
@@ -12,12 +13,10 @@ namespace HiveShard.Fabrics.InMemory
 {
     public class InMemoryTelemetryFabric: InMemorySimpleFabric, ITelemetryFabric
     {
-        public InMemoryTelemetryFabric(IFabricLoggingProvider loggingProvider, IIdentityConfig identityConfig) : base(loggingProvider, identityConfig)
+        public InMemoryTelemetryFabric(IFabricLoggingProvider loggingProvider, IIdentityConfig identityConfig, ICancellationProvider cancellationProvider) : base(loggingProvider, identityConfig, cancellationProvider)
         {
         }
 
-        public new Task Start(CancellationToken cancellationToken) => base.Start(cancellationToken);
-        public new Task WaitForReady() => base.WaitForReady();
         public new void Register<T>(string topic, Action<Consumption<T>> action) => 
             base.Register<T>(topic, action);
 

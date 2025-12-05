@@ -10,7 +10,7 @@ namespace HiveShard.Util
 {
     public static class Resilience
     {
-        private static ResiliencePipeline Pipeline(IScopedFabricLoggingProvider scopedLoggingProvider)
+        private static ResiliencePipeline Pipeline(IWarningLoggingProvider scopedLoggingProvider)
         {
             return new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions()
@@ -32,7 +32,7 @@ namespace HiveShard.Util
             
 
 
-        public static async Task Retry(Func<CancellationToken, Task> action, string context, CancellationToken ctx, IScopedFabricLoggingProvider scopedLoggingProvider)
+        public static async Task Retry(Func<CancellationToken, Task> action, string context, CancellationToken ctx, IWarningLoggingProvider scopedLoggingProvider)
         {
             int attempt = 0;
             await Pipeline(scopedLoggingProvider).ExecuteAsync(async token =>

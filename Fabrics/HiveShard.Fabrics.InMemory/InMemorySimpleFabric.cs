@@ -4,8 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Fabric.Ticker;
+using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
+using HiveShard.Util;
 
 namespace HiveShard.Fabrics.InMemory
 {
@@ -15,9 +17,11 @@ namespace HiveShard.Fabrics.InMemory
         private Dictionary<(Type, Chunk), List<Action<Consumption<object>>>> _actions = new Dictionary<(Type, Chunk), List<Action<Consumption<object>>>>();
         private Dictionary<(Type, Chunk), long> _offsets = new Dictionary<(Type, Chunk), long>();
         private IScopedFabricLoggingProvider _scopedLogger;
+        private ICancellationProvider _cancellationProvider;
 
-        public InMemorySimpleFabric(IFabricLoggingProvider loggingProvider, IIdentityConfig identityConfig)
+        public InMemorySimpleFabric(IFabricLoggingProvider loggingProvider, IIdentityConfig identityConfig, ICancellationProvider cancellationProvider)
         {
+            _cancellationProvider = cancellationProvider;
             _scopedLogger = loggingProvider.GetScopedLogger<InMemoryEdgeFabric>(identityConfig);
         }
 
@@ -41,29 +45,32 @@ namespace HiveShard.Fabrics.InMemory
             return Send<T>(topic, new Chunk(0, 0), message);
         }
 
-        public Task Send<T>(string topic, Chunk chunk, T message)
+        public async Task Send<T>(string topic, Chunk chunk, T message)
         {
-            var index = (typeof(T), chunk);
-            if (!_actions.ContainsKey(index) || !_offsets.ContainsKey(index))
+            await Resilience.Retry(c =>
             {
-                var exception = new Exception($"{index} was not consumed yet");
-                _scopedLogger.LogException(exception);
-                throw exception;
-            }
+                var index = (typeof(T), chunk);
 
-            var newOffset = _offsets[index] + 1;
+                if (!_actions.ContainsKey(index) || !_offsets.ContainsKey(index))
+                {
+                    var exception = new Exception($"{index} was not consumed yet");
+                    _scopedLogger.LogException(exception);
+                    throw exception;
+                }
 
-            foreach (var action in _actions[index])
-            {
-                action(new Consumption<object>(message, newOffset));
-            }
+                var newOffset = _offsets[index] + 1;
 
-            _offsets[index] = newOffset;
-            return Task.CompletedTask;
+                foreach (var action in _actions[index])
+                {
+                    action(new Consumption<object>(message, newOffset));
+                }
+
+                _offsets[index] = newOffset;
+                return Task.CompletedTask;
+            }, 
+                $"{nameof(InMemorySimpleFabric)}:{nameof(Send)}",
+                _cancellationProvider.GetToken(),
+                _scopedLogger);
         }
-
-        public Task Start(CancellationToken cancellationToken) => Task.CompletedTask;
-
-        public Task WaitForReady() => Task.CompletedTask;
     }
 }

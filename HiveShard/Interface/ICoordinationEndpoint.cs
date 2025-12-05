@@ -4,6 +4,6 @@ namespace HiveShard.Interface
 {
     public interface ICoordinationEndpoint
     {
-        EdgeConnectorDetails GetEdge(HiveShard.Data.Client client);
+        EdgeConnectorDetails GetEdge(HiveShard.Data.HiveShardClient hiveShardClient);
     }
 }
