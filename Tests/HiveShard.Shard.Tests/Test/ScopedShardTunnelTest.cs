@@ -30,7 +30,7 @@ public class ScopedShardTunnelTest
         ICancellationProvider cancellationProvider = new CancellationProvider();
         var inMemorySimpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, cancellationProvider);
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        ScopedShardTunnel tunnel = new ScopedShardTunnel(shardIdentity, workerLoggingProvider, inMemorySimpleFabric, tickRepository);
+        ScopedShardTunnel tunnel = new ScopedShardTunnel(shardIdentity, workerLoggingProvider, inMemorySimpleFabric, tickRepository, cancellationProvider);
         tunnel.Initialize(new TestShard(tunnel));
 
         // Arrange
@@ -41,7 +41,7 @@ public class ScopedShardTunnelTest
             Console.WriteLine("received response");
             responses.Add(e.Message);
         });
-        Task tunnelStart = tunnel.Start(cancellationTokenSource.Token);
+        Task tunnelStart = tunnel.Start();
         await tunnel.WaitForReady();
         
         // Act

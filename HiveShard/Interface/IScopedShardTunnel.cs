@@ -4,7 +4,7 @@ using HiveShard.Fabric;
 
 namespace HiveShard.Interface
 {
-    public interface IScopedShardTunnel: IFabric
+    public interface IScopedShardTunnel: IFabric, IIsolatedEntryPoint
     {
         public Task Register<TEvent>(Action<TEvent> handler);
         public Task Send<TEvent>(TEvent message);

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using HiveShard.Data;
@@ -20,6 +21,8 @@ namespace HiveShard.Workers.Shard
         private ISerializer _serializer;
         private ISimpleFabric _fabric;
         private ICancellationProvider _cancellationProvider;
+        
+        private Dictionary<HiveShardIdentity, Task> _tunnels = new();
 
         public ShardWorker(
             ISimpleFabric fabric, 
@@ -50,6 +53,7 @@ namespace HiveShard.Workers.Shard
                         .AddSingleton(shardType)
                         .AddSingleton<Chunk>(shardChunk)
                         .AddSingleton<IScopedShardTunnel, ScopedShardTunnel>()
+                        .AddSingleton<ICancellationProvider>(_cancellationProvider)
                         .AddSingleton<ISimpleFabric>(_fabric)
                         .AddSingleton<ITickRepository>(_tickRepository)
                         .AddSingleton<ISerializer>(_serializer)
@@ -62,7 +66,7 @@ namespace HiveShard.Workers.Shard
                     hiveShard.Initialize();
                     tunnel.Initialize(hiveShard);
                     _hiveShardRepository.AddHiveShard(request.ShardIdentity, shardServiceProvider);
-                    var hashCode = RuntimeHelpers.GetHashCode(_hiveShardRepository);
+                    _tunnels.Add(request.ShardIdentity, tunnel.Start());
                 }
             }
             return Task.CompletedTask;
