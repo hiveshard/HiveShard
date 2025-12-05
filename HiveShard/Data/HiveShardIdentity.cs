@@ -1,22 +1,26 @@
-﻿namespace HiveShard.Data
+﻿using System;
+
+namespace HiveShard.Data
 {
     public class HiveShardIdentity
     {
-        public HiveShardIdentity(Chunk chunk, ShardType shardType)
+        public HiveShardIdentity(Chunk chunk, ShardType shardType, Guid id)
         {
             Chunk = chunk;
             ShardType = shardType;
+            Id = id;
         }
 
         public Chunk Chunk { get; }
         public ShardType ShardType { get; }
+        public Guid Id { get; }
 
-        private bool Equals(HiveShardIdentity other)
+        protected bool Equals(HiveShardIdentity other)
         {
-            return Equals(Chunk, other.Chunk) && Equals(ShardType, other.ShardType);
+            return Chunk.Equals(other.Chunk) && ShardType.Equals(other.ShardType) && Id.Equals(other.Id);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
@@ -28,7 +32,10 @@
         {
             unchecked
             {
-                return ((Chunk != null ? Chunk.GetHashCode() : 0) * 397) ^ (ShardType != null ? ShardType.GetHashCode() : 0);
+                var hashCode = Chunk.GetHashCode();
+                hashCode = (hashCode * 397) ^ ShardType.GetHashCode();
+                hashCode = (hashCode * 397) ^ Id.GetHashCode();
+                return hashCode;
             }
         }
     }

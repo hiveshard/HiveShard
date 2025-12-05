@@ -15,7 +15,7 @@
         <PackageReference Include="NUnit.Analyzers" Version="4.4.0"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.6.0"/>
         <PackageReference Include="TestCentric.Metadata" Version="3.0.2" />
-        <PackageReference Include="Xcepto" Version="5.3.51" />
+        <PackageReference Include="Xcepto" Version="7.0.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -23,11 +23,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Deployments\HiveShard.Deployments.InMemory\HiveShard.Deployments.InMemory.csproj" />
       <ProjectReference Include="..\..\Fabrics\HiveShard.Fabrics.InMemory\HiveShard.Fabrics.InMemory.csproj" />
       <ProjectReference Include="..\..\Fabrics\HiveShard.Fabrics.Kafka\HiveShard.Fabrics.Kafka.csproj" />
       <ProjectReference Include="..\..\HiveShard.Ticker\HiveShard.Ticker.csproj" />
-      <ProjectReference Include="..\..\HiveShard.Worker\HiveShard.Worker.csproj" />
       <ProjectReference Include="..\..\Util\Xcepto.HiveShard\Xcepto.HiveShard.csproj" />
+      <ProjectReference Include="..\..\Workers\HiveShard.Workers.Ticker\HiveShard.Workers.Ticker.csproj" />
     </ItemGroup>
 
 </Project>

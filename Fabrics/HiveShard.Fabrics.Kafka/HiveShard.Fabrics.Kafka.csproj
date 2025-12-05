@@ -10,7 +10,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\HiveShard.Worker\HiveShard.Worker.csproj" />
       <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
     </ItemGroup>
 

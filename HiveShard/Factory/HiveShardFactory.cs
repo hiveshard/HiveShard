@@ -1,17 +1,20 @@
 using Microsoft.Extensions.DependencyInjection;
 
+using System;
+using HiveShard.Builder;
+using HiveShard.Data;
+using HiveShard.Interface;
+
 namespace HiveShard.Factory;
 
-public class HiveShardFactory
+public static class HiveShardFactory
 {
-    private ServiceCollection _serviceCollection;
-
-    public HiveShardFactory()
+    public static ServiceEnvironment Create<TDeployment>(Action<DecentralizedHiveShardBuilder> builder)
+    where TDeployment: IDeployment, new()
     {
-        _serviceCollection = new ServiceCollection();
-    }
-    public ServiceCollection Build()
-    {
-        return _serviceCollection;
+        var builderInstance = new DecentralizedHiveShardBuilder(new TDeployment());
+        builder(builderInstance);
+        
+        return builderInstance.Build();
     }
 }

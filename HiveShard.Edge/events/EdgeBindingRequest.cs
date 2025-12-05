@@ -4,11 +4,11 @@ namespace HiveShard.Edge.events
 {
     public class EdgeBindingRequest
     {
-        public EdgeBindingRequest(Client client)
+        public EdgeBindingRequest(HiveShardClient hiveShardClient)
         {
-            Client = client;
+            HiveShardClient = hiveShardClient;
         }
 
-        public Client Client { get; }
+        public HiveShardClient HiveShardClient { get; }
     }
 }

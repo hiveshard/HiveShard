@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using HiveShard.Data.Telemetry;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
@@ -49,5 +50,7 @@ namespace HiveShard.Provider.Logging
             _telemetryProvider.Log(new LogMessage(exception.ToString() ,LogLevel.Error, logOrigin, _tickRepository.GetLatestTick()));
 
         }
+
+        public void LogWarning(string warning, [CallerMemberName] string name = "") => LogWarning(warning);
     }
 }
