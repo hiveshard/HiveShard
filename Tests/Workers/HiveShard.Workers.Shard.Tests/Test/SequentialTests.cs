@@ -1,6 +1,5 @@
 using HiveShard.Data;
 using HiveShard.Deployments.DockerCompose;
-using HiveShard.Deployments.HiveShardPlatform;
 using HiveShard.Factory;
 using HiveShard.Interface;
 using HiveShard.ShardWorker.Tests.Events;

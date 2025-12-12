@@ -24,7 +24,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Deployments\HiveShard.Deployments.DockerCompose\HiveShard.Deployments.DockerCompose.csproj" />
-      <ProjectReference Include="..\..\..\Deployments\HiveShard.Deployments.HiveShardPlatform\HiveShard.Deployments.HiveShardPlatform.csproj" />
       <ProjectReference Include="..\..\..\Deployments\HiveShard.Deployments.InMemory\HiveShard.Deployments.InMemory.csproj" />
       <ProjectReference Include="..\..\..\Fabrics\HiveShard.Fabrics.Kafka\HiveShard.Fabrics.Kafka.csproj" />
       <ProjectReference Include="..\..\..\HiveShard\HiveShard.csproj" />
