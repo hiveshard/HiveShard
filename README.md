@@ -1,6 +1,7 @@
 # Hiveshard
 
 
+
 ## Consistency Model
 
 **Atomic Total-Order Broadcast** with **Exactly-Once Semantics**
