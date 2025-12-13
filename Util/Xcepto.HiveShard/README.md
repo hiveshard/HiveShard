@@ -1,0 +1,1 @@
+# Xcepto HiveShard adapters

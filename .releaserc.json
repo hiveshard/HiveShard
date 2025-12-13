@@ -73,6 +73,12 @@
       {
         "publishCmd": "./release.sh ./Fabrics HiveShard.Fabrics.InMemory ${nextRelease.version}"
       }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh ./Util Xcepto.HiveShard ${nextRelease.version}"
+      }
     ]
   ]
 }
