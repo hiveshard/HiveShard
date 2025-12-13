@@ -51,6 +51,18 @@
       {
         "publishCmd": "./release.sh ./Workers HiveShard.Workers.Ticker ${nextRelease.version}"
       }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh ./Deployments HiveShard.Deployments.InMemory ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh ./Fabrics HiveShard.Fabrics.InMemory ${nextRelease.version}"
+      }
     ]
   ]
 }
