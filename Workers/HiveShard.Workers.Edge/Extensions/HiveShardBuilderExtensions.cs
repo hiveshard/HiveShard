@@ -1,3 +1,4 @@
+using System;
 using HiveShard.Builder;
 using HiveShard.Workers.Edge.Builder;
 

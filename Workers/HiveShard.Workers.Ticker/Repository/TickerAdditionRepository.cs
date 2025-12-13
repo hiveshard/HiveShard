@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 
 namespace HiveShard.Workers.Ticker.Repository;

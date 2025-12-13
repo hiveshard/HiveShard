@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using HiveShard.Ticker;
 
 namespace HiveShard.Workers.Ticker.Data;

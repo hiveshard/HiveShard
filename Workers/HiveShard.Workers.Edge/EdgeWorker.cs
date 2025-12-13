@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using HiveShard.Interface;
 
 namespace HiveShard.Workers.Edge;

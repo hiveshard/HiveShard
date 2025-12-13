@@ -1,3 +1,4 @@
+using System;
 using HiveShard.Data.Telemetry;
 using HiveShard.Interface.Logging;
 
