@@ -3,6 +3,54 @@
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    "@semantic-release/github"
+    "@semantic-release/github",
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh . HiveShard ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh . HiveShard.Client ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh . HiveShard.Edge ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh . HiveShard.Shard ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh . HiveShard.Ticker ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh ./Workers HiveShard.Workers.Shard ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh ./Workers HiveShard.Workers.Edge ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "./release.sh ./Workers HiveShard.Workers.Ticker ${nextRelease.version}"
+      }
+    ]
   ]
 }
