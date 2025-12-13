@@ -2,7 +2,7 @@ using System;
 using HiveShard.Data.Telemetry;
 using HiveShard.Interface.Logging;
 
-namespace InMemory.Providers;
+namespace HiveShard.Deployments.InMemory.Providers;
 
 public class SimpleLoggingProvider: IWorkerLoggingProvider, IHiveShardSimpleLoggingProvider, IDebugLoggingProvider
 {

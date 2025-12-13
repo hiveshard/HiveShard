@@ -1,6 +1,6 @@
 using HiveShard.Interface;
 
-namespace HiveShard.ShardWorker.Tests.Events;
+namespace HiveShard.Worker.Tests.Events;
 
 public class TestEventResponse: IEvent
 {

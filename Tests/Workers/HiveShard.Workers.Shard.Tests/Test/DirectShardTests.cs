@@ -1,5 +1,6 @@
 using HiveShard.Config;
 using HiveShard.Data;
+using HiveShard.Deployments.InMemory.Providers;
 using HiveShard.Event;
 using HiveShard.Fabric.Ticker;
 using HiveShard.Fabrics.InMemory;
@@ -9,9 +10,8 @@ using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
 using HiveShard.Shard;
-using HiveShard.ShardWorker.Tests.Events;
-using HiveShard.ShardWorker.Tests.Shards;
-using InMemory.Providers;
+using HiveShard.Worker.Tests.Events;
+using HiveShard.Worker.Tests.Shards;
 
 namespace HiveShard.Worker.Tests.Test;
 
