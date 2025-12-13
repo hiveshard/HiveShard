@@ -1,3 +1,4 @@
+using System;
 using HiveShard.Builder;
 using HiveShard.Workers.Ticker.Builder;
 using HiveShard.Workers.Ticker.Data;

@@ -1,12 +1,12 @@
 using HiveShard.Data;
 using HiveShard.Deployments.DockerCompose;
+using HiveShard.Deployments.InMemory;
 using HiveShard.Event;
 using HiveShard.Factory;
 using HiveShard.Interface;
-using HiveShard.ShardWorker.Tests.Events;
-using HiveShard.ShardWorker.Tests.Shards;
+using HiveShard.Worker.Tests.Events;
+using HiveShard.Worker.Tests.Shards;
 using HiveShard.Workers.Shard.Extensions;
-using InMemory;
 using Xcepto;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;

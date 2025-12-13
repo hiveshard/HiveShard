@@ -1,9 +1,12 @@
-﻿using HiveShard;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using HiveShard.Client;
 using HiveShard.Client.Data;
 using HiveShard.Client.Interface;
 using HiveShard.Config;
 using HiveShard.Data;
+using HiveShard.Deployments.InMemory.Providers;
 using HiveShard.Edge;
 using HiveShard.Fabric.Client;
 using HiveShard.Fabric.Edge;
@@ -16,7 +19,6 @@ using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
 using HiveShard.Serializer;
-using HiveShard.Ticker;
 using HiveShard.Util;
 using HiveShard.Workers.Edge;
 using HiveShard.Workers.Edge.Data;
@@ -26,10 +28,9 @@ using HiveShard.Workers.Shard.Repositories;
 using HiveShard.Workers.Ticker;
 using HiveShard.Workers.Ticker.Data;
 using HiveShard.Workers.Ticker.Repository;
-using InMemory.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace InMemory;
+namespace HiveShard.Deployments.InMemory;
 
 public class InMemoryDeployment: IDeployment
 {

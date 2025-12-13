@@ -1,9 +1,7 @@
-using HiveShard.Data;
 using HiveShard.Interface;
-using HiveShard.Shard;
-using HiveShard.ShardWorker.Tests.Events;
+using HiveShard.Worker.Tests.Events;
 
-namespace HiveShard.ShardWorker.Tests.Shards;
+namespace HiveShard.Worker.Tests.Shards;
 
 public class EchoHiveShard: IHiveShard
 {

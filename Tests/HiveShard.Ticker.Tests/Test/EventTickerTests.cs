@@ -1,11 +1,11 @@
 ﻿using HiveShard.Data;
+using HiveShard.Deployments.InMemory;
 using HiveShard.Event;
 using HiveShard.Factory;
 using HiveShard.Interface;
 using HiveShard.Ticker.Tests.Events;
 using HiveShard.Ticker.Tests.Shards;
 using HiveShard.Workers.Ticker.Extensions;
-using InMemory;
 using Xcepto;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
