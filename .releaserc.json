@@ -17,66 +17,77 @@
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh . HiveShard ${nextRelease.version}",
         "publishCmd": "./release.sh . HiveShard ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh . HiveShard.Client ${nextRelease.version}",
         "publishCmd": "./release.sh . HiveShard.Client ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh . HiveShard.Edge ${nextRelease.version}",
         "publishCmd": "./release.sh . HiveShard.Edge ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh . HiveShard.Shard ${nextRelease.version}",
         "publishCmd": "./release.sh . HiveShard.Shard ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh . HiveShard.Ticker ${nextRelease.version}",
         "publishCmd": "./release.sh . HiveShard.Ticker ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh ./Workers HiveShard.Workers.Shard ${nextRelease.version}",
         "publishCmd": "./release.sh ./Workers HiveShard.Workers.Shard ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh ./Workers HiveShard.Workers.Edge ${nextRelease.version}",
         "publishCmd": "./release.sh ./Workers HiveShard.Workers.Edge ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh ./Workers HiveShard.Workers.Ticker ${nextRelease.version}",
         "publishCmd": "./release.sh ./Workers HiveShard.Workers.Ticker ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh ./Deployments HiveShard.Deployments.InMemory ${nextRelease.version}",
         "publishCmd": "./release.sh ./Deployments HiveShard.Deployments.InMemory ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh ./Fabrics HiveShard.Fabrics.InMemory ${nextRelease.version}",
         "publishCmd": "./release.sh ./Fabrics HiveShard.Fabrics.InMemory ${nextRelease.version}"
       }
     ],
     [
       "@semantic-release/exec",
       {
+        "verifyConditionsCmd": "./verify.sh ./Util Xcepto.HiveShard ${nextRelease.version}",
         "publishCmd": "./release.sh ./Util Xcepto.HiveShard ${nextRelease.version}"
       }
     ]
