@@ -8,6 +8,5 @@ namespace HiveShard.Interface
     {
         public Task Register<TEvent>(Action<TEvent> handler);
         public Task Send<TEvent>(TEvent message);
-        void Initialize<T>(T hiveShard) where T : class, IHiveShard;
     }
 }

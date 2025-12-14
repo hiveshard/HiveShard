@@ -61,6 +61,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fabrics", "Fabrics", "{FC23
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveShard.Fabrics.Kafka.Tests", "Tests\Fabrics\HiveShard.Fabrics.Kafka.Tests\HiveShard.Fabrics.Kafka.Tests.csproj", "{7002632D-4AF0-4BA0-B452-B7AFC63E553B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveShard.Workers.Initialization.Tests", "Tests\Workers\HiveShard.Workers.Initialization.Tests\HiveShard.Workers.Initialization.Tests.csproj", "{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -154,6 +156,10 @@ Global
 		{7002632D-4AF0-4BA0-B452-B7AFC63E553B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7002632D-4AF0-4BA0-B452-B7AFC63E553B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7002632D-4AF0-4BA0-B452-B7AFC63E553B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8A33580F-899C-4BBE-9E0F-029E5ECF127F} = {DC5DCDF9-C8CB-4A8F-8D1A-ACE90F3EFAA9}
@@ -174,5 +180,6 @@ Global
 		{2AB34D64-7EE2-4F04-845F-3F91B6670E94} = {4D443145-EAB1-4A74-B080-C2247ED15881}
 		{FC23ED92-6F9B-494D-AA83-64769EB20359} = {7D80B2AF-9121-4933-811C-CA2578653D0E}
 		{7002632D-4AF0-4BA0-B452-B7AFC63E553B} = {FC23ED92-6F9B-494D-AA83-64769EB20359}
+		{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641} = {65413284-EDD7-4DD5-8867-AE9498DA7175}
 	EndGlobalSection
 EndGlobal

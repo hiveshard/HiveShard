@@ -61,7 +61,7 @@ namespace HiveShard.Workers.Shard
                         .AddSingleton<IWorkerLoggingProvider>(_loggingProvider)
                         .BuildServiceProvider();
 
-                    IScopedShardTunnel tunnel = shardServiceProvider.GetRequiredService<IScopedShardTunnel>();
+                    ScopedShardTunnel tunnel = (ScopedShardTunnel)shardServiceProvider.GetRequiredService<IScopedShardTunnel>();
                     var hiveShard = (IHiveShard)shardServiceProvider.GetRequiredService(shardType);
                     hiveShard.Initialize();
                     tunnel.Initialize(hiveShard);

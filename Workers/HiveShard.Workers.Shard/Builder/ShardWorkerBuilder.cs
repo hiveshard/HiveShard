@@ -16,7 +16,13 @@ public class ShardWorkerBuilder
     public ShardWorkerBuilder AddShard<T>(Chunk chunk, Guid identity)
         where T : class, IHiveShard
     {
-        _hiveShards.Add(new HiveShardIdentity(chunk, ShardType.From<T>(), identity));
+        return AddShard(new HiveShardIdentity(chunk, ShardType.From<T>(), identity));
+    }
+
+    
+    public ShardWorkerBuilder AddShard(HiveShardIdentity shardIdentity)
+    {
+        _hiveShards.Add(shardIdentity);
         return this;
     }
 
