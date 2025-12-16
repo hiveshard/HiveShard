@@ -13,5 +13,7 @@ namespace HiveShard.Workers.Ticker.Data
             TickerWorkerIdentifier = tickerWorkerIdentifier;
             Tickers = tickers;
         }
+
+        public override bool IsUnique => false;
     }
 }

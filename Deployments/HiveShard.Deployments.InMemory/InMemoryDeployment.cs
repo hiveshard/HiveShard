@@ -12,6 +12,7 @@ using HiveShard.Fabric.Client;
 using HiveShard.Fabric.Edge;
 using HiveShard.Fabric.Ticker;
 using HiveShard.Fabrics.InMemory;
+using HiveShard.Initializer.Interfaces;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
@@ -22,6 +23,9 @@ using HiveShard.Serializer;
 using HiveShard.Util;
 using HiveShard.Workers.Edge;
 using HiveShard.Workers.Edge.Data;
+using HiveShard.Workers.Initializer;
+using HiveShard.Workers.Initializer.Data;
+using HiveShard.Workers.Initializer.Repositories;
 using HiveShard.Workers.Shard;
 using HiveShard.Workers.Shard.Data;
 using HiveShard.Workers.Shard.Repositories;
@@ -77,12 +81,38 @@ public class InMemoryDeployment: IDeployment
                 BuildTickerWorker(tickerWorkerIsolatedEnvironment);
             else if (isolatedEnvironment is ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment)
                 BuildShardWorker(shardWorkerIsolatedEnvironment);
+            else if (isolatedEnvironment is InitializerIsolatedEnvironment initializationIsolatedEnvironment)
+                BuildIsolatedEnvironment(initializationIsolatedEnvironment);
             else
                 throw new NotImplementedException(
                     $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
         }
 
         return new ServiceEnvironment(gridSize, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable());
+    }
+
+    private void BuildIsolatedEnvironment(InitializerIsolatedEnvironment initializationIsolatedEnvironment)
+    {
+        ServiceCollection serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton<Initialization>();
+        serviceCollection.AddSingleton<IInitializationTunnel, InitializationTunnel>();
+        InitializerAdditionRepository initializerAdditionRepository = new InitializerAdditionRepository();
+        serviceCollection.AddSingleton(initializerAdditionRepository);
+        
+        foreach (var initializer in initializationIsolatedEnvironment.Initializers)
+        {
+            initializerAdditionRepository.AddInitializer(initializer);
+        }
+        
+        var compartmentEnvironment = new CompartmentEnvironment(
+            $"initializer", 
+            serviceCollection, 
+            new DependencyBuilder()
+                .Add<ISimpleFabric>()
+                .Build(),
+            typeof(Initialization)
+        );
+        _isolatedEnvironments.Add(compartmentEnvironment);
     }
 
     private void BuildShardWorker(ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment)

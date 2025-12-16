@@ -15,4 +15,5 @@ public class ShardWorkerIsolatedEnvironment: IsolatedEnvironment
     }
 
     public string Identifier { get; }
+    public override bool IsUnique => false;
 }

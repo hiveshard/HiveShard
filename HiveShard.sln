@@ -63,6 +63,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveShard.Fabrics.Kafka.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveShard.Workers.Initialization.Tests", "Tests\Workers\HiveShard.Workers.Initialization.Tests\HiveShard.Workers.Initialization.Tests.csproj", "{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveShard.Workers.Initializer", "Workers\HiveShard.Workers.Initializer\HiveShard.Workers.Initializer.csproj", "{551513C2-E78A-4D63-BC9F-5D9B3D68D093}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveShard.Initializer", "HiveShard.Initializer\HiveShard.Initializer.csproj", "{031D39B2-CC26-45CC-88F7-9F7AE75141E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -160,6 +164,14 @@ Global
 		{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641}.Release|Any CPU.Build.0 = Release|Any CPU
+		{551513C2-E78A-4D63-BC9F-5D9B3D68D093}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{551513C2-E78A-4D63-BC9F-5D9B3D68D093}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{551513C2-E78A-4D63-BC9F-5D9B3D68D093}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{551513C2-E78A-4D63-BC9F-5D9B3D68D093}.Release|Any CPU.Build.0 = Release|Any CPU
+		{031D39B2-CC26-45CC-88F7-9F7AE75141E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{031D39B2-CC26-45CC-88F7-9F7AE75141E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{031D39B2-CC26-45CC-88F7-9F7AE75141E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{031D39B2-CC26-45CC-88F7-9F7AE75141E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8A33580F-899C-4BBE-9E0F-029E5ECF127F} = {DC5DCDF9-C8CB-4A8F-8D1A-ACE90F3EFAA9}
@@ -181,5 +193,6 @@ Global
 		{FC23ED92-6F9B-494D-AA83-64769EB20359} = {7D80B2AF-9121-4933-811C-CA2578653D0E}
 		{7002632D-4AF0-4BA0-B452-B7AFC63E553B} = {FC23ED92-6F9B-494D-AA83-64769EB20359}
 		{1FC16486-7F1E-4DFD-AD55-4F2DBA6C5641} = {65413284-EDD7-4DD5-8867-AE9498DA7175}
+		{551513C2-E78A-4D63-BC9F-5D9B3D68D093} = {4D443145-EAB1-4A74-B080-C2247ED15881}
 	EndGlobalSection
 EndGlobal

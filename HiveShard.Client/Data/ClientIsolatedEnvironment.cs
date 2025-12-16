@@ -8,4 +8,5 @@ public class ClientIsolatedEnvironment: IsolatedEnvironment
     }
 
     public string Username { get; }
+    public override bool IsUnique => false;
 }

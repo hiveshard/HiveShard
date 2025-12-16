@@ -11,4 +11,5 @@ public class EdgeWorkerIsolatedEnvironment : IsolatedEnvironment
         DynamicEdgeAssignment = dynamicEdgeAssignment;
     }
 
+    public override bool IsUnique => false;
 }

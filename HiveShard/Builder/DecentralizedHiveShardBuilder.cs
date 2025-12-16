@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HiveShard.Data;
@@ -32,8 +33,15 @@ public class DecentralizedHiveShardBuilder
         return _deployment.Build(_gridSize, _workers.AsEnumerable());
     }
 
-    public void RegisterWorker(IsolatedEnvironment environment)
+    private ISet<Type> _isolatedEnvironment = new HashSet<Type>();
+
+    public void RegisterWorker<TIsolatedEnvironment>(TIsolatedEnvironment environment)
+    where TIsolatedEnvironment: IsolatedEnvironment
     {
+        var type = typeof(TIsolatedEnvironment);
+        if (_isolatedEnvironment.Contains(type) && environment.IsUnique)
+            throw new InvalidOperationException($"Already registered one {type.Name}");
+        _isolatedEnvironment.Add(type);
         _workers.Add(environment);
     }
 }

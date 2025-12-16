@@ -11,4 +11,6 @@ public class TickerIsolatedEnvironment: IsolatedEnvironment
     {
         EventType = eventType;
     }
+
+    public override bool IsUnique => false;
 }
