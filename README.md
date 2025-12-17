@@ -1,5 +1,7 @@
 # Hiveshard
 
+[![codecov](https://codecov.io/gh/hiveshard/HiveShard/graph/badge.svg?token=KOI7AGCISI)](https://codecov.io/gh/hiveshard/HiveShard)
+
 
 
 ## Consistency Model
