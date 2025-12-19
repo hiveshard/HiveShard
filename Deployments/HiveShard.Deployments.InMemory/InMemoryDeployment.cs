@@ -95,7 +95,7 @@ public class InMemoryDeployment: IDeployment
     {
         ServiceCollection serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton<Initialization>();
-        serviceCollection.AddSingleton<IInitializationTunnel, InitializationTunnel>();
+        serviceCollection.AddSingleton<InitializationTunnel>();
         InitializerAdditionRepository initializerAdditionRepository = new InitializerAdditionRepository();
         serviceCollection.AddSingleton(initializerAdditionRepository);
         
