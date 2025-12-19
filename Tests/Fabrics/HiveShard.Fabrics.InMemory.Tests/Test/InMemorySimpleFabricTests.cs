@@ -29,6 +29,7 @@ public class InMemorySimpleFabricTests
         });
 
         var startTime = DateTime.Now;
+        bool condition;
         while (true)
         {
             if (DateTime.Now - startTime > TimeSpan.FromSeconds(5))
@@ -36,8 +37,11 @@ public class InMemorySimpleFabricTests
             
             if(receivedMessages.TryDequeue(out TestEvent? testEvent))
             {
-                Assert.That(testEvent.Value.Equals(id));
+                condition = testEvent.Value.Equals(id);
+                if(condition)
+                    break;
             }
         }
+        Assert.That(condition);
     }
 }

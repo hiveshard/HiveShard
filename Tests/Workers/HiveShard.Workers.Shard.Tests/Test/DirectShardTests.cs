@@ -28,7 +28,7 @@ public class DirectShardTests
         var tickRepository = new TickRepository();
         var fabricLoggingProvider = new FabricLoggingProvider(new SimpleTelemetryProvider(loggingProvider), tickRepository);
         var identityConfig = new IdentityConfig(Guid.NewGuid(), "test");
-        ISimpleFabric simpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, cancellationProvider);
+        ISimpleFabric simpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig);
         ScopedShardTunnel tunnel = new ScopedShardTunnel(identity, loggingProvider, simpleFabric, tickRepository, cancellationProvider);
         EchoHiveShard shard = new EchoHiveShard(tunnel);
         

@@ -19,6 +19,6 @@ public class InMemorySimpleFabricBuilder
         IFabricLoggingProvider fabricLoggingProvider = new FabricLoggingProvider(telemetryProvider, tickRepository);
         IIdentityConfig identityConfig = new IdentityConfig(Guid.NewGuid(), "test");
         ICancellationProvider cancellationProvider = new CancellationProvider();
-        return new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, cancellationProvider);
+        return new InMemorySimpleFabric(fabricLoggingProvider, identityConfig);
     }
 }

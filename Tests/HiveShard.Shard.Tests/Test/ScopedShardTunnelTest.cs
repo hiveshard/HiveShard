@@ -28,7 +28,7 @@ public class ScopedShardTunnelTest
         var workerLoggingProvider = new WorkerLoggingProvider(simpleTelemetryProvider, tickRepository, identityConfig);
         var fabricLoggingProvider = new FabricLoggingProvider(simpleTelemetryProvider, tickRepository);
         ICancellationProvider cancellationProvider = new CancellationProvider();
-        var inMemorySimpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, cancellationProvider);
+        var inMemorySimpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig);
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         ScopedShardTunnel tunnel = new ScopedShardTunnel(shardIdentity, workerLoggingProvider, inMemorySimpleFabric, tickRepository, cancellationProvider);
         tunnel.Initialize(new TestShard(tunnel));
