@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,10 +15,10 @@ namespace HiveShard.Fabrics.InMemory
     public class InMemorySimpleFabric: ISimpleFabric
     {
         
-        private Dictionary<(Type, Chunk), Dictionary<long, Consumption<object>>> _topics = new();
-        private Dictionary<(Type, Chunk), List<Action<Consumption<object>>>> _consumers = new();
-        private Dictionary<(Type, Chunk), long> _topicMaxOffsets = new();
-        private Dictionary<Action<Consumption<object>>, long> _consumerOffsets = new();
+        private ConcurrentDictionary<(Type, Chunk), ConcurrentDictionary<long, Consumption<object>>> _topics = new();
+        private ConcurrentDictionary<(Type, Chunk), List<Action<Consumption<object>>>> _consumers = new();
+        private ConcurrentDictionary<(Type, Chunk), long> _topicMaxOffsets = new();
+        private ConcurrentDictionary<Action<Consumption<object>>, long> _consumerOffsets = new();
 
         public InMemorySimpleFabric(IFabricLoggingProvider loggingProvider, IIdentityConfig identityConfig)
         {
@@ -30,8 +31,7 @@ namespace HiveShard.Fabrics.InMemory
         public void Register<T>(string topic, Chunk chunk, Action<Consumption<T>> action)
         {
             var index = (typeof(T), chunk);
-            if (!_topicMaxOffsets.ContainsKey(index))
-                InitTopic(index);
+            InitTopic(index);
 
             Action<Consumption<object>> newConsumer = o => action(new Consumption<T>((T)o.Message, o.Offset));
             _consumers[index].Add(newConsumer);
@@ -59,13 +59,12 @@ namespace HiveShard.Fabrics.InMemory
         {
             var index = (typeof(T), chunk);
 
-            if (!_topicMaxOffsets.ContainsKey(index))
-                InitTopic(index);
+            InitTopic(index);
             
             
             var currentOffset = _topicMaxOffsets[index];
             var consumption = new Consumption<object>(message, currentOffset);
-            _topics[index].Add(currentOffset, consumption);
+            _topics[index].TryAdd(currentOffset, consumption);
 
             var newOffset = currentOffset + 1;
 
@@ -81,9 +80,9 @@ namespace HiveShard.Fabrics.InMemory
 
         private void InitTopic((Type, Chunk) index)
         {
-            _topicMaxOffsets[index] = 0;
-            _topics[index] = new Dictionary<long, Consumption<object>>();
-            _consumers[index] = new List<Action<Consumption<object>>>();
+            _topicMaxOffsets.GetOrAdd(index, _ => 0);
+            _topics.GetOrAdd(index, _ => new ConcurrentDictionary<long, Consumption<object>>());
+            _consumers.GetOrAdd(index, _ => new List<Action<Consumption<object>>>());
         }
     }
 }
