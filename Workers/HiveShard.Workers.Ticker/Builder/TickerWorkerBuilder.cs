@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using HiveShard.Event;
 using HiveShard.Interface;
 using HiveShard.Ticker.Data;
 using HiveShard.Workers.Ticker.Data;
@@ -20,6 +21,12 @@ public class TickerWorkerBuilder
     where T: class, IEvent
     {
         _tickers.Add(new TickerIsolatedEnvironment(typeof(T)));
+        return this;
+    }
+
+    public TickerWorkerBuilder CentralTicker()
+    {
+        _tickers.Add(new TickerIsolatedEnvironment(typeof(CompletedTick)));
         return this;
     }
 

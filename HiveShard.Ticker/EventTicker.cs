@@ -38,7 +38,7 @@ namespace HiveShard.Ticker
             _allTopics = topicPartitions.ToImmutableArray();
             _allShards = shards.ToImmutableArray();
             
-            _simpleFabric.Register<CompletedTick>("completed-ticks", HandleCompletedTicks);
+            
         }
 
         private readonly ISimpleFabric _simpleFabric;
@@ -134,7 +134,7 @@ namespace HiveShard.Ticker
 
         public void Start()
         {
-            throw new NotImplementedException();
+            _simpleFabric.Register<CompletedTick>("completed-ticks", HandleCompletedTicks);
         }
     }
 }
