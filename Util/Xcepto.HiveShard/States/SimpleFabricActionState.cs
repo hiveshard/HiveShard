@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using HiveShard.Fabric.Ticker;
+using HiveShard.Fabric;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.States;
 

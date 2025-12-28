@@ -2,7 +2,7 @@ using HiveShard.Config;
 using HiveShard.Data;
 using HiveShard.Deployments.InMemory.Providers;
 using HiveShard.Event;
-using HiveShard.Fabric.Ticker;
+using HiveShard.Fabric;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;

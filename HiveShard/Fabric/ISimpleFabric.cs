@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using HiveShard.Data;
 
-namespace HiveShard.Fabric.Ticker
+namespace HiveShard.Fabric
 {
     public interface ISimpleFabric: IFabric
     {

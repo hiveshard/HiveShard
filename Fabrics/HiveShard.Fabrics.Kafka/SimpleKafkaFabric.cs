@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 using HiveShard.Data;
-using HiveShard.Fabric.Ticker;
+using HiveShard.Fabric;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
-using HiveShard.Fabric.Ticker;
+using HiveShard.Fabric;
 using HiveShard.Initializer.Interfaces;
 using HiveShard.Interface;
 

@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
-using HiveShard.Fabric.Ticker;
+using HiveShard.Fabric;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
 

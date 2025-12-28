@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using HiveShard.Data;
-using HiveShard.Fabric.Ticker;
+using HiveShard.Fabric;
 using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.States;
