@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
+using HiveShard.Interface.Providers;
 using HiveShard.Util;
 using HiveShard.Workers.Shard;
 using HiveShard.Workers.Shard.Repositories;

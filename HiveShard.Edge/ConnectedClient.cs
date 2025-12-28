@@ -1,8 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 
-namespace HiveShard.Data
+namespace HiveShard.Edge
 {
     public class ConnectedClient
     {

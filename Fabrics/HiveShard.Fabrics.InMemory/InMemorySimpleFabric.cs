@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Data;
-using HiveShard.Fabric;
+using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
 using HiveShard.Util;

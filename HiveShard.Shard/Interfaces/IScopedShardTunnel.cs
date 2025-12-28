@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using HiveShard.Fabric;
+using HiveShard.Interface;
 
-namespace HiveShard.Interface
+namespace HiveShard.Shard.Interfaces
 {
     public interface IScopedShardTunnel: IFabric, IIsolatedEntryPoint
     {

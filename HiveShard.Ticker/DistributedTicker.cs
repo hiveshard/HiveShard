@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
-using HiveShard.Fabric;
+using HiveShard.Interface;
 using HiveShard.Interface.Repository;
 
 namespace HiveShard.Ticker;

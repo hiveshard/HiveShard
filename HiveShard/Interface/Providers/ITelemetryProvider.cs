@@ -1,6 +1,6 @@
 ﻿using HiveShard.Data.Telemetry;
 
-namespace HiveShard.Interface
+namespace HiveShard.Interface.Providers
 {
     public interface ITelemetryProvider
     {

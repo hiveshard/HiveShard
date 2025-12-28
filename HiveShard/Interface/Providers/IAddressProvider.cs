@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HiveShard.Interface
+namespace HiveShard.Interface.Providers
 {
     public interface IAddressProvider
     {

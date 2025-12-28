@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using HiveShard.Client.Interface;
+using HiveShard.Client.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.Repositories;
 using Xcepto.States;

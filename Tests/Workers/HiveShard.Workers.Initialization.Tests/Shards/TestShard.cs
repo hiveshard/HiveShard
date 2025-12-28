@@ -1,4 +1,5 @@
 using HiveShard.Interface;
+using HiveShard.Shard.Interfaces;
 using HiveShard.Workers.Initialization.Tests.Events;
 using HiveShard.Workers.Initialization.Tests.Repositories;
 

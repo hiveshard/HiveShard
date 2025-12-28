@@ -8,9 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
-using HiveShard.Fabric;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
+using HiveShard.Interface.Providers;
 
 namespace HiveShard.Ticker
 {

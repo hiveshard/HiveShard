@@ -1,7 +1,7 @@
 using HiveShard.Client.Extensions;
 using HiveShard.Data;
 using HiveShard.Deployments.InMemory;
-using HiveShard.Edge.events;
+using HiveShard.Edge.Events;
 using HiveShard.Edge.Tests.Edge;
 using HiveShard.Edge.Tests.Events;
 using HiveShard.Factory;

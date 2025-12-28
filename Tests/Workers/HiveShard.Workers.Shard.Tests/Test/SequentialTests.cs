@@ -3,6 +3,7 @@ using HiveShard.Deployments.DockerCompose;
 using HiveShard.Deployments.InMemory;
 using HiveShard.Factory;
 using HiveShard.Interface;
+using HiveShard.Shard.Interfaces;
 using HiveShard.Worker.Tests.Events;
 using HiveShard.Worker.Tests.Shards;
 using HiveShard.Workers.Edge.Extensions;

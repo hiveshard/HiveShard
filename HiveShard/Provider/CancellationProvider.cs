@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using HiveShard.Interface;
+using HiveShard.Interface.Providers;
 
 namespace HiveShard.Provider
 {

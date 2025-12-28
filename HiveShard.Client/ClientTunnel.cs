@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using HiveShard.Client.Interface;
+using HiveShard.Client.Interfaces;
 using HiveShard.Data;
-using HiveShard.Fabric;
-using HiveShard.Fabric.Client;
 using HiveShard.Interface;
+using HiveShard.Interface.Providers;
 
 namespace HiveShard.Client
 {

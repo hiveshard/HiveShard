@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
+using HiveShard.Interface;
 
-namespace HiveShard.Fabric.Edge
+namespace HiveShard.Edge.Interfaces
 {
     public interface IEdgeTunnelServerEndpoint: IFabric
     {

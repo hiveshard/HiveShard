@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
+using HiveShard.Interface;
 
-namespace HiveShard.Fabric.Client
+namespace HiveShard.Client.Interfaces
 {
     public interface IEdgeTunnelClientEndpoint: IFabric
     {
         Task SendEvent(object message, Type messageType);
 
         void RegisterCallback(Action<object> callback, Type type);
-        void Disconnect(Data.HiveShardClient hiveShardClient);
-        Task Connect(Data.HiveShardClient hiveShardClient);
+        void Disconnect(HiveShard.Data.HiveShardClient hiveShardClient);
+        Task Connect(HiveShard.Data.HiveShardClient hiveShardClient);
     }
 }

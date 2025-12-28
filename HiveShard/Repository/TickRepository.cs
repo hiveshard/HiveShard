@@ -1,4 +1,5 @@
 ﻿using HiveShard.Interface;
+using HiveShard.Interface.Providers;
 
 namespace HiveShard.Repository
 {

@@ -4,6 +4,7 @@ using HiveShard.Data;
 using HiveShard.Event;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Interface;
+using HiveShard.Interface.Providers;
 using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;

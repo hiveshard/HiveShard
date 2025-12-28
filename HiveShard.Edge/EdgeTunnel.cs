@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HiveShard.Data;
-using HiveShard.Fabric.Edge;
+using HiveShard.Edge.Interfaces;
 using HiveShard.Interface;
+using HiveShard.Interface.Providers;
 
 namespace HiveShard.Edge
 {

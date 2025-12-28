@@ -1,7 +1,7 @@
 ﻿using System;
 using HiveShard.Interface;
 
-namespace HiveShard.Edge.events
+namespace HiveShard.Edge.Events
 {
     public class ConnectionSucceeded: IEvent
     {

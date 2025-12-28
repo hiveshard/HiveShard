@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using HiveShard.Client.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.Repositories;
 using Xcepto.States;

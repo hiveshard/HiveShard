@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using HiveShard.Client;
 using HiveShard.Client.Data;
-using HiveShard.Client.Interface;
+using HiveShard.Client.Interfaces;
 using HiveShard.Config;
 using HiveShard.Data;
 using HiveShard.Deployments.InMemory.Providers;
 using HiveShard.Edge;
-using HiveShard.Fabric;
-using HiveShard.Fabric.Client;
-using HiveShard.Fabric.Edge;
+using HiveShard.Edge.Interfaces;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Initializer.Interfaces;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
+using HiveShard.Interface.Providers;
 using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
@@ -56,7 +55,6 @@ public class InMemoryDeployment: IDeployment
             .AddSingleton<IHiveShardSimpleLoggingProvider, SimpleLoggingProvider>()
             .AddSingleton<ITelemetryProvider, SimpleTelemetryProvider>()
             .AddSingleton<IFabricLoggingProvider, FabricLoggingProvider>()
-            .AddSingleton<IShardRepository, ShardRepository>()
             .AddSingleton<ISerializer, NewtonsoftSerializer>()
             .AddSingleton<ITickRepository, TickRepository>()
             .AddSingleton<ICancellationProvider>(cancellationProvider)

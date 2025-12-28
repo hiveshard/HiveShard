@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using HiveShard.Client.Interfaces;
 using HiveShard.Data;
-using HiveShard.Edge.events;
-using HiveShard.Fabric.Client;
-using HiveShard.Fabric.Edge;
+using HiveShard.Edge.Events;
+using HiveShard.Edge.Interfaces;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
+using HiveShard.Interface.Providers;
 
 namespace HiveShard.Fabrics.InMemory
 {

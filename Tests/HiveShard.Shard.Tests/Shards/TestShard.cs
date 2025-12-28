@@ -1,4 +1,5 @@
 ﻿using HiveShard.Interface;
+using HiveShard.Shard.Interfaces;
 using HiveShard.Shard.Tests.Events;
 
 namespace HiveShard.Shard.Tests.Shards;

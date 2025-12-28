@@ -5,14 +5,14 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using HiveShard.Client.Interfaces;
 using HiveShard.Data;
-using HiveShard.Edge.events;
-using HiveShard.Fabric;
-using HiveShard.Fabric.Client;
+using HiveShard.Edge.Events;
 using HiveShard.Fabrics.Tcp.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
+using HiveShard.Interface.Providers;
 using HiveShard.Util;
 
 namespace HiveShard.Fabrics.Tcp

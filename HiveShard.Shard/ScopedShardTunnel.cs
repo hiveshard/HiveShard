@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Data.Telemetry;
 using HiveShard.Event;
-using HiveShard.Fabric;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
+using HiveShard.Interface.Providers;
 using HiveShard.Shard.Data;
+using HiveShard.Shard.Interfaces;
 using HiveShard.Util;
 
 namespace HiveShard.Shard

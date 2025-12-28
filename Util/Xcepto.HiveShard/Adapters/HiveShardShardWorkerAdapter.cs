@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using HiveShard.Client.Interface;
 using HiveShard.Data;
 using HiveShard.Interface;
 using Xcepto.Adapters;

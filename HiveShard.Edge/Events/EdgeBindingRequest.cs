@@ -1,6 +1,6 @@
 ﻿using HiveShard.Data;
 
-namespace HiveShard.Edge.events
+namespace HiveShard.Edge.Events
 {
     public class EdgeBindingRequest
     {

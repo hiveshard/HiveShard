@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using HiveShard.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HiveShard.Data

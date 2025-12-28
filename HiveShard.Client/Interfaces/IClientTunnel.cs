@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace HiveShard.Client.Interface
+namespace HiveShard.Client.Interfaces
 {
     public interface IClientTunnel
     {

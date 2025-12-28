@@ -1,4 +1,4 @@
-namespace HiveShard.Interface
+namespace HiveShard.Interface.Config
 {
     public interface INetworkConfiguration
     {

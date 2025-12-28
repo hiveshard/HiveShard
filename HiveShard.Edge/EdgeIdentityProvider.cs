@@ -1,6 +1,7 @@
 ﻿using System;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
+using HiveShard.Interface.Providers;
 
 namespace HiveShard.Edge
 {

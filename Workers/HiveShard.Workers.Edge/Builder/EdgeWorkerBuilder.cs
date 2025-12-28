@@ -1,4 +1,4 @@
-using HiveShard.Data;
+using HiveShard.Edge;
 using HiveShard.Workers.Edge.Data;
 using Microsoft.Extensions.DependencyInjection;
 
