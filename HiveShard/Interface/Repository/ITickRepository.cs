@@ -1,4 +1,4 @@
-﻿namespace HiveShard.Interface.Providers
+﻿namespace HiveShard.Interface.Repository
 {
     public interface ITickRepository
     {

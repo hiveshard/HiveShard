@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using HiveShard.Data;
 using HiveShard.Interface;
-using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
+using HiveShard.Interface.Repository;
 using HiveShard.Ticker;
 using HiveShard.Workers.Ticker.Data;
 using HiveShard.Workers.Ticker.Repository;
@@ -16,22 +15,16 @@ public class TickerWorker: IIsolatedEntryPoint
     private TickerAdditionRepository _tickerAdditionRepository;
     private ICancellationProvider _cancellationProvider;
     private ISimpleFabric _simpleFabric;
-    private IWorkerLoggingProvider _workerLoggingProvider;
-    private IShardRepository _shardRepository;
-    private ServiceEnvironment _serviceEnvironment;
+    private IEventRepository _eventRepository;
 
     public TickerWorker(
         TickerRepository tickerRepository, 
         TickerAdditionRepository tickerAdditionRepository, 
         ICancellationProvider cancellationProvider,
-        ISimpleFabric simpleFabric,
-        IWorkerLoggingProvider workerLoggingProvider,
-        IShardRepository shardRepository, ServiceEnvironment serviceEnvironment)
+        ISimpleFabric simpleFabric, IEventRepository eventRepository)
     {
-        _shardRepository = shardRepository;
-        _serviceEnvironment = serviceEnvironment;
-        _workerLoggingProvider = workerLoggingProvider;
         _simpleFabric = simpleFabric;
+        _eventRepository = eventRepository;
         _tickerRepository = tickerRepository;
         _tickerAdditionRepository = tickerAdditionRepository;
         _cancellationProvider = cancellationProvider;
@@ -43,7 +36,7 @@ public class TickerWorker: IIsolatedEntryPoint
         {
             while (_tickerAdditionRepository.TryConsumeRequest(out Type eventType))
             {
-                var eventTicker = new EventTicker(_simpleFabric, new TickerConfig(eventType), _workerLoggingProvider, _shardRepository);
+                var eventTicker = new DistributedTicker(new DistributedTickerConfig(eventType), _simpleFabric, _eventRepository);
                 var task = Task.Run(() => eventTicker.Start());
                 _tickerRepository.AddTicker(eventType, new EventTickerInstance(eventTicker, task));
             }

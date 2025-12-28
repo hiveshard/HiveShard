@@ -2,6 +2,7 @@ using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
+using HiveShard.Interface.Repository;
 
 namespace HiveShard.Provider.Logging
 {

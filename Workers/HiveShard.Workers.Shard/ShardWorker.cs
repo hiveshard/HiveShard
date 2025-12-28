@@ -5,6 +5,7 @@ using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
+using HiveShard.Interface.Repository;
 using HiveShard.Shard;
 using HiveShard.Shard.Interfaces;
 using HiveShard.Workers.Shard.Data;

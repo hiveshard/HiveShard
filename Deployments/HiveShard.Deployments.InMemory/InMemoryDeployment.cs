@@ -15,6 +15,7 @@ using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
+using HiveShard.Interface.Repository;
 using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
@@ -201,7 +202,6 @@ public class InMemoryDeployment: IDeployment
                 .Add<ICancellationProvider>()
                 .Add<ISimpleFabric>()
                 .Add<IWorkerLoggingProvider>()
-                .Add<IShardRepository>()
                 .Add<ServiceEnvironment>()
                 .Build(),
             typeof(TickerWorker)

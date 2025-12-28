@@ -5,12 +5,12 @@ namespace HiveShard.Workers.Ticker.Data;
 
 public class EventTickerInstance
 {
-    public EventTickerInstance(EventTicker instance, Task task)
+    public EventTickerInstance(DistributedTicker instance, Task task)
     {
         Instance = instance;
         Task = task;
     }
 
-    public EventTicker Instance { get; }
+    public DistributedTicker Instance { get; }
     public Task Task { get; }
 }

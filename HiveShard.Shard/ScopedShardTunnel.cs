@@ -10,6 +10,7 @@ using HiveShard.Event;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
+using HiveShard.Interface.Repository;
 using HiveShard.Shard.Data;
 using HiveShard.Shard.Interfaces;
 using HiveShard.Util;
@@ -24,7 +25,8 @@ namespace HiveShard.Shard
         private readonly ICancellationProvider _cancellationProvider;
         private readonly Dictionary<TopicPartition, BlockingCollection<Caster>> _events = new();
         private readonly BlockingCollection<Consumption<Tick>> _ticks = new(50);
-        private readonly Dictionary<TopicPartition, long> _eventQueueOffsets = new();private ITickRepository _tickRepository;
+        private readonly Dictionary<TopicPartition, long> _eventQueueOffsets = new();
+        private ITickRepository _tickRepository;
         private GlobalChunkConfig _globalChunkConfig;
 
         private long _lastTick;
