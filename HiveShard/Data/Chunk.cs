@@ -8,8 +8,6 @@ namespace HiveShard.Data
         public int YCoord { get; }
 
         public const int Size = 128;
-        public const int MaxChunks = MaxRow * MaxRow;
-        public const int MaxRow = 3;
 
         public Chunk(int xCoord, int yCoord)
         {
@@ -19,21 +17,24 @@ namespace HiveShard.Data
 
         public string Topic => $"{XCoord}-{YCoord}";
 
-        public IEnumerable<Chunk> GetNeighbours()
+        public IEnumerable<Chunk> GetNeighboursAndSelf(GlobalChunkConfig globalChunkConfig)
         {
-            List<Chunk> chunks = new List<Chunk>();
             for (int i = -1; i <= 1; i++)
             {
                 for (int j = -1; j <= 1; j++)
                 {
-                    Chunk chunk = new Chunk(XCoord + i, YCoord + j);
-                    if(chunk.XCoord < 0 ||chunk.YCoord < 0 || chunk.XCoord >= Chunk.MaxRow || chunk.YCoord >= Chunk.MaxRow)
+                    int x = XCoord + i;
+                    int y = YCoord + j;
+
+                    if (x < globalChunkConfig.MinChunk.XCoord ||
+                        y < globalChunkConfig.MinChunk.YCoord ||
+                        x > globalChunkConfig.MaxChunk.XCoord ||
+                        y > globalChunkConfig.MaxChunk.YCoord)
                         continue;
-                    chunks.Add(chunk);
+
+                    yield return new Chunk(x, y);
                 }
             }
-
-            return chunks;
         }
 
         protected bool Equals(Chunk other)
@@ -57,9 +58,12 @@ namespace HiveShard.Data
             }
         }
 
-        public int ToPartition()
+        public Partition ToPartition(GlobalChunkConfig globalChunkConfig)
         {
-            return XCoord * MaxRow + YCoord;
+            var max = globalChunkConfig.MaxChunk;
+            var min = globalChunkConfig.MinChunk;
+            var cols = max.YCoord - min.YCoord + 1;
+            return new Partition((XCoord - min.XCoord) * cols + (YCoord - min.YCoord));
         }
 
         public override string ToString()

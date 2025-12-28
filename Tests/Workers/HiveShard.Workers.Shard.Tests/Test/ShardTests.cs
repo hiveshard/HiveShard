@@ -20,11 +20,11 @@ where T: IDeployment, new()
     [Test]
     public async Task EchoShardResponseWithNumber()
     {
-        var chunk = new Chunk(0, 0);
+        var onlyChunk = new Chunk(0, 0);
         var environment = HiveShardFactory.Create<T>(builder => builder
-            .SetGridSize(1)
+            .SetGridSize(onlyChunk, onlyChunk)
             .ShardWorker(x => x
-                .AddShard<EchoHiveShard>(chunk, Guid.NewGuid())
+                .AddShard<EchoHiveShard>(onlyChunk, Guid.NewGuid())
             )
         );
         await HiveShardTest.Given(environment, builder =>
@@ -32,7 +32,7 @@ where T: IDeployment, new()
             var simpleFabric = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
 
             // arrange
-            TopicPartition topicPartition = new TopicPartition(typeof(TestEvent).FullName!, chunk);
+            TopicPartition topicPartition = new TopicPartition(typeof(TestEvent).FullName!, onlyChunk);
             
             // act
             simpleFabric.FabricAction(x => x.Register<CompletedTick>("completed-ticks", e => { }));

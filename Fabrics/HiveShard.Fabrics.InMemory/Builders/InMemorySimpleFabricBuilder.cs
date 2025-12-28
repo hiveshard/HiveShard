@@ -1,5 +1,6 @@
 using System;
 using HiveShard.Config;
+using HiveShard.Data;
 using HiveShard.Fabrics.InMemory.Providers;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
@@ -19,6 +20,6 @@ public class InMemorySimpleFabricBuilder
         IFabricLoggingProvider fabricLoggingProvider = new FabricLoggingProvider(telemetryProvider, tickRepository);
         IIdentityConfig identityConfig = new IdentityConfig(Guid.NewGuid(), "test");
         ICancellationProvider cancellationProvider = new CancellationProvider();
-        return new InMemorySimpleFabric(fabricLoggingProvider, identityConfig);
+        return new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, new GlobalChunkConfig(new Chunk(0,0), new Chunk(0,0)));
     }
 }

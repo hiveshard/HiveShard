@@ -24,16 +24,18 @@ namespace HiveShard.Shard
         private readonly Dictionary<TopicPartition, BlockingCollection<Caster>> _events = new();
         private readonly BlockingCollection<Consumption<Tick>> _ticks = new(50);
         private readonly Dictionary<TopicPartition, long> _eventQueueOffsets = new();private ITickRepository _tickRepository;
+        private GlobalChunkConfig _globalChunkConfig;
 
         private long _lastTick;
         private volatile int _ready;
         private IHiveShard? _hiveShard;
         
-        public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IWorkerLoggingProvider loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository, ICancellationProvider cancellationProvider)
+        public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IWorkerLoggingProvider loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository, ICancellationProvider cancellationProvider, GlobalChunkConfig globalChunkConfig)
         {
             _simpleFabric = simpleFabric;
             _tickRepository = tickRepository;
             _cancellationProvider = cancellationProvider;
+            _globalChunkConfig = globalChunkConfig;
             _hiveShardIdentity = hiveShardIdentity;
             _loggingProvider = loggingProvider;
             
@@ -108,7 +110,7 @@ namespace HiveShard.Shard
             if (fullName is null)
                 throw new Exception("event name was null");
         
-            foreach (var neighbour in _hiveShardIdentity.Chunk.GetNeighbours())
+            foreach (var neighbour in _hiveShardIdentity.Chunk.GetNeighboursAndSelf(_globalChunkConfig))
             {
                 var topicPartition = new TopicPartition(fullName, neighbour);
                 _eventQueueOffsets[topicPartition] = 0;

@@ -43,7 +43,7 @@ public class TickerWorker: IIsolatedEntryPoint
         {
             while (_tickerAdditionRepository.TryConsumeRequest(out Type eventType))
             {
-                var eventTicker = new EventTicker(_simpleFabric, new TickerConfig(_serviceEnvironment.GridSize, eventType), _workerLoggingProvider, _shardRepository);
+                var eventTicker = new EventTicker(_simpleFabric, new TickerConfig(eventType), _workerLoggingProvider, _shardRepository);
                 var task = Task.Run(() => eventTicker.Start());
                 _tickerRepository.AddTicker(eventType, new EventTickerInstance(eventTicker, task));
             }

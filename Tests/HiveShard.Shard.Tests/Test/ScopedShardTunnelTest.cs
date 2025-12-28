@@ -20,7 +20,8 @@ public class ScopedShardTunnelTest
     [Test]
     public async Task Test()
     {
-        var shardIdentity = new HiveShardIdentity(new Chunk(0, 0), ShardType.From<TestShard>(), Guid.NewGuid());
+        var onlyChunk = new Chunk(0, 0);
+        var shardIdentity = new HiveShardIdentity(onlyChunk, ShardType.From<TestShard>(), Guid.NewGuid());
         var loggingProvider = new LoggingProvider();
         var identityConfig = new IdentityConfig(Guid.NewGuid(), "test");
         var tickRepository = new TickRepository();
@@ -28,9 +29,10 @@ public class ScopedShardTunnelTest
         var workerLoggingProvider = new WorkerLoggingProvider(simpleTelemetryProvider, tickRepository, identityConfig);
         var fabricLoggingProvider = new FabricLoggingProvider(simpleTelemetryProvider, tickRepository);
         ICancellationProvider cancellationProvider = new CancellationProvider();
-        var inMemorySimpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig);
+        var globalChunkConfig = new GlobalChunkConfig(onlyChunk, onlyChunk);
+        var inMemorySimpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, globalChunkConfig);
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        ScopedShardTunnel tunnel = new ScopedShardTunnel(shardIdentity, workerLoggingProvider, inMemorySimpleFabric, tickRepository, cancellationProvider);
+        ScopedShardTunnel tunnel = new ScopedShardTunnel(shardIdentity, workerLoggingProvider, inMemorySimpleFabric, tickRepository, cancellationProvider, globalChunkConfig);
         tunnel.Initialize(new TestShard(tunnel));
 
         // Arrange
@@ -45,7 +47,7 @@ public class ScopedShardTunnelTest
         await tunnel.WaitForReady();
         
         // Act
-        var testEventPartition = new TopicPartition(typeof(TestEvent).FullName!, new Chunk(0, 0));
+        var testEventPartition = new TopicPartition(typeof(TestEvent).FullName!, onlyChunk);
         await inMemorySimpleFabric.Send(testEventPartition.Topic, testEventPartition.Chunk , new TestEvent(7));
         await inMemorySimpleFabric.Send("ticks", new Tick(1, 0, [new TopicPartitionOffset(testEventPartition.Topic, testEventPartition.Chunk, 1)], DateTime.Now));
 
@@ -53,8 +55,8 @@ public class ScopedShardTunnelTest
         // Assert
         var completed = await Task.WhenAny(tunnelStart, Task.Run(() =>
         {
-            var eventResponse = responses.Take();
-            Assert.That(eventResponse.Number == 7);
+            Assert.That(responses.TryTake(out var eventResponse, TimeSpan.FromSeconds(5)), Is.True);
+            Assert.That(eventResponse.Number, Is.EqualTo(7));
         }));
         if(completed.IsFaulted)
             throw completed.Exception;

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using HiveShard.Config;
+using HiveShard.Data;
 using HiveShard.Fabrics.Kafka.Tests.Data;
 using HiveShard.Provider;
 using HiveShard.Provider.Logging;
@@ -22,8 +23,11 @@ public class SimpleKafkaFabricTests
             cancellationProvider,
             new NewtonsoftSerializer(),
             new FabricLoggingProvider(new SimpleTelemetryProvider(new LoggingProvider()), new TickRepository()),
-            new EnvironmentConfig(Guid.NewGuid())
+            new EnvironmentConfig(Guid.NewGuid()),
+            new GlobalChunkConfig(new Chunk(0,0), new Chunk(0,0))
             );
+
+        throw new NotImplementedException();
 
         BlockingCollection<TestEvent> testEvents = new BlockingCollection<TestEvent>();
         simpleKafkaFabric.Register<TestEvent>("test", e =>

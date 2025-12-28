@@ -8,7 +8,9 @@ namespace HiveShard.Fabric.Ticker
     {
         void Register<T>(string topic, Action<Consumption<T>> action);
         void Register<T>(string topic, Chunk chunk, Action<Consumption<T>> action);
+        void Register<T>(string topic, Partition partition, Action<Consumption<T>> action);
         Task Send<T>(string topic, T message);
         Task Send<T>(string topic, Chunk chunk, T message);
+        Task Send<T>(string topic, Partition partition, T message);
     }
 }

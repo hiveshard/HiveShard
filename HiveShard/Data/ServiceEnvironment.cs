@@ -8,19 +8,19 @@ namespace HiveShard.Data
 {
     public class ServiceEnvironment
     {
-        public int GridSize { get; }
+        public GlobalChunkConfig GlobalChunkConfig { get; }
         public IEnumerable<(string, Type, string)> EntryPointLocations { get; }
         public IServiceCollection Outer { get; }
         public IEnumerable<CompartmentEnvironment> Inner { get; }
 
-        public ServiceEnvironment(int gridSize,
+        public ServiceEnvironment(GlobalChunkConfig globalChunkConfig,
             IServiceCollection serviceCollection,
             IEnumerable<CompartmentEnvironment> inner, IEnumerable<(string, Type, string)> entryPointLocations)
         {
             EntryPointLocations = entryPointLocations;
             Inner = inner;
             Outer = serviceCollection;
-            GridSize = gridSize;
+            GlobalChunkConfig = globalChunkConfig;
         }
 
         public Task Start()

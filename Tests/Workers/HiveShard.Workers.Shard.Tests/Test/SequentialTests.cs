@@ -27,9 +27,10 @@ where T: IDeployment, new()
     public void SetUp()
     {
         _hiveShardWorker = "SW1";
-        _hiveShardIdentity = new HiveShardIdentity(new Chunk(0, 0), ShardType.From<EchoHiveShard>(), Guid.NewGuid());
+        var onlyChunk = new Chunk(0, 0);
+        _hiveShardIdentity = new HiveShardIdentity(onlyChunk, ShardType.From<EchoHiveShard>(), Guid.NewGuid());
         ServiceEnvironment environment = HiveShardFactory.Create<T>(builder => builder
-            .SetGridSize(1)
+            .SetGridSize(onlyChunk, onlyChunk)
             .ShardWorker(workerBuilder => workerBuilder
                 .AddShard<EchoHiveShard>(_hiveShardIdentity.Chunk, _hiveShardIdentity.Id)
                 .Identify(_hiveShardWorker)

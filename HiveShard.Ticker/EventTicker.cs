@@ -22,18 +22,19 @@ namespace HiveShard.Ticker
             _simpleFabric = simpleFabric;
             var topicPartitions = new List<TopicPartition>();
             var shards = new List<HiveShardIdentity>();
-            for (int i = 0; i < config.N; i++)
-            {
-                for (int j = 0; j < config.N; j++)
-                {
-                    var chunk = new Chunk(i, j);
-                    foreach (ShardType shardType in shardRepository.GetShardTypes())
-                    {
-                        shards.Add(new HiveShardIdentity(chunk, shardType, Guid.NewGuid()));
-                    }
-                    topicPartitions.Add(new TopicPartition(config.EventType.FullName!, chunk));
-                }
-            }
+            throw new NotImplementedException();
+            // for (int i = 0; i < config.N; i++)
+            // {
+            //     for (int j = 0; j < config.N; j++)
+            //     {
+            //         var chunk = new Chunk(i, j);
+            //         foreach (ShardType shardType in shardRepository.GetShardTypes())
+            //         {
+            //             shards.Add(new HiveShardIdentity(chunk, shardType, Guid.NewGuid()));
+            //         }
+            //         topicPartitions.Add(new TopicPartition(config.EventType.FullName!, chunk));
+            //     }
+            // }
 
             _allTopics = topicPartitions.ToImmutableArray();
             _allShards = shards.ToImmutableArray();

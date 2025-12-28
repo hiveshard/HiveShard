@@ -40,7 +40,6 @@ public class InMemoryDeployment: IDeployment
 {
     private readonly List<CompartmentEnvironment> _isolatedEnvironments = new();
     private readonly List<(string, Type, string)> _entryPointLocations = new();
-    private int _gridSize;
 
     private void AddEntryPoint<T>(string compartment, string compartmentType)
     where T: class
@@ -48,9 +47,9 @@ public class InMemoryDeployment: IDeployment
         _entryPointLocations.Add((compartment, typeof(T), compartmentType));
     }
 
-    public ServiceEnvironment Build(int gridSize, IEnumerable<IsolatedEnvironment> workers)
+    public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, IEnumerable<IsolatedEnvironment> workers)
     {
-        _gridSize = gridSize;
+        
         CancellationProvider cancellationProvider = new CancellationProvider();
         IServiceCollection topLevelServices = new ServiceCollection()
             .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))
@@ -88,7 +87,7 @@ public class InMemoryDeployment: IDeployment
                     $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
         }
 
-        return new ServiceEnvironment(gridSize, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable());
+        return new ServiceEnvironment(new GlobalChunkConfig(minChunk, maxChunk), topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable());
     }
 
     private void BuildIsolatedEnvironment(InitializerIsolatedEnvironment initializationIsolatedEnvironment)
@@ -119,7 +118,6 @@ public class InMemoryDeployment: IDeployment
     {
         ServiceCollection serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton<ShardWorker>();
-        serviceCollection.AddSingleton<WorkerConfig>(new WorkerConfig(_gridSize));
         serviceCollection.AddSingleton<ITickRepository, TickRepository>();
         serviceCollection.AddSingleton<HiveShardRepository>();
         ShardAdditionRepository repository = new ShardAdditionRepository();

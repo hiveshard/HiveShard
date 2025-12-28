@@ -21,15 +21,16 @@ public class DirectShardTests
     [Test]
     public async Task TestShardDirectly()
     {
-        var partition = new Chunk(0,0);
-        HiveShardIdentity identity = new HiveShardIdentity(partition, ShardType.From<EchoHiveShard>(), Guid.NewGuid());
+        var onlyChunk = new Chunk(0,0);
+        HiveShardIdentity identity = new HiveShardIdentity(onlyChunk, ShardType.From<EchoHiveShard>(), Guid.NewGuid());
         SimpleLoggingProvider loggingProvider = new SimpleLoggingProvider();
         ICancellationProvider cancellationProvider = new CancellationProvider();
         var tickRepository = new TickRepository();
         var fabricLoggingProvider = new FabricLoggingProvider(new SimpleTelemetryProvider(loggingProvider), tickRepository);
         var identityConfig = new IdentityConfig(Guid.NewGuid(), "test");
-        ISimpleFabric simpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig);
-        ScopedShardTunnel tunnel = new ScopedShardTunnel(identity, loggingProvider, simpleFabric, tickRepository, cancellationProvider);
+        var globalChunkConfig = new GlobalChunkConfig(onlyChunk, onlyChunk);
+        ISimpleFabric simpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, globalChunkConfig);
+        ScopedShardTunnel tunnel = new ScopedShardTunnel(identity, loggingProvider, simpleFabric, tickRepository, cancellationProvider, globalChunkConfig);
         EchoHiveShard shard = new EchoHiveShard(tunnel);
         
         tunnel.Initialize(shard);
@@ -44,12 +45,12 @@ public class DirectShardTests
             Assert.That(testEventResponse.Number, Is.EqualTo(5));
             responseArrived = true;
         });
-        simpleFabric.Register<CompletedTick>("completed-ticks", partition, consumption => { });
+        simpleFabric.Register<CompletedTick>("completed-ticks", onlyChunk, consumption => { });
         
         await tunnel.Send(new TestEvent(5));
-        await simpleFabric.Send("ticks", partition, new Tick(1, 0, new List<TopicPartitionOffset>()
+        await simpleFabric.Send("ticks", onlyChunk, new Tick(1, 0, new List<TopicPartitionOffset>()
         {
-            new TopicPartitionOffset(typeof(TestEvent).FullName!, partition, 1)
+            new TopicPartitionOffset(typeof(TestEvent).FullName!, onlyChunk, 1)
         }, DateTime.Now));
 
         await Task.Delay(TimeSpan.FromSeconds(5));

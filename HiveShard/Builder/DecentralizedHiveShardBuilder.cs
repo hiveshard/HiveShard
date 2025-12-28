@@ -10,7 +10,8 @@ namespace HiveShard.Builder;
 public class DecentralizedHiveShardBuilder
 {
     private IDeployment _deployment;
-    private int _gridSize = 1;
+    private Chunk _minChunk = new(0,0);
+    private Chunk _maxChunk = new(0,0);
     private List<IsolatedEnvironment> _workers = new();
     private ServiceCollection _topLevelServices = new();
     internal DecentralizedHiveShardBuilder(IDeployment deployment)
@@ -23,14 +24,18 @@ public class DecentralizedHiveShardBuilder
         return _topLevelServices;
     }
 
-    public DecentralizedHiveShardBuilder SetGridSize(int n)
+    public DecentralizedHiveShardBuilder SetGridSize(Chunk min, Chunk max)
     {
-        _gridSize = n;
+        if (min.XCoord > max.XCoord || min.YCoord > max.YCoord)
+            throw new InvalidOperationException("MinChunk has to be >= MaxChunk");
+            
+        _minChunk = min;
+        _maxChunk = max;
         return this;
     }
     internal ServiceEnvironment Build()
     {
-        return _deployment.Build(_gridSize, _workers.AsEnumerable());
+        return _deployment.Build(_minChunk, _maxChunk, _workers.AsEnumerable());
     }
 
     private ISet<Type> _isolatedEnvironment = new HashSet<Type>();
