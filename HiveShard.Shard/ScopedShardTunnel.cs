@@ -110,7 +110,7 @@ namespace HiveShard.Shard
             });
         }
 
-        public Task Register<TEvent>(Action<TEvent> handler)
+        public Task Register<TEvent>(Action<TEvent> handler) where TEvent: IEvent
         {
             var fullName = typeof(TEvent).FullName;
             if (fullName is null)
@@ -134,7 +134,7 @@ namespace HiveShard.Shard
             return Task.CompletedTask;
         }
 
-        public Task Send<TEvent>(TEvent message)
+        public Task Send<TEvent>(TEvent message) where TEvent: IEvent
         {
             return Resilience.Retry(_ =>
             {

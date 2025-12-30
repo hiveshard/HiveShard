@@ -1,6 +1,8 @@
+using HiveShard.Interface;
+
 namespace HiveShard.Fabrics.Kafka.Tests.Data;
 
-public class TestEvent
+public class TestEvent: IEvent
 {
     public TestEvent(int testNumber)
     {

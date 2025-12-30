@@ -16,9 +16,9 @@ namespace HiveShard.Fabrics.InMemory
     {
         private GlobalChunkConfig _globalChunkConfig;
         
-        private ConcurrentDictionary<(Type, Partition), ConcurrentDictionary<long, Consumption<object>>> _topics = new();
-        private ConcurrentDictionary<(Type, Partition), List<Action<Consumption<object>>>> _consumers = new();
-        private ConcurrentDictionary<(Type, Partition), long> _topicMaxOffsets = new();
+        private ConcurrentDictionary<(EventType, Partition), ConcurrentDictionary<long, Consumption<object>>> _topics = new();
+        private ConcurrentDictionary<(EventType, Partition), List<Action<Consumption<object>>>> _consumers = new();
+        private ConcurrentDictionary<(EventType, Partition), long> _topicMaxOffsets = new();
         private ConcurrentDictionary<Action<Consumption<object>>, long> _consumerOffsets = new();
 
         public InMemorySimpleFabric(IFabricLoggingProvider loggingProvider, IIdentityConfig identityConfig, GlobalChunkConfig globalChunkConfig)
@@ -28,14 +28,15 @@ namespace HiveShard.Fabrics.InMemory
         }
 
         public void Register<T>(string topic, Action<Consumption<T>> action)
-            => Register(topic, new Chunk(0, 0), action);
+            where T: IEvent => Register(topic, new Chunk(0, 0), action);
 
-        public void Register<T>(string topic, Chunk chunk, Action<Consumption<T>> action) =>
-            Register(topic, chunk.ToPartition(_globalChunkConfig), action);
+        public void Register<T>(string topic, Chunk chunk, Action<Consumption<T>> action) 
+            where T: IEvent => Register(topic, chunk.ToPartition(_globalChunkConfig), action);
 
         public void Register<T>(string topic, Partition partition, Action<Consumption<T>> action)
+        where T: IEvent
         {
-            var index = (typeof(T), partition);
+            var index = (EventType.From<T>(), partition);
             InitTopic(index);
 
             Action<Consumption<object>> newConsumer = o => action(new Consumption<T>((T)o.Message, o.Offset));
@@ -55,17 +56,17 @@ namespace HiveShard.Fabrics.InMemory
             }
         }
 
-        public Task Send<T>(string topic, T message)
+        public Task Send<T>(string topic, T message) where T: IEvent
         {
             return Send<T>(topic, new Chunk(0, 0), message);
         }
 
-        public Task Send<T>(string topic, Chunk chunk, T message) =>
+        public Task Send<T>(string topic, Chunk chunk, T message) where T: IEvent =>
             Send<T>(topic, chunk.ToPartition(_globalChunkConfig), message);
 
-        public Task Send<T>(string topic, Partition partition, T message)
+        public Task Send<T>(string topic, Partition partition, T message) where T: IEvent
         {
-            var index = (typeof(T), partition);
+            var index = (EventType.From<T>(), partition);
 
             InitTopic(index);
             
@@ -86,7 +87,7 @@ namespace HiveShard.Fabrics.InMemory
             return Task.CompletedTask;
         }
 
-        private void InitTopic((Type, Partition) index)
+        private void InitTopic((EventType, Partition) index)
         {
             _topicMaxOffsets.GetOrAdd(index, _ => 0);
             _topics.GetOrAdd(index, _ => new ConcurrentDictionary<long, Consumption<object>>());

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using HiveShard.Data;
 using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.Adapters;
@@ -14,10 +15,10 @@ namespace Xcepto.HiveShard.Adapters
             AddStep(new SimpleFabricActionState("Simple Fabric action", action));
         }
 
-        public void FabricExpectation<T>(Predicate<T> predicate, string topic)
+        public void FabricExpectation<T>(Predicate<T> predicate, string topic, Partition partition)
             where T: IEvent 
         {
-            AddStep(new SimpleFabricExpectationState<T>("Simple fabric expectation state", predicate, topic));
+            AddStep(new SimpleFabricExpectationState<T>("Simple fabric expectation state", predicate, topic, partition));
         }
     }
 }

@@ -84,16 +84,16 @@ public class InMemoryDeployment: IDeployment
             else if (isolatedEnvironment is ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment)
                 BuildShardWorker(shardWorkerIsolatedEnvironment);
             else if (isolatedEnvironment is InitializerIsolatedEnvironment initializationIsolatedEnvironment)
-                BuildIsolatedEnvironment(initializationIsolatedEnvironment);
+                BuildInitializationWorker(initializationIsolatedEnvironment);
             else
                 throw new NotImplementedException(
                     $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
         }
 
-        return new ServiceEnvironment(globalChunkConfig, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable());
+        return new ServiceEnvironment(globalChunkConfig, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable(), eventRepository);
     }
 
-    private void BuildIsolatedEnvironment(InitializerIsolatedEnvironment initializationIsolatedEnvironment)
+    private void BuildInitializationWorker(InitializerIsolatedEnvironment initializationIsolatedEnvironment)
     {
         ServiceCollection serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton<Initialization>();
@@ -138,6 +138,7 @@ public class InMemoryDeployment: IDeployment
                 .Add<ISimpleFabric>()
                 .Add<IWorkerLoggingProvider>()
                 .Add<ICancellationProvider>()
+                .Add<IEventRepository>()
                 .Add<ISerializer>()
                 .Add<GlobalChunkConfig>()
                 .Build(),

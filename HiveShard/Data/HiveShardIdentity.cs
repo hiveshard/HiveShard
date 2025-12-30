@@ -41,7 +41,7 @@ namespace HiveShard.Data
         }
 
         public string Identity => $"{ShardType.TypeName}-{Chunk}";
-        public bool EmitsFirstTickOnly => false;
+        public bool InitializationTickOnly => false;
     }
 
 }

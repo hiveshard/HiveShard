@@ -28,19 +28,12 @@ public class InMemorySimpleFabricTests
             receivedMessages.Enqueue(e.Message);
         });
 
-        var startTime = DateTime.Now;
-        bool condition;
-        while (true)
+        bool condition = false;
+        while (receivedMessages.TryDequeue(out TestEvent? testEvent))
         {
-            if (DateTime.Now - startTime > TimeSpan.FromSeconds(5))
-                throw new TimeoutException("did not receive TestEvent in time");
-            
-            if(receivedMessages.TryDequeue(out TestEvent? testEvent))
-            {
-                condition = testEvent.Value.Equals(id);
-                if(condition)
-                    break;
-            }
+            condition = testEvent.Value.Equals(id);
+            if(condition)
+                break;
         }
         Assert.That(condition);
     }

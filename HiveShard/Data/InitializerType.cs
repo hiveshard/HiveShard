@@ -10,5 +10,5 @@ public class InitializerType: IEventEmitterType
     }
 
     public string Identity { get; }
-    public bool EmitsFirstTickOnly => true;
+    public bool InitializationTickOnly => true;
 }

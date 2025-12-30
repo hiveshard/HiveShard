@@ -6,11 +6,11 @@ namespace HiveShard.Interface
 {
     public interface ISimpleFabric: IFabric
     {
-        void Register<T>(string topic, Action<Consumption<T>> action);
-        void Register<T>(string topic, Chunk chunk, Action<Consumption<T>> action);
-        void Register<T>(string topic, Partition partition, Action<Consumption<T>> action);
-        Task Send<T>(string topic, T message);
-        Task Send<T>(string topic, Chunk chunk, T message);
-        Task Send<T>(string topic, Partition partition, T message);
+        void Register<T>(string topic, Action<Consumption<T>> action) where T: IEvent;
+        void Register<T>(string topic, Chunk chunk, Action<Consumption<T>> action) where T: IEvent;
+        void Register<T>(string topic, Partition partition, Action<Consumption<T>> action) where T: IEvent;
+        Task Send<T>(string topic, T message) where T: IEvent;
+        Task Send<T>(string topic, Chunk chunk, T message) where T: IEvent;
+        Task Send<T>(string topic, Partition partition, T message) where T: IEvent;
     }
 }

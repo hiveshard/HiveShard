@@ -15,9 +15,11 @@ namespace Xcepto.HiveShard.States
         private string _topic;
 
         private ConcurrentQueue<T> _messages = new ConcurrentQueue<T>();
+        private Partition _partition;
 
-        public SimpleFabricExpectationState(string name, Predicate<T> predicate, string topic) : base(name)
+        public SimpleFabricExpectationState(string name, Predicate<T> predicate, string topic, Partition partition) : base(name)
         {
+            _partition = partition;
             _topic = topic;
             _predicate = predicate;
         }
@@ -25,7 +27,7 @@ namespace Xcepto.HiveShard.States
         public override Task Initialize(IServiceProvider serviceProvider)
         {
             var fabric = serviceProvider.GetRequiredService<ISimpleFabric>();
-            fabric.Register<T>(_topic, x =>
+            fabric.Register<T>(_topic, _partition, x =>
             {
                 _messages.Enqueue(((Consumption<T>)x).Message);
             });

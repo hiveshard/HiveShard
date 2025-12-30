@@ -29,7 +29,7 @@ namespace HiveShard.Event
         public static CompletedTick From(string eventType, IEventEmitterType emitter, long tick,
             IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
         {
-            if (emitter.EmitsFirstTickOnly && tick >= 1)
+            if (emitter.InitializationTickOnly && tick != 2)
                 throw new InvalidOperationException();
 
             return new CompletedTick(emitter.Identity, tick, eventType, topicPartitionOffsets);
