@@ -30,7 +30,8 @@ public class DirectShardTests
         var identityConfig = new IdentityConfig(Guid.NewGuid(), "test");
         var globalChunkConfig = new GlobalChunkConfig(onlyChunk, onlyChunk);
         ISimpleFabric simpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, globalChunkConfig);
-        ScopedShardTunnel tunnel = new ScopedShardTunnel(identity, loggingProvider, simpleFabric, tickRepository, cancellationProvider, globalChunkConfig);
+        EventRepository eventRepository = new EventRepository();
+        ScopedShardTunnel tunnel = new ScopedShardTunnel(identity, loggingProvider, simpleFabric, tickRepository, cancellationProvider, globalChunkConfig, eventRepository);
         EchoHiveShard shard = new EchoHiveShard(tunnel);
         
         tunnel.Initialize(shard);

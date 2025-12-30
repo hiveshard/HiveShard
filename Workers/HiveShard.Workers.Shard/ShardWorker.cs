@@ -23,6 +23,7 @@ namespace HiveShard.Workers.Shard
         private ISerializer _serializer;
         private ISimpleFabric _fabric;
         private ICancellationProvider _cancellationProvider;
+        private GlobalChunkConfig _globalChunkConfig;
         
         private Dictionary<HiveShardIdentity, Task> _tunnels = new();
 
@@ -32,13 +33,14 @@ namespace HiveShard.Workers.Shard
             ITickRepository tickRepository, 
             ISerializer serializer, 
             ShardAdditionRepository shardAdditionRepository, 
-            ICancellationProvider cancellationProvider, HiveShardRepository hiveShardRepository)
+            ICancellationProvider cancellationProvider, HiveShardRepository hiveShardRepository, GlobalChunkConfig globalChunkConfig)
         {
             _fabric = fabric;
             _serializer = serializer;
             _shardAdditionRepository = shardAdditionRepository;
             _cancellationProvider = cancellationProvider;
             _hiveShardRepository = hiveShardRepository;
+            _globalChunkConfig = globalChunkConfig;
             _tickRepository = tickRepository;
             _loggingProvider = loggingProvider;
         }
@@ -54,6 +56,7 @@ namespace HiveShard.Workers.Shard
                     var shardServiceProvider = new ServiceCollection()
                         .AddSingleton(shardType)
                         .AddSingleton<Chunk>(shardChunk)
+                        .AddSingleton<GlobalChunkConfig>(_globalChunkConfig)
                         .AddSingleton<IScopedShardTunnel, ScopedShardTunnel>()
                         .AddSingleton<ICancellationProvider>(_cancellationProvider)
                         .AddSingleton<ISimpleFabric>(_fabric)

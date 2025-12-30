@@ -1,8 +1,9 @@
 ﻿using System;
+using HiveShard.Interface;
 
 namespace HiveShard.Data
 {
-    public class HiveShardIdentity
+    public class HiveShardIdentity: IEventEmitterType
     {
         public HiveShardIdentity(Chunk chunk, ShardType shardType, Guid id)
         {
@@ -38,6 +39,9 @@ namespace HiveShard.Data
                 return hashCode;
             }
         }
+
+        public string Identity => $"{ShardType.TypeName}-{Chunk}";
+        public bool EmitsFirstTickOnly => false;
     }
 
 }

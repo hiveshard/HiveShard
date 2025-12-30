@@ -28,17 +28,19 @@ namespace HiveShard.Shard
         private readonly Dictionary<TopicPartition, long> _eventQueueOffsets = new();
         private ITickRepository _tickRepository;
         private GlobalChunkConfig _globalChunkConfig;
+        private IEventRepository _eventRepository;
 
         private long _lastTick;
         private volatile int _ready;
         private IHiveShard? _hiveShard;
         
-        public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IWorkerLoggingProvider loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository, ICancellationProvider cancellationProvider, GlobalChunkConfig globalChunkConfig)
+        public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IWorkerLoggingProvider loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository, ICancellationProvider cancellationProvider, GlobalChunkConfig globalChunkConfig, IEventRepository eventRepository)
         {
             _simpleFabric = simpleFabric;
             _tickRepository = tickRepository;
             _cancellationProvider = cancellationProvider;
             _globalChunkConfig = globalChunkConfig;
+            _eventRepository = eventRepository;
             _hiveShardIdentity = hiveShardIdentity;
             _loggingProvider = loggingProvider;
             
@@ -53,7 +55,6 @@ namespace HiveShard.Shard
         {
             _hiveShard = hiveShard;
             _hiveShard.Initialize();
-            
         }
 
 
@@ -98,11 +99,13 @@ namespace HiveShard.Shard
                     }
                     
                     _hiveShard.Process(tick.Message.Delta);
-                    
-                    var newOffsets = _eventQueueOffsets.Select(
+                    var groupedOffsets = _eventQueueOffsets.GroupBy(x=> x.Key.Topic,
                         x => new TopicPartitionOffset(x.Key.Topic, x.Key.Chunk, x.Value));
-                    var completedTick = new CompletedTick(_hiveShardIdentity, tick.Message.TickNumber, newOffsets, tick.Message.TickDateTime);
-                    _simpleFabric.Send("completed-ticks", completedTick);
+                    foreach (var groupedOffset in groupedOffsets)
+                    {
+                        var completedTick = CompletedTick.From(groupedOffset.Key, _hiveShardIdentity, tick.Message.TickNumber, groupedOffset.AsEnumerable());
+                        _simpleFabric.Send<CompletedTick>("completed-ticks", new Partition(_eventRepository.GetEventOrder(groupedOffset.Key)), completedTick);
+                    }
                 }
             });
         }

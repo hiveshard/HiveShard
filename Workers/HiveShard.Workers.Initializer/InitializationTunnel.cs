@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
@@ -8,7 +9,7 @@ using HiveShard.Interface;
 
 namespace HiveShard.Workers.Initializer
 {
-    public class InitializationTunnel: IInitializationTunnel, IHiveShard
+    public class InitializationTunnel: IInitializationTunnel
     {
         private ISimpleFabric _simpleFabric;
         private Dictionary<(Type, Chunk), long> _offsets = new();
@@ -29,12 +30,18 @@ namespace HiveShard.Workers.Initializer
         public async Task FinalizeInitialization()
         {
             var newGuid = Guid.NewGuid();
-            var hiveShardIdentity = new HiveShardIdentity(new Chunk(-1, -1), ShardType.From<InitializationTunnel>(), newGuid);
-            foreach (var keyValuePair in _offsets)
+            var emitterIdentity = new InitializerType($"initializer-{newGuid}");
+            foreach (var offsetsPerTopic in _offsets
+                         .GroupBy(x=>x.Key.Item1, 
+                             x => (x.Key.Item2, x.Value)))
             {
-                var offset = new TopicPartitionOffset(keyValuePair.Key.Item1.FullName!, keyValuePair.Key.Item2, keyValuePair.Value);
+                List<TopicPartitionOffset> offsets = new();
+                foreach (var (chunk, offset) in offsetsPerTopic)
+                {
+                    offsets.Add(new TopicPartitionOffset(offsetsPerTopic.Key.FullName!, chunk, offset));
+                }
                 await _simpleFabric.Send("completed-ticks",
-                    new CompletedTick(hiveShardIdentity, keyValuePair.Value, new[] { offset }, DateTime.Now));
+                    CompletedTick.From(offsetsPerTopic.Key, emitterIdentity, 0, offsets.AsEnumerable()));
             }
         }
 

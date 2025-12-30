@@ -47,11 +47,15 @@ public class InMemoryDeployment: IDeployment
         _entryPointLocations.Add((compartment, typeof(T), compartmentType));
     }
 
-    public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, IEnumerable<IsolatedEnvironment> workers)
+    public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, 
+        IEnumerable<IsolatedEnvironment> workers,
+        IEventRepository eventRepository)
     {
-        
+        var globalChunkConfig = new GlobalChunkConfig(minChunk, maxChunk);
         CancellationProvider cancellationProvider = new CancellationProvider();
         IServiceCollection topLevelServices = new ServiceCollection()
+            .AddSingleton<GlobalChunkConfig>(globalChunkConfig)
+            .AddSingleton<IEventRepository>(eventRepository)
             .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))
             .AddSingleton<IHiveShardSimpleLoggingProvider, SimpleLoggingProvider>()
             .AddSingleton<ITelemetryProvider, SimpleTelemetryProvider>()
@@ -86,7 +90,7 @@ public class InMemoryDeployment: IDeployment
                     $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
         }
 
-        return new ServiceEnvironment(new GlobalChunkConfig(minChunk, maxChunk), topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable());
+        return new ServiceEnvironment(globalChunkConfig, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable());
     }
 
     private void BuildIsolatedEnvironment(InitializerIsolatedEnvironment initializationIsolatedEnvironment)
@@ -135,6 +139,7 @@ public class InMemoryDeployment: IDeployment
                 .Add<IWorkerLoggingProvider>()
                 .Add<ICancellationProvider>()
                 .Add<ISerializer>()
+                .Add<GlobalChunkConfig>()
                 .Build(),
             typeof(ShardWorker)
         );
@@ -201,6 +206,7 @@ public class InMemoryDeployment: IDeployment
             new DependencyBuilder()
                 .Add<ICancellationProvider>()
                 .Add<ISimpleFabric>()
+                .Add<IEventRepository>()
                 .Add<IWorkerLoggingProvider>()
                 .Add<ServiceEnvironment>()
                 .Build(),

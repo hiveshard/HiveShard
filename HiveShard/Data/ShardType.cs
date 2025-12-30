@@ -16,7 +16,7 @@ namespace HiveShard.Data
             return new ShardType(typeof(T).AssemblyQualifiedName!);
         }
 
-        private string TypeName { get; }
+        public string TypeName { get; }
 
         public Type GetShardType()
         {

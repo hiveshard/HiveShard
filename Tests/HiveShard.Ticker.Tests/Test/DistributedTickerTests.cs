@@ -25,6 +25,7 @@ public class DistributedTickerTests<T>
             ShardType.From<NavigationShard>(),
             Guid.NewGuid()
         );
+        IEventEmitterType testEmitter = new InitializerType("test emitter");
         var environment = HiveShardFactory.Create<T>(builder => builder
             .ShardWorker(workerBuilder => workerBuilder
                 .Identify(shardWorker)
@@ -48,12 +49,9 @@ public class DistributedTickerTests<T>
                 navigationShard.Chunk,
                 new InitializationEvent(data)
             ));
-            fabricAdapter.FabricAction(fabric => fabric.Send("completed-ticks", new CompletedTick(
-                navigationShard, 
-                0,
-                [new TopicPartitionOffset(initializationTopic, navigationShard.Chunk, 1)], 
-                DateTime.Now
-            )));
+            fabricAdapter.FabricAction(fabric => fabric.Send("completed-ticks", 
+                CompletedTick.From<InitializationEvent>(testEmitter, 0,
+                    [new TopicPartitionOffset(initializationTopic, navigationShard.Chunk, 1)])));
 
             fabricAdapter.FabricExpectation<Tick>(x=>x.TickNumber == 1, "ticks");
             navigationShardAdapter.ExpectEvent<InitializationEvent>(x => x.Data == data);

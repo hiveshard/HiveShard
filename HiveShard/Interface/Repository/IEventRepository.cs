@@ -8,5 +8,6 @@ public interface IEventRepository
 {
     public int GetEventOrder<T>() where T : IEvent;
     int GetEventOrder(Type configEventType);
-    public KeyValuePair<Type, int>[] GetTotalOrder();
+    int GetEventOrder(string eventType);
+    public KeyValuePair<string, int>[] GetTotalOrder();
 }

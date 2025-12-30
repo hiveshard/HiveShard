@@ -20,8 +20,12 @@ public class EventTickerTests<T>
     public async Task TickerProducesIncrementedTick()
     {
         string tickerIdentifier = "TW1";
-        
+        var initializerType = new InitializerType("test initializer");
+
         var environment = HiveShardFactory.Create<T>(builder => builder
+            .Events(eventBuilder => eventBuilder
+                .RegisterEvent<TestEvent>(initializerType)
+            )
             .TickerWorker(tickerWorkerBuilder => tickerWorkerBuilder
                 .Identify(tickerIdentifier)
                 .Ticker<TestEvent>()
@@ -31,10 +35,8 @@ public class EventTickerTests<T>
         {
             var testFabricAccess = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
 
-            var shard = new HiveShardIdentity(new Chunk(0, 0), ShardType.From<NavigationShard>(), Guid.NewGuid());
-
             testFabricAccess.FabricAction(x => x.Send("completed-ticks",
-                new CompletedTick(shard,1,  ArraySegment<TopicPartitionOffset>.Empty, DateTime.MinValue)));
+                CompletedTick.From<TestEvent>(initializerType, 1, ArraySegment<TopicPartitionOffset>.Empty)));
 
             testFabricAccess.FabricExpectation<Tick>(x => x.TickNumber == 2, "ticks");
         });

@@ -9,17 +9,34 @@ namespace HiveShard.Event
     public class CompletedTick: IEvent
     {
         [JsonConstructor]
-        public CompletedTick(HiveShardIdentity hiveShardIdentity, long number, IEnumerable<TopicPartitionOffset> produceOffsets, DateTime lastTickTime)
+        public CompletedTick(string emitterIdentity, long tick, string eventType,
+            IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
         {
-            HiveShardIdentity = hiveShardIdentity;
-            Number = number;
-            ProduceOffsets = produceOffsets;
-            LastTickTime = lastTickTime;
+            TopicPartitionOffsets = topicPartitionOffsets;
+            EmitterIdentity = emitterIdentity;
+            Tick = tick;
+            EventType = eventType;
         }
 
-        public HiveShardIdentity HiveShardIdentity { get; }
-        public long Number { get; }
-        public DateTime LastTickTime { get; }
-        public IEnumerable<TopicPartitionOffset> ProduceOffsets { get; }
+        public static CompletedTick From<T>(IEventEmitterType emitter, long tick, 
+            IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
+            where T : IEvent => From(typeof(T), emitter, tick, topicPartitionOffsets);
+        
+        public static CompletedTick From(Type eventType, IEventEmitterType emitter, long tick,
+            IEnumerable<TopicPartitionOffset> topicPartitionOffsets) =>
+            From(eventType.FullName!, emitter, tick, topicPartitionOffsets);
+        
+        public static CompletedTick From(string eventType, IEventEmitterType emitter, long tick,
+            IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
+        {
+            if (emitter.EmitsFirstTickOnly && tick >= 1)
+                throw new InvalidOperationException();
+
+            return new CompletedTick(emitter.Identity, tick, eventType, topicPartitionOffsets);
+        }
+        public string EmitterIdentity { get; }
+        public long Tick { get; }
+        public string EventType { get; }
+        public IEnumerable<TopicPartitionOffset> TopicPartitionOffsets { get; }
     }
 }

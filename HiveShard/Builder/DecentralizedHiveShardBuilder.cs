@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using HiveShard.Data;
 using HiveShard.Interface;
+using HiveShard.Interface.Repository;
+using HiveShard.Repository;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HiveShard.Builder;
@@ -14,6 +16,7 @@ public class DecentralizedHiveShardBuilder
     private Chunk _maxChunk = new(0,0);
     private List<IsolatedEnvironment> _workers = new();
     private ServiceCollection _topLevelServices = new();
+    private EventRepository _eventRepository = new EventRepository();
     internal DecentralizedHiveShardBuilder(IDeployment deployment)
     {
         _deployment = deployment;
@@ -35,7 +38,7 @@ public class DecentralizedHiveShardBuilder
     }
     internal ServiceEnvironment Build()
     {
-        return _deployment.Build(_minChunk, _maxChunk, _workers.AsEnumerable());
+        return _deployment.Build(_minChunk, _maxChunk, _workers.AsEnumerable(), _eventRepository);
     }
 
     private ISet<Type> _isolatedEnvironment = new HashSet<Type>();
@@ -48,5 +51,11 @@ public class DecentralizedHiveShardBuilder
             throw new InvalidOperationException($"Already registered one {type.Name}");
         _isolatedEnvironment.Add(type);
         _workers.Add(environment);
+    }
+
+    public DecentralizedHiveShardBuilder Events(Func<EventBuilder, EventBuilder> eventBuilder)
+    {
+        eventBuilder(new EventBuilder(_eventRepository));
+        return this;
     }
 }

@@ -5,6 +5,7 @@ using HiveShard.Event;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Interface;
 using HiveShard.Interface.Providers;
+using HiveShard.Interface.Repository;
 using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
@@ -33,7 +34,8 @@ public class ScopedShardTunnelTest
         var globalChunkConfig = new GlobalChunkConfig(onlyChunk, onlyChunk);
         var inMemorySimpleFabric = new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, globalChunkConfig);
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-        ScopedShardTunnel tunnel = new ScopedShardTunnel(shardIdentity, workerLoggingProvider, inMemorySimpleFabric, tickRepository, cancellationProvider, globalChunkConfig);
+        EventRepository eventRepository = new EventRepository();
+        ScopedShardTunnel tunnel = new ScopedShardTunnel(shardIdentity, workerLoggingProvider, inMemorySimpleFabric, tickRepository, cancellationProvider, globalChunkConfig, eventRepository);
         tunnel.Initialize(new TestShard(tunnel));
 
         // Arrange
