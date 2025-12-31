@@ -98,7 +98,7 @@ namespace HiveShard.Shard
                         }
                     }
                     
-                    _hiveShard.Process(tick.Message.Delta);
+                    _hiveShard.Process();
                     var groupedOffsets = _eventQueueOffsets.GroupBy(x=> x.Key.Topic,
                         x => new TopicPartitionOffset(x.Key.Topic, x.Key.Chunk, x.Value));
                     foreach (var groupedOffset in groupedOffsets)

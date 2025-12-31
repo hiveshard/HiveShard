@@ -14,7 +14,7 @@ public class TestShard: IHiveShard
         _tunnel = tunnel;
     }
 
-    public void Process(float seconds)
+    public void Process()
     {
         _tunnel.Send(new TestEventResponse(_testEvent.Number));
     }

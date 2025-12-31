@@ -197,7 +197,11 @@ public class InMemoryDeployment: IDeployment
         serviceCollection.AddSingleton<TickerAdditionRepository>(tickerAdditionRepository);
         foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers)
         {
-            tickerAdditionRepository.RequestAddition(tickerIsolatedEnvironment.EventType);
+            tickerAdditionRepository.RequestEventTickerAddition(tickerIsolatedEnvironment.EventType);
+        }
+        foreach (var globalTickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.GlobalTickers)
+        {
+            tickerAdditionRepository.RequestGlobalTickerAddition(globalTickerIsolatedEnvironment.GlobalTickerIdentity);
         }
         AddEntryPoint<TickerWorker>(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, "tickerWorker");
 

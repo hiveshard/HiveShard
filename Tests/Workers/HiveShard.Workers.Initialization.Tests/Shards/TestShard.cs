@@ -17,7 +17,7 @@ public class TestShard: IHiveShard
 
     public int ReceivedIncrements { get; private set; } = 0;
 
-    public void Process(float seconds)
+    public void Process()
     {
         while (_testRepository.TryGet(out int increment))
         {

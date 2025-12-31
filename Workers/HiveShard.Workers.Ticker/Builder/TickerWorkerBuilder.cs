@@ -10,11 +10,12 @@ namespace HiveShard.Workers.Ticker.Builder;
 public class TickerWorkerBuilder
 {
     private List<TickerIsolatedEnvironment> _tickers = new();
+    private List<GlobalTickerIsolatedEnvironment> _globalTickers = new();
     private string _tickerIdentifier;
 
     internal IsolatedEnvironment Build()
     {
-        return new TickerWorkerIsolatedEnvironment(_tickerIdentifier, _tickers.AsEnumerable());
+        return new TickerWorkerIsolatedEnvironment(_tickerIdentifier, _tickers.AsEnumerable(), _globalTickers.AsEnumerable());
     }
 
     public TickerWorkerBuilder Ticker<T>()
@@ -24,9 +25,9 @@ public class TickerWorkerBuilder
         return this;
     }
 
-    public TickerWorkerBuilder CentralTicker()
+    public TickerWorkerBuilder GlobalTicker(GlobalTickerIdentity globalTickerIdentity)
     {
-        _tickers.Add(new TickerIsolatedEnvironment(typeof(CompletedTick)));
+        _globalTickers.Add(new GlobalTickerIsolatedEnvironment(globalTickerIdentity));
         return this;
     }
 
@@ -35,4 +36,5 @@ public class TickerWorkerBuilder
         _tickerIdentifier = tickerIdentifier;
         return this;
     }
+
 }

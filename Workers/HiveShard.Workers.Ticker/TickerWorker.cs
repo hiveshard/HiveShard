@@ -4,6 +4,7 @@ using HiveShard.Interface;
 using HiveShard.Interface.Providers;
 using HiveShard.Interface.Repository;
 using HiveShard.Ticker;
+using HiveShard.Ticker.Data;
 using HiveShard.Workers.Ticker.Data;
 using HiveShard.Workers.Ticker.Repository;
 
@@ -34,11 +35,18 @@ public class TickerWorker: IIsolatedEntryPoint
     {
         while (!_cancellationProvider.GetToken().IsCancellationRequested)
         {
-            while (_tickerAdditionRepository.TryConsumeRequest(out Type eventType))
+            while (_tickerAdditionRepository.TryConsumeEventTickerRequest(out Type eventType))
             {
                 var eventTicker = new DistributedTicker(new DistributedTickerConfig(eventType), _simpleFabric, _eventRepository);
                 var task = Task.Run(() => eventTicker.Start());
                 _tickerRepository.AddTicker(eventType, new EventTickerInstance(eventTicker, task));
+            }
+            
+            while (_tickerAdditionRepository.TryConsumeGlobalTickerRequest(out GlobalTickerIdentity globalTickerIdentity))
+            {
+                var globalTicker = new GlobalTicker(globalTickerIdentity, _simpleFabric, _eventRepository);
+                var task = Task.Run(() => globalTicker.Start());
+                _tickerRepository.AddGlobalTicker(globalTickerIdentity, new GlobalTickerInstance(globalTicker, task));
             }
             
             

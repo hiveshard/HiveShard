@@ -3,9 +3,11 @@ using HiveShard.Deployments.InMemory;
 using HiveShard.Event;
 using HiveShard.Factory;
 using HiveShard.Interface;
+using HiveShard.Ticker.Data;
 using HiveShard.Ticker.Tests.Events;
 using HiveShard.Ticker.Tests.Shards;
 using HiveShard.Workers.Shard.Extensions;
+using HiveShard.Workers.Ticker.Data;
 using HiveShard.Workers.Ticker.Extensions;
 using Xcepto;
 using Xcepto.HiveShard;
@@ -28,11 +30,12 @@ public class EventTickerTests<T>
         var environment = HiveShardFactory.Create<T>(builder => builder
             .SetGridSize(onlyChunk, onlyChunk)
             .Events(eventBuilder => eventBuilder
-                .RegisterEvent<TestEvent>(initializerType)
+                .RegisterEvent<TestEvent>(hiveShardIdentity)
                 .RegisterEvent<InitializationEvent>(initializerType)
             )
             .TickerWorker(tickerWorkerBuilder => tickerWorkerBuilder
                 .Identify(tickerIdentifier)
+                .GlobalTicker(new GlobalTickerIdentity(Guid.NewGuid()))
                 .Ticker<TestEvent>()
             )
             .ShardWorker(shardWorkerBuilder => shardWorkerBuilder

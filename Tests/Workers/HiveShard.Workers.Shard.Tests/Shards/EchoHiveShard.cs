@@ -13,7 +13,7 @@ public class EchoHiveShard: IHiveShard
         _scopedShardTunnel = scopedShardTunnel;
     }
 
-    public void Process(float seconds)
+    public void Process()
     {
     }
 
