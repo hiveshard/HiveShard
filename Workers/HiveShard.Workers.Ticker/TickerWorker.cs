@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Providers;
 using HiveShard.Interface.Repository;
@@ -37,7 +38,8 @@ public class TickerWorker: IIsolatedEntryPoint
         {
             while (_tickerAdditionRepository.TryConsumeEventTickerRequest(out Type eventType))
             {
-                var eventTicker = new DistributedTicker(new DistributedTickerConfig(eventType), _simpleFabric, _eventRepository);
+                var tickerEmitterType = new TickerEmitterType(new EmitterIdentity($"{eventType.FullName!}"));
+                var eventTicker = new DistributedTicker(new DistributedTickerConfig(eventType, tickerEmitterType), _simpleFabric, _eventRepository);
                 var task = Task.Run(() => eventTicker.Start());
                 _tickerRepository.AddTicker(eventType, new EventTickerInstance(eventTicker, task));
             }

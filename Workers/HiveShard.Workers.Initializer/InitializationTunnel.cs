@@ -30,7 +30,7 @@ namespace HiveShard.Workers.Initializer
         public async Task FinalizeInitialization()
         {
             var newGuid = Guid.NewGuid();
-            var emitterIdentity = new InitializerType($"initializer-{newGuid}");
+            var emitterIdentity = new InitializerType(new EmitterIdentity($"initializer-{newGuid}"));
             foreach (var offsetsPerTopic in _offsets
                          .GroupBy(x=>x.Key.Item1, 
                              x => (x.Key.Item2, x.Value)))

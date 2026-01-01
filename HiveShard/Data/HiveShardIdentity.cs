@@ -40,7 +40,7 @@ namespace HiveShard.Data
             }
         }
 
-        public string Identity => $"{ShardType.TypeName}-{Chunk}";
+        public EmitterIdentity Identity => new($"{ShardType.TypeName}-{Chunk}");
         public bool InitializationTickOnly => false;
     }
 

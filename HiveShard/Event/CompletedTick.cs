@@ -9,7 +9,7 @@ namespace HiveShard.Event
     public class CompletedTick: IEvent
     {
         [JsonConstructor]
-        public CompletedTick(string emitterIdentity, long tick, string eventType,
+        public CompletedTick(EmitterIdentity emitterIdentity, long tick, string eventType,
             IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
         {
             TopicPartitionOffsets = topicPartitionOffsets;
@@ -34,7 +34,7 @@ namespace HiveShard.Event
 
             return new CompletedTick(emitter.Identity, tick, eventType, topicPartitionOffsets);
         }
-        public string EmitterIdentity { get; }
+        public EmitterIdentity EmitterIdentity { get; }
         public long Tick { get; }
         public string EventType { get; }
         public IEnumerable<TopicPartitionOffset> TopicPartitionOffsets { get; }

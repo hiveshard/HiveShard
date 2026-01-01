@@ -25,7 +25,7 @@ public class EventTickerTests<T>
         string tickerIdentifier = "TW1";
         var onlyChunk = new Chunk(0, 0);
         var hiveShardIdentity = new HiveShardIdentity(onlyChunk, ShardType.From<NavigationShard>(), Guid.NewGuid());
-        var initializerType = new InitializerType("test initializer");
+        var initializerType = new InitializerType(new EmitterIdentity("test initializer"));
 
         var environment = HiveShardFactory.Create<T>(builder => builder
             .SetGridSize(onlyChunk, onlyChunk)

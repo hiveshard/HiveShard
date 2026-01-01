@@ -31,4 +31,10 @@ public class EventRepository: IEventRepository
     public int GetEventOrder(string eventType) => _totalOrder[eventType];
 
     public KeyValuePair<string, int>[] GetTotalOrder() => _totalOrder.Select(x => x).ToArray();
+    public IEventEmitterType[] GetEmitters(string eventType)
+    {
+        if (!_eventShards.ContainsKey(eventType))
+            return [];
+        return _eventShards[eventType].ToArray();
+    }
 }

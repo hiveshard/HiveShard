@@ -4,11 +4,11 @@ namespace HiveShard.Data;
 
 public class InitializerType: IEventEmitterType
 {
-    public InitializerType(string identity)
+    public InitializerType(EmitterIdentity identity)
     {
         Identity = identity;
     }
 
-    public string Identity { get; }
+    public EmitterIdentity Identity { get; }
     public bool InitializationTickOnly => true;
 }
