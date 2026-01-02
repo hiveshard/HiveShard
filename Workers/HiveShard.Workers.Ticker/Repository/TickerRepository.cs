@@ -28,4 +28,6 @@ public class TickerRepository
     }
 
     public IEnumerable<EventTickerInstance> GetAll() => _eventTickerMap.Values;
+
+    public IEnumerable<GlobalTickerInstance> GetGlobalTickers() => _globalTickerMap.Values;
 }

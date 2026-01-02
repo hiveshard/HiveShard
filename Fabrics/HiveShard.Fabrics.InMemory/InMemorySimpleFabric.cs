@@ -76,8 +76,8 @@ namespace HiveShard.Fabrics.InMemory
             _topics[index].TryAdd(currentOffset, consumption);
 
             var newOffset = currentOffset + 1;
-
-            foreach (var action in _consumers[index])
+            var fetchedConsumers = _consumers[index].ToArray();
+            foreach (var action in fetchedConsumers)
             {
                 action(consumption);
                 _consumerOffsets[action] = newOffset;
