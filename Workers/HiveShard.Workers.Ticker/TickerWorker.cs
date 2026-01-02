@@ -90,7 +90,7 @@ public class TickerWorker: IIsolatedEntryPoint
                 var task = Task.Run(eventTicker.Start);
                 _tickerRepository.AddTicker(eventType, new EventTickerInstance(eventTicker, task));
 
-                StartTracked(task); // ← THIS is the missing piece
+                StartTracked(task);
             }
 
             while (_tickerAdditionRepository.TryConsumeGlobalTickerRequest(out GlobalTickerIdentity id))
@@ -100,7 +100,7 @@ public class TickerWorker: IIsolatedEntryPoint
                 var task = Task.Run(globalTicker.Start);
                 _tickerRepository.AddGlobalTicker(id, new GlobalTickerInstance(globalTicker, task));
 
-                StartTracked(task); // ← AND HERE
+                StartTracked(task);
             }
 
             await Task.Delay(100);
