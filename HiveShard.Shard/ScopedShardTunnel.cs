@@ -30,7 +30,7 @@ namespace HiveShard.Shard
         private GlobalChunkConfig _globalChunkConfig;
         private IEventRepository _eventRepository;
 
-        private long _lastTick;
+        private long _lastTick = -1;
         private volatile int _ready;
         private IHiveShard? _hiveShard;
         
@@ -99,12 +99,24 @@ namespace HiveShard.Shard
                     }
                     
                     _hiveShard.Process();
-                    var groupedOffsets = _eventQueueOffsets.GroupBy(x=> x.Key.Topic,
-                        x => new TopicPartitionOffset(x.Key.Topic, x.Key.Chunk, x.Value));
-                    foreach (var groupedOffset in groupedOffsets)
+                    var topicsOfEmitter = _eventRepository.GetTopicsOfEmitter(_hiveShardIdentity);
+                    foreach (var topic in topicsOfEmitter)
                     {
-                        var completedTick = CompletedTick.From(groupedOffset.Key, _hiveShardIdentity, tick.Message.TickNumber, groupedOffset.AsEnumerable());
-                        _simpleFabric.Send<CompletedTick>("completed-ticks", new Partition(_eventRepository.GetEventOrder(groupedOffset.Key)), completedTick);
+                        List<TopicPartitionOffset> topicOffsets = new(); 
+                        foreach (var chunk in _hiveShardIdentity.Chunk.GetNeighboursAndSelf(_globalChunkConfig))
+                        {
+                            var topicPartition = new TopicPartition(topic, chunk);
+                            if (!_eventQueueOffsets.ContainsKey(topicPartition))
+                            {
+                                topicOffsets.Add(new TopicPartitionOffset(topic, chunk, 0));
+                                continue;
+                            }
+
+                            var eventQueueOffset = _eventQueueOffsets[topicPartition];
+                            topicOffsets.Add(new TopicPartitionOffset(topic, chunk, eventQueueOffset));
+                        }
+                        var completedTick = CompletedTick.From(topic, _hiveShardIdentity, tick.Message.TickNumber, topicOffsets);
+                        _simpleFabric.Send<CompletedTick>("completed-ticks", new Partition(_eventRepository.GetEventOrder(topic)), completedTick);
                     }
                 }
             });

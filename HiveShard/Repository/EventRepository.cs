@@ -11,6 +11,7 @@ public class EventRepository: IEventRepository
 {
     private Dictionary<string, int> _totalOrder = new Dictionary<string, int>();
     private Dictionary<string, ISet<IEventEmitterType>> _eventShards = new Dictionary<string, ISet<IEventEmitterType>>();
+    private Dictionary<EmitterIdentity, ISet<string>> _topicsByEmitter = new();
     private int _current = 0;
     public int RegisterEvent<T>(IEventEmitterType shardType)
         where T : IEvent
@@ -21,8 +22,12 @@ public class EventRepository: IEventRepository
             _totalOrder[type] = ++_current;
             _eventShards[type] = new HashSet<IEventEmitterType>();
         }
-
         _eventShards[type].Add(shardType);
+
+        if (!_topicsByEmitter.ContainsKey(shardType.Identity))
+            _topicsByEmitter[shardType.Identity] = new HashSet<string>();
+        _topicsByEmitter[shardType.Identity].Add(type);
+            
         return _current;
     }
 
@@ -37,4 +42,7 @@ public class EventRepository: IEventRepository
             return [];
         return _eventShards[eventType].ToArray();
     }
+
+    public string[] GetTopicsOfEmitter(HiveShardIdentity hiveShardIdentity) =>
+        _topicsByEmitter[hiveShardIdentity.Identity].ToArray();
 }

@@ -11,4 +11,5 @@ public interface IEventRepository
     public int GetEventOrder(string eventType);
     public KeyValuePair<string, int>[] GetTotalOrder();
     public IEventEmitterType[] GetEmitters(string eventType);
+    public string[] GetTopicsOfEmitter(HiveShardIdentity hiveShardIdentity);
 }
