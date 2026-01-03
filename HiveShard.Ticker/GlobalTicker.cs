@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
@@ -26,7 +28,7 @@ public class GlobalTicker
     {
         var tickEventName = typeof(Tick).FullName!;
         // this tick should be ignored if receivers already know of something > 0
-        _simpleFabric.Send(tickEventName, new Tick(0, [], DateTime.Now, tickEventName));
+        _simpleFabric.Send("ticks", new Partition(0), new Tick(0, [], DateTime.Now, tickEventName));
         _currentTick = 0;
         
         
@@ -38,12 +40,31 @@ public class GlobalTicker
         return Task.CompletedTask;
     }
 
-    
+
+    private Dictionary<long, ISet<string>> _completedTicks = new();
     private void HandleEventCompletedTick(Consumption<CompletedTick> consumption)
     {
-        if (consumption.Message.Tick < _currentTick) 
+        var messageTick = consumption.Message.Tick;
+        if (messageTick < _currentTick) 
             return;
         
-        
+        if (!_completedTicks.ContainsKey(messageTick))
+            _completedTicks[messageTick] = new HashSet<string>();
+        _completedTicks[messageTick].Add(consumption.Message.EventType);
+
+        foreach (var eventTypeString in _eventRepository.GetTotalOrder()
+                     .Select(x => x.Key))
+        {
+            // Ignore initialization ticks outside of tick 1
+            if(messageTick != 1 && _eventRepository.GetInitializationOnlyEvents().Contains(eventTypeString))
+                continue;
+            
+            // require all remaining ticks
+            if(!_completedTicks[messageTick].Contains(eventTypeString))
+                return;
+        }
+
+        _currentTick += 1;
+        _simpleFabric.Send("ticks", new Partition(0), new Tick(_currentTick, [], DateTime.Now, typeof(Tick).FullName!));
     }
 }

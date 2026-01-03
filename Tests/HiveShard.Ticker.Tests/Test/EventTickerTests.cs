@@ -66,9 +66,6 @@ public class EventTickerTests<T>
             testFabricAccess.FabricExpectation<CompletedTick>(x => 
                 x.Tick == 0 && x.EventType == testEventName, 
                 "completed-ticks", testEventPartition);
-            testFabricAccess.FabricExpectation<CompletedTick>(x => 
-                    x.Tick == 0 && x.EventType == tickEventName,
-                "completed-ticks", tickEventPartition);
             
             // Tick 1 (Publish Initialize)
             testFabricAccess.FabricExpectation<Tick>(x => 
@@ -85,9 +82,6 @@ public class EventTickerTests<T>
             testFabricAccess.FabricExpectation<CompletedTick>(x => 
                     x.Tick == 1 && x.EventType == tickEventName, 
                 "ticks", tickEventPartition);
-            testFabricAccess.FabricExpectation<CompletedTick>(x => 
-                    x.Tick == 1 && x.EventType == testEventName, 
-                "ticks", testEventPartition);
 
             // Tick 2 (Shard Init Response)
             testFabricAccess.FabricExpectation<Tick>(x => 

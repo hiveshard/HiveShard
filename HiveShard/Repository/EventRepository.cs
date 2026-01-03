@@ -12,6 +12,7 @@ public class EventRepository: IEventRepository
     private Dictionary<string, int> _totalOrder = new Dictionary<string, int>();
     private Dictionary<string, ISet<IEventEmitterType>> _eventShards = new Dictionary<string, ISet<IEventEmitterType>>();
     private Dictionary<EmitterIdentity, ISet<string>> _topicsByEmitter = new();
+    private ISet<string> _initializationEvents = new HashSet<string>();
     private int _current = 0;
     public int RegisterEvent<T>(IEventEmitterType shardType)
         where T : IEvent
@@ -24,6 +25,9 @@ public class EventRepository: IEventRepository
         }
         _eventShards[type].Add(shardType);
 
+        if (shardType.InitializationTickOnly)
+            _initializationEvents.Add(type);
+        
         if (!_topicsByEmitter.ContainsKey(shardType.Identity))
             _topicsByEmitter[shardType.Identity] = new HashSet<string>();
         _topicsByEmitter[shardType.Identity].Add(type);
@@ -35,12 +39,14 @@ public class EventRepository: IEventRepository
     public int GetEventOrder(Type eventType) => GetEventOrder(eventType.FullName!);
     public int GetEventOrder(string eventType) => _totalOrder[eventType];
 
+    public IEnumerable<string> GetInitializationOnlyEvents() => _initializationEvents;
+
     public KeyValuePair<string, int>[] GetTotalOrder() => _totalOrder.Select(x => x).ToArray();
     public IEventEmitterType[] GetEmitters(string eventType)
     {
-        if (!_eventShards.ContainsKey(eventType))
+        if (!_eventShards.TryGetValue(eventType, out var shard))
             return [];
-        return _eventShards[eventType].ToArray();
+        return shard.ToArray();
     }
 
     public string[] GetTopicsOfEmitter(HiveShardIdentity hiveShardIdentity) =>
