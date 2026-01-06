@@ -55,7 +55,7 @@ public class DistributedTicker
             _currentTick += 1;
             var eventPartition = new Partition(_eventRepository.GetEventOrder(_config.EventType));
             _simpleFabric.Send("ticks", eventPartition,
-                new Tick(_currentTick, [], DateTime.Now, _config.EventType.FullName!));
+                new Tick(_currentTick, [], DateTime.Now, _config.EventType.FullName!, _config.EmitterType.Identity));
         }
             
     }

@@ -1,4 +1,5 @@
 using System;
+using HiveShard.Data;
 
 namespace HiveShard.Ticker.Data;
 
@@ -27,5 +28,10 @@ public class GlobalTickerIdentity
     public override int GetHashCode()
     {
         return Id.GetHashCode();
+    }
+
+    public EmitterIdentity ToEmitterType()
+    {
+        return new EmitterIdentity($"globalTicker[{Id}]");
     }
 }

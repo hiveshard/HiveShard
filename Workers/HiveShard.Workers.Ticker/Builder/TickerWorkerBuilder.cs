@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HiveShard.Event;
@@ -18,10 +19,16 @@ public class TickerWorkerBuilder
         return new TickerWorkerIsolatedEnvironment(_tickerIdentifier, _tickers.AsEnumerable(), _globalTickers.AsEnumerable());
     }
 
-    public TickerWorkerBuilder Ticker<T>()
+    public TickerWorkerBuilder Ticker<T>(Guid id)
     where T: class, IEvent
     {
-        _tickers.Add(new TickerIsolatedEnvironment(typeof(T)));
+        Ticker(new DistributedTickerIdentity(id, typeof(T)));
+        return this;
+    }
+    
+    public TickerWorkerBuilder Ticker(DistributedTickerIdentity identity)
+    {
+        _tickers.Add(new TickerIsolatedEnvironment(identity));
         return this;
     }
 

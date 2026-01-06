@@ -28,7 +28,7 @@ public class GlobalTicker
     {
         var tickEventName = typeof(Tick).FullName!;
         // this tick should be ignored if receivers already know of something > 0
-        _simpleFabric.Send("ticks", new Partition(0), new Tick(0, [], DateTime.Now, tickEventName));
+        _simpleFabric.Send("ticks", new Partition(0), new Tick(0, [], DateTime.Now, tickEventName, _globalTickerIdentity.ToEmitterType()));
         _currentTick = 0;
         
         
@@ -65,6 +65,6 @@ public class GlobalTicker
         }
 
         _currentTick += 1;
-        _simpleFabric.Send("ticks", new Partition(0), new Tick(_currentTick, [], DateTime.Now, typeof(Tick).FullName!));
+        _simpleFabric.Send("ticks", new Partition(0), new Tick(_currentTick, [], DateTime.Now, typeof(Tick).FullName!, _globalTickerIdentity.ToEmitterType()));
     }
 }

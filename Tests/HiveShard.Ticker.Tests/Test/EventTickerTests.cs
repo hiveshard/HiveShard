@@ -26,6 +26,9 @@ public class EventTickerTests<T>
         var onlyChunk = new Chunk(0, 0);
         var hiveShardIdentity = new HiveShardIdentity(onlyChunk, ShardType.From<NavigationShard>(), Guid.NewGuid());
         var initializerType = new InitializerType(new EmitterIdentity("test initializer"));
+        var initTickerIdentity = new DistributedTickerIdentity(Guid.NewGuid(), typeof(InitializationEvent));
+        var testEventIdentity = new DistributedTickerIdentity(Guid.NewGuid(), typeof(TestEvent));
+        var globalTickerIdentity = new GlobalTickerIdentity(Guid.NewGuid());
 
         var environment = HiveShardFactory.Create<T>(builder => builder
             .SetGridSize(onlyChunk, onlyChunk)
@@ -35,9 +38,9 @@ public class EventTickerTests<T>
             )
             .TickerWorker(tickerWorkerBuilder => tickerWorkerBuilder
                 .Identify(tickerIdentifier)
-                .GlobalTicker(new GlobalTickerIdentity(Guid.NewGuid()))
-                .Ticker<InitializationEvent>()
-                .Ticker<TestEvent>()
+                .GlobalTicker(globalTickerIdentity)
+                .Ticker(initTickerIdentity)
+                .Ticker(testEventIdentity)
             )
             .ShardWorker(shardWorkerBuilder => shardWorkerBuilder
                 .AddShard<NavigationShard>(onlyChunk, hiveShardIdentity.Id)
@@ -60,11 +63,10 @@ public class EventTickerTests<T>
         await HiveShardTest.Given(environment, builder =>
         {
             var testFabricAccess = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
+            var globalTicker = builder.RegisterAdapter(new HiveShardGlobalTickerAdapter(globalTickerIdentity.ToEmitterType()));
             
             // Tick 0 (Hello)
-            testFabricAccess.FabricExpectation<Tick>(x => 
-                x.TickNumber == 0 && x.TickEventType == tickEventName, 
-                "ticks", tickEventPartition);
+            globalTicker.ExpectTick(0);
             testFabricAccess.FabricExpectation<Tick>(x => 
                     x.TickNumber == 0 && x.TickEventType == testEventName, 
                 "ticks",testEventPartition);
@@ -88,9 +90,7 @@ public class EventTickerTests<T>
                 "completed-ticks", initializationEventPartition);
             
             // Tick 1 (Publish Initialize)
-            testFabricAccess.FabricExpectation<Tick>(x => 
-                    x.TickNumber == 1 && x.TickEventType == tickEventName, 
-                "ticks", tickEventPartition);
+            globalTicker.ExpectTick(1);
             testFabricAccess.FabricExpectation<Tick>(x => 
                     x.TickNumber == 1 && x.TickEventType == testEventName, 
                 "ticks", testEventPartition);
@@ -108,9 +108,7 @@ public class EventTickerTests<T>
                 "ticks", tickEventPartition);
 
             // Tick 2 (Shard Init Response)
-            testFabricAccess.FabricExpectation<Tick>(x => 
-                    x.TickNumber == 2 && x.TickEventType == tickEventName, 
-                "ticks", tickEventPartition);
+            globalTicker.ExpectTick(2);
             testFabricAccess.FabricExpectation<Tick>(x => 
                     x.TickNumber == 2 && x.TickEventType == testEventName, 
                 "ticks", testEventPartition);

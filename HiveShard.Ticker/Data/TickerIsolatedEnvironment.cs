@@ -5,12 +5,12 @@ namespace HiveShard.Ticker.Data;
 
 public class TickerIsolatedEnvironment: IsolatedEnvironment
 {
-    public Type EventType { get; }
 
-    public TickerIsolatedEnvironment(Type eventType)
+    public TickerIsolatedEnvironment(DistributedTickerIdentity tickerIdentity)
     {
-        EventType = eventType;
+        Identity = tickerIdentity;
     }
 
     public override bool IsUnique => false;
+    public DistributedTickerIdentity Identity { get; }
 }

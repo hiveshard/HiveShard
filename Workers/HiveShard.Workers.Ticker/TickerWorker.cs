@@ -79,16 +79,16 @@ public class TickerWorker: IIsolatedEntryPoint
     {
         while (!_cancellationProvider.GetToken().IsCancellationRequested)
         {
-            while (_tickerAdditionRepository.TryConsumeEventTickerRequest(out Type eventType))
+            while (_tickerAdditionRepository.TryConsumeEventTickerRequest(out DistributedTickerIdentity identity))
             {
-                var tickerEmitterType = new TickerEmitterType(new EmitterIdentity(eventType.FullName!));
+                var tickerEmitterType = new TickerEmitterType(identity.ToEmitterIdentity());
                 var eventTicker = new DistributedTicker(
-                    new DistributedTickerConfig(eventType, tickerEmitterType),
+                    new DistributedTickerConfig(identity.EventType, tickerEmitterType),
                     _simpleFabric,
                     _eventRepository);
 
                 var task = Task.Run(eventTicker.Start);
-                _tickerRepository.AddTicker(eventType, new EventTickerInstance(eventTicker, task));
+                _tickerRepository.AddTicker(identity.EventType, new EventTickerInstance(eventTicker, task));
 
                 StartTracked(task);
             }

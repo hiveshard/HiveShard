@@ -7,10 +7,10 @@ namespace HiveShard.Workers.Ticker.Repository;
 
 public class TickerAdditionRepository
 {
-    private ConcurrentQueue<Type> _eventTickersToBeAdded = new();
+    private ConcurrentQueue<DistributedTickerIdentity> _eventTickersToBeAdded = new();
     private ConcurrentQueue<GlobalTickerIdentity> _globalTickersToBeAdded = new();
 
-    public void RequestEventTickerAddition(Type type)
+    public void RequestEventTickerAddition(DistributedTickerIdentity type)
     {
         _eventTickersToBeAdded.Enqueue(type);
     }
@@ -20,7 +20,7 @@ public class TickerAdditionRepository
         _globalTickersToBeAdded.Enqueue(globalTickerIdentity);
     }
 
-    public bool TryConsumeEventTickerRequest(out Type eventType)
+    public bool TryConsumeEventTickerRequest(out DistributedTickerIdentity eventType)
     {
         return _eventTickersToBeAdded.TryDequeue(out eventType);
     }
