@@ -8,7 +8,7 @@ namespace HiveShard.Serializer
     {
         public string Serialize<T>(T obj)
         {
-            return JsonConvert.SerializeObject(obj);
+            return JsonConvert.SerializeObject(obj, Formatting.Indented);
         }
 
         public T Deserialize<T>(string serializedObj)

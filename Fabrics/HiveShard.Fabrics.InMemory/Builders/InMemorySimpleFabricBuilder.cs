@@ -10,6 +10,7 @@ using HiveShard.Interface.Repository;
 using HiveShard.Provider;
 using HiveShard.Provider.Logging;
 using HiveShard.Repository;
+using HiveShard.Serializer;
 
 namespace HiveShard.Fabrics.InMemory.Builders;
 
@@ -22,6 +23,7 @@ public class InMemorySimpleFabricBuilder
         IFabricLoggingProvider fabricLoggingProvider = new FabricLoggingProvider(telemetryProvider, tickRepository);
         IIdentityConfig identityConfig = new IdentityConfig(Guid.NewGuid(), "test");
         ICancellationProvider cancellationProvider = new CancellationProvider();
-        return new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, new GlobalChunkConfig(new Chunk(0,0), new Chunk(0,0)));
+        ISerializer serializer = new NewtonsoftSerializer();
+        return new InMemorySimpleFabric(fabricLoggingProvider, identityConfig, new GlobalChunkConfig(new Chunk(0,0), new Chunk(0,0)), serializer);
     }
 }
