@@ -6,7 +6,6 @@ using HiveShard.Client.Data;
 using HiveShard.Client.Interfaces;
 using HiveShard.Config;
 using HiveShard.Data;
-using HiveShard.Deployments.InMemory.Providers;
 using HiveShard.Edge;
 using HiveShard.Edge.Interfaces;
 using HiveShard.Fabrics.InMemory;
@@ -17,9 +16,9 @@ using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
 using HiveShard.Interface.Repository;
 using HiveShard.Provider;
-using HiveShard.Provider.Logging;
 using HiveShard.Repository;
 using HiveShard.Serializer;
+using HiveShard.Telemetry.Console;
 using HiveShard.Util;
 using HiveShard.Workers.Edge;
 using HiveShard.Workers.Edge.Data;
@@ -57,15 +56,11 @@ public class InMemoryDeployment: IDeployment
             .AddSingleton<GlobalChunkConfig>(globalChunkConfig)
             .AddSingleton<IEventRepository>(eventRepository)
             .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))
-            .AddSingleton<ITelemetryProvider, SimpleTelemetryProvider>()
-            .AddSingleton<IFabricLoggingProvider, FabricLoggingProvider>()
             .AddSingleton<ISerializer, NewtonsoftSerializer>()
             .AddSingleton<ITickRepository, TickRepository>()
             .AddSingleton<ICancellationProvider>(cancellationProvider)
             .AddSingleton(cancellationProvider)
-            .AddSingleton<IHiveShardSimpleLoggingProvider, SimpleLoggingProvider>()
-            .AddSingleton<IWorkerLoggingProvider, SimpleLoggingProvider>()
-            .AddSingleton<IDebugLoggingProvider, SimpleLoggingProvider>()
+            .AddSingleton<IHiveShardTelemetry, SimpleConsoleTelemetry>()
             .AddSingleton<ISimpleFabric, InMemorySimpleFabric>()
             .AddSingleton<InMemoryEdgeFabric>()
             .AddSingleton<IEdgeTunnelClientEndpoint>(x => x.GetRequiredService<InMemoryEdgeFabric>())
@@ -136,7 +131,7 @@ public class InMemoryDeployment: IDeployment
             serviceCollection, 
             new DependencyBuilder()
                 .Add<ISimpleFabric>()
-                .Add<IWorkerLoggingProvider>()
+                .Add<IHiveShardTelemetry>()
                 .Add<ICancellationProvider>()
                 .Add<IEventRepository>()
                 .Add<ISerializer>()
@@ -181,7 +176,7 @@ public class InMemoryDeployment: IDeployment
             new DependencyBuilder()
                 .Add<IEdgeTunnelClientEndpoint>()
                 .Add<ICancellationProvider>()
-                .Add<IDebugLoggingProvider>()
+                .Add<IHiveShardTelemetry>()
                 .Build(),
             typeof(ClientTunnel)
         );
@@ -212,7 +207,7 @@ public class InMemoryDeployment: IDeployment
                 .Add<ICancellationProvider>()
                 .Add<ISimpleFabric>()
                 .Add<IEventRepository>()
-                .Add<IWorkerLoggingProvider>()
+                .Add<IHiveShardTelemetry>()
                 .Add<ServiceEnvironment>()
                 .Build(),
             typeof(TickerWorker)

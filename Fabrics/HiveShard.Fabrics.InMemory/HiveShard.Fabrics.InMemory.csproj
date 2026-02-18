@@ -28,6 +28,7 @@
       <ProjectReference Include="..\..\HiveShard.Client\HiveShard.Client.csproj" />
       <ProjectReference Include="..\..\HiveShard.Edge\HiveShard.Edge.csproj" />
       <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
+      <ProjectReference Include="..\..\Telemetry\HiveShard.Telemetry.Console\HiveShard.Telemetry.Console.csproj" />
     </ItemGroup>
 
     <ItemGroup>

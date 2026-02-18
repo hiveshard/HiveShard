@@ -21,7 +21,7 @@ namespace HiveShard.Fabrics.Tcp
     {
         private TcpClient _tcpClient;
 
-        public ClientTcpFabric(ISerializer serializer, INetworkConfiguration networkConfiguration, ICancellationProvider cancellationProvider, IFabricLoggingProvider fabricLoggingProvider, IIdentityConfig identityConfig)
+        public ClientTcpFabric(ISerializer serializer, INetworkConfiguration networkConfiguration, ICancellationProvider cancellationProvider, IHiveShardTelemetry fabricLoggingProvider, IIdentityConfig identityConfig)
         {
             _networkConfiguration = networkConfiguration;
             _cancellationProvider = cancellationProvider;
@@ -38,7 +38,7 @@ namespace HiveShard.Fabrics.Tcp
 
         private volatile int _ready;
         private INetworkConfiguration _networkConfiguration;
-        private IScopedFabricLoggingProvider _scopedLogger;
+        private IHiveShardTelemetry _scopedLogger;
 
         public Task Start(CancellationToken cancellationToken)
         {

@@ -18,7 +18,7 @@ namespace HiveShard.Workers.Shard
     {
         private ShardAdditionRepository _shardAdditionRepository;
         private HiveShardRepository _hiveShardRepository;
-        private IWorkerLoggingProvider _loggingProvider;
+        private IHiveShardTelemetry _loggingProvider;
         private ITickRepository _tickRepository;
         private ISerializer _serializer;
         private ISimpleFabric _fabric;
@@ -30,7 +30,7 @@ namespace HiveShard.Workers.Shard
 
         public ShardWorker(
             ISimpleFabric fabric, 
-            IWorkerLoggingProvider loggingProvider, 
+            IHiveShardTelemetry loggingProvider, 
             ITickRepository tickRepository, 
             ISerializer serializer, 
             ShardAdditionRepository shardAdditionRepository, 
@@ -66,7 +66,7 @@ namespace HiveShard.Workers.Shard
                         .AddSingleton<ITickRepository>(_tickRepository)
                         .AddSingleton<ISerializer>(_serializer)
                         .AddSingleton<HiveShardIdentity>(request.ShardIdentity)
-                        .AddSingleton<IWorkerLoggingProvider>(_loggingProvider)
+                        .AddSingleton<IHiveShardTelemetry>(_loggingProvider)
                         .BuildServiceProvider();
 
                     ScopedShardTunnel tunnel = (ScopedShardTunnel)shardServiceProvider.GetRequiredService<IScopedShardTunnel>();

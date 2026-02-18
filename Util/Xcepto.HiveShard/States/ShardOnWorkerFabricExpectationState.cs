@@ -46,7 +46,7 @@ where TEvent: IEvent
     public override Task OnEnter(IServiceProvider serviceProvider)
     {
         var cancellationProvider = serviceProvider.GetRequiredService<ICancellationProvider>();
-        var debugLoggingProvider = serviceProvider.GetRequiredService<IDebugLoggingProvider>();
+        var debugLoggingProvider = serviceProvider.GetRequiredService<IHiveShardTelemetry>();
         return Resilience.Retry(_ =>
         {
             var hiveShardRepository =

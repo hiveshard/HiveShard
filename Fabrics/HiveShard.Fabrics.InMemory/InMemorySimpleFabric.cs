@@ -20,15 +20,15 @@ namespace HiveShard.Fabrics.InMemory
         private ConcurrentDictionary<(EventType, Partition), List<Action<Consumption<object>>>> _consumers = new();
         private ConcurrentDictionary<(EventType, Partition), long> _topicMaxOffsets = new();
         private ConcurrentDictionary<Action<Consumption<object>>, long> _consumerOffsets = new();
-        private IScopedFabricLoggingProvider _scopedFabricLoggingProvider;
+        private IHiveShardTelemetry _scopedFabricLoggingProvider;
         private ISerializer _serializer;
 
 
-        public InMemorySimpleFabric(IFabricLoggingProvider loggingProvider, IIdentityConfig identityConfig, GlobalChunkConfig globalChunkConfig, ISerializer serializer)
+        public InMemorySimpleFabric(IHiveShardTelemetry loggingProvider, GlobalChunkConfig globalChunkConfig, ISerializer serializer)
         {
             _globalChunkConfig = globalChunkConfig;
             _serializer = serializer;
-            _scopedFabricLoggingProvider = loggingProvider.GetScopedLogger<InMemoryEdgeFabric>(identityConfig);
+            _scopedFabricLoggingProvider = loggingProvider;
         }
 
         public void Register<T>(string topic, Action<Consumption<T>> action)
@@ -79,8 +79,7 @@ namespace HiveShard.Fabrics.InMemory
             var consumption = new Consumption<object>(message, currentOffset);
             _topics[index].TryAdd(currentOffset, consumption);
             
-            _scopedFabricLoggingProvider.LogDebug(_serializer.Serialize(message), 
-                $"Send({topic}[{partition.Value}/{partition.ToChunk(_globalChunkConfig)}])");
+            _scopedFabricLoggingProvider.LogDebug($"Send({topic}[{partition.Value}/{partition.ToChunk(_globalChunkConfig)}]) with {_serializer.Serialize(message)}");
 
             var newOffset = currentOffset + 1;
             var fetchedConsumers = _consumers[index].ToArray();

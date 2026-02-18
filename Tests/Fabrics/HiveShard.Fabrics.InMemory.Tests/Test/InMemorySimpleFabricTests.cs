@@ -2,10 +2,7 @@ using System.Collections.Concurrent;
 using HiveShard.Data;
 using HiveShard.Fabrics.InMemory.Builders;
 using HiveShard.Fabrics.InMemory.Tests.Data;
-using HiveShard.Interface;
-using HiveShard.Interface.Logging;
-using HiveShard.Provider;
-using HiveShard.Provider.Logging;
+using HiveShard.Telemetry.Console;
 
 namespace HiveShard.Fabrics.InMemory.Tests.Test;
 
@@ -15,7 +12,8 @@ public class InMemorySimpleFabricTests
     [Test]
     public async Task RegistrationAfterPublishWorks()
     {
-        var inMemorySimpleFabric = new InMemorySimpleFabricBuilder().Build();
+        SimpleConsoleTelemetry simpleConsoleTelemetry = new SimpleConsoleTelemetry();
+        var inMemorySimpleFabric = new InMemorySimpleFabricBuilder().Build(simpleConsoleTelemetry);
         var id = Guid.NewGuid();
         var topic = "test";
         var chunk = new Chunk(1, 1);

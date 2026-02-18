@@ -14,7 +14,7 @@ namespace HiveShard.Fabrics.InMemory
 {
     public class InMemoryEdgeFabric: IEdgeTunnelClientEndpoint, IEdgeTunnelServerEndpoint
     {
-        private IDebugLoggingProvider _debugLoggingProvider;
+        private IHiveShardTelemetry _debugLoggingProvider;
         private IAddressProvider _addressProvider;
         private Dictionary<Type, Action<object>> _clientCallbacks = new Dictionary<Type, Action<object>>();
         private Dictionary<Type, Action<object, HiveShardClient>> _serverCallbacks = new Dictionary<Type, Action<object, HiveShardClient>>();
@@ -22,7 +22,7 @@ namespace HiveShard.Fabrics.InMemory
         private HiveShardClient _connectedHiveShardClient = null;
         private Action<HiveShardClient> _clientConnectedCallback = client => { };
 
-        public InMemoryEdgeFabric(IDebugLoggingProvider debugLoggingProvider, IAddressProvider addressProvider)
+        public InMemoryEdgeFabric(IHiveShardTelemetry debugLoggingProvider, IAddressProvider addressProvider)
         {
             _debugLoggingProvider = debugLoggingProvider;
             _addressProvider = addressProvider;

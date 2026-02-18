@@ -35,7 +35,7 @@ public class ShardOnWorkerActionState<TService>: XceptoState
     public override Task OnEnter(IServiceProvider serviceProvider)
     {
         var cancellationProvider = serviceProvider.GetRequiredService<ICancellationProvider>();
-        var loggingProvider = serviceProvider.GetRequiredService<IDebugLoggingProvider>();
+        var loggingProvider = serviceProvider.GetRequiredService<IHiveShardTelemetry>();
         return Resilience.Retry(_ =>
         {
             var repository = serviceProvider.GetCompartmentalizedService<HiveShardRepository>(_compartmentIdentifier);

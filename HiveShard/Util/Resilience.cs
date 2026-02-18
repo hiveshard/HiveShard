@@ -10,7 +10,7 @@ namespace HiveShard.Util
 {
     public static class Resilience
     {
-        private static ResiliencePipeline Pipeline(IWarningLoggingProvider scopedLoggingProvider)
+        private static ResiliencePipeline Pipeline(IHiveShardTelemetry telemetry)
         {
             return new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions()
@@ -22,7 +22,7 @@ namespace HiveShard.Util
                     OnRetry = args =>
                     {
                         var exception = args.Outcome.Exception;
-                        scopedLoggingProvider.LogWarning($"[RETRY] Attempt {args.AttemptNumber}, Exception: {exception?.Message}, StackTrace: {exception?.StackTrace}");
+                        telemetry.LogWarning($"[RETRY] Attempt {args.AttemptNumber}, Exception: {exception?.Message}, StackTrace: {exception?.StackTrace}");
                         return new ValueTask();
                     }
                 })
@@ -32,14 +32,14 @@ namespace HiveShard.Util
             
 
 
-        public static async Task Retry(Func<CancellationToken, Task> action, string context, CancellationToken ctx, IWarningLoggingProvider scopedLoggingProvider)
+        public static async Task Retry(Func<CancellationToken, Task> action, string context, CancellationToken ctx, IHiveShardTelemetry telemetry)
         {
             int attempt = 0;
-            await Pipeline(scopedLoggingProvider).ExecuteAsync(async token =>
+            await Pipeline(telemetry).ExecuteAsync(async token =>
                 {
                     attempt += 1;
                     if (attempt > 1)
-                        scopedLoggingProvider.LogWarning($"{context} retry attempt #{attempt-1}");
+                        telemetry.LogWarning($"{context} retry attempt #{attempt-1}");
                     await action(token);
                 }, 
                 ctx);

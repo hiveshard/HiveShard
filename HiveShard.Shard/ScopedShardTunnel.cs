@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Data;
-using HiveShard.Data.Telemetry;
 using HiveShard.Event;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
@@ -21,7 +20,7 @@ namespace HiveShard.Shard
     {
         private readonly HiveShardIdentity _hiveShardIdentity;
         private readonly ISimpleFabric _simpleFabric;
-        private readonly IWorkerLoggingProvider _loggingProvider;
+        private readonly IHiveShardTelemetry _loggingProvider;
         private readonly ICancellationProvider _cancellationProvider;
         private readonly Dictionary<TopicPartition, BlockingCollection<Caster>> _events = new();
         private readonly BlockingCollection<Consumption<Tick>> _ticks = new(50);
@@ -34,7 +33,7 @@ namespace HiveShard.Shard
         private volatile int _ready;
         private IHiveShard? _hiveShard;
         
-        public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IWorkerLoggingProvider loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository, ICancellationProvider cancellationProvider, GlobalChunkConfig globalChunkConfig, IEventRepository eventRepository)
+        public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IHiveShardTelemetry loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository, ICancellationProvider cancellationProvider, GlobalChunkConfig globalChunkConfig, IEventRepository eventRepository)
         {
             _simpleFabric = simpleFabric;
             _tickRepository = tickRepository;
@@ -93,7 +92,7 @@ namespace HiveShard.Shard
                         }
                         catch (Exception e)
                         {
-                            _loggingProvider.LogError(e, new LogOrigin(_hiveShardIdentity));
+                            _loggingProvider.LogException(e);
                             throw;
                         }
                     }
