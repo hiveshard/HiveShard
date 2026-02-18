@@ -1,10 +1,9 @@
 ﻿using HiveShard.Data;
 using HiveShard.Interface;
 
-namespace HiveShard.Initializer.Interfaces
+namespace HiveShard.Initializer.Interfaces;
+
+public interface IInitializationTunnel
 {
-    public interface IInitializationTunnel
-    {
-        public void Send<TEvent>(TEvent e, Chunk chunk) where TEvent: IEvent;
-    }
+    public void Send<TEvent>(TEvent e, Chunk chunk) where TEvent: IEvent;
 }

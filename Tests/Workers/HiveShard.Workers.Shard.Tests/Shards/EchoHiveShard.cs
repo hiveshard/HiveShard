@@ -6,7 +6,7 @@ namespace HiveShard.Worker.Tests.Shards;
 
 public class EchoHiveShard: IHiveShard
 {
-    private IScopedShardTunnel _scopedShardTunnel;
+    private readonly IScopedShardTunnel _scopedShardTunnel;
 
     public EchoHiveShard(IScopedShardTunnel scopedShardTunnel)
     {

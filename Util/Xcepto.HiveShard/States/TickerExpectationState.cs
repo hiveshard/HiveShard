@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using HiveShard.Data;
-using HiveShard.Event;
 using HiveShard.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.States;
@@ -20,11 +19,11 @@ where TTickEvent : ITickEvent
     }
 
     
-    private Partition _partition;
-    private Predicate<TTickEvent> _predicate;
+    private readonly Partition _partition;
+    private readonly Predicate<TTickEvent> _predicate;
 
-    private ConcurrentQueue<TTickEvent> _messages = new ConcurrentQueue<TTickEvent>();
-    private string _topic;
+    private readonly ConcurrentQueue<TTickEvent> _messages = new();
+    private readonly string _topic;
 
     public override Task Initialize(IServiceProvider serviceProvider)
     {
@@ -43,10 +42,7 @@ where TTickEvent : ITickEvent
             if (!_messages.TryDequeue(out var t))
                 break;
 
-            if (_predicate(t))
-            {
-                return Task.FromResult(true);
-            }
+            if (_predicate(t)) return Task.FromResult(true);
         }
 
         return Task.FromResult(false);

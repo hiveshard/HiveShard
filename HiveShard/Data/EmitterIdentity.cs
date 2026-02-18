@@ -9,7 +9,7 @@ public class EmitterIdentity
 
     public string EmitterIdentityString { get; }
 
-    protected bool Equals(EmitterIdentity other)
+    private bool Equals(EmitterIdentity other)
     {
         return EmitterIdentityString == other.EmitterIdentityString;
     }
@@ -18,8 +18,7 @@ public class EmitterIdentity
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((EmitterIdentity)obj);
+        return obj.GetType() == GetType() && Equals((EmitterIdentity)obj);
     }
 
     public override int GetHashCode()

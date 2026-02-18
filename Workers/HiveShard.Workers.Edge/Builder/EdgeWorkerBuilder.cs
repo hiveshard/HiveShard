@@ -6,7 +6,7 @@ namespace HiveShard.Workers.Edge.Builder;
 
 public class EdgeWorkerBuilder()
 {
-    private ServiceCollection _serviceCollection = new();
+    private readonly ServiceCollection _serviceCollection = new();
     private bool _dynamicEdgeAssignment = false;
     private string _identifier;
 

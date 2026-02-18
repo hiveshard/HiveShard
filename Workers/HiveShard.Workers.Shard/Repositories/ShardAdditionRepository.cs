@@ -5,7 +5,7 @@ namespace HiveShard.Workers.Shard.Repositories;
 
 public class ShardAdditionRepository
 {
-    private ConcurrentQueue<ShardAdditionRequest> _requests = new();
+    private readonly ConcurrentQueue<ShardAdditionRequest> _requests = new();
 
     public void Add(ShardAdditionRequest shardAdditionRequest)
     {

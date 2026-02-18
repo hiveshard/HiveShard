@@ -1,103 +1,98 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Interface;
-using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
-using HiveShard.Util;
 
-namespace HiveShard.Fabrics.InMemory
+namespace HiveShard.Fabrics.InMemory;
+
+public class InMemorySimpleFabric: ISimpleFabric
 {
-    public class InMemorySimpleFabric: ISimpleFabric
-    {
-        private GlobalChunkConfig _globalChunkConfig;
+    private readonly GlobalChunkConfig _globalChunkConfig;
         
-        private ConcurrentDictionary<(EventType, Partition), ConcurrentDictionary<long, Consumption<object>>> _topics = new();
-        private ConcurrentDictionary<(EventType, Partition), List<Action<Consumption<object>>>> _consumers = new();
-        private ConcurrentDictionary<(EventType, Partition), long> _topicMaxOffsets = new();
-        private ConcurrentDictionary<Action<Consumption<object>>, long> _consumerOffsets = new();
-        private IHiveShardTelemetry _scopedFabricLoggingProvider;
-        private ISerializer _serializer;
+    private readonly ConcurrentDictionary<(EventType, Partition), ConcurrentDictionary<long, Consumption<object>>> _topics = new();
+    private readonly ConcurrentDictionary<(EventType, Partition), List<Action<Consumption<object>>>> _consumers = new();
+    private readonly ConcurrentDictionary<(EventType, Partition), long> _topicMaxOffsets = new();
+    private readonly ConcurrentDictionary<Action<Consumption<object>>, long> _consumerOffsets = new();
+    private readonly IHiveShardTelemetry _scopedFabricLoggingProvider;
+    private readonly ISerializer _serializer;
 
 
-        public InMemorySimpleFabric(IHiveShardTelemetry loggingProvider, GlobalChunkConfig globalChunkConfig, ISerializer serializer)
-        {
-            _globalChunkConfig = globalChunkConfig;
-            _serializer = serializer;
-            _scopedFabricLoggingProvider = loggingProvider;
-        }
+    public InMemorySimpleFabric(IHiveShardTelemetry loggingProvider, GlobalChunkConfig globalChunkConfig, ISerializer serializer)
+    {
+        _globalChunkConfig = globalChunkConfig;
+        _serializer = serializer;
+        _scopedFabricLoggingProvider = loggingProvider;
+    }
 
-        public void Register<T>(string topic, Action<Consumption<T>> action)
-            where T: IEvent => Register(topic, new Chunk(0, 0), action);
+    public void Register<T>(string topic, Action<Consumption<T>> action)
+        where T: IEvent => Register(topic, new Chunk(0, 0), action);
 
-        public void Register<T>(string topic, Chunk chunk, Action<Consumption<T>> action) 
-            where T: IEvent => Register(topic, chunk.ToPartition(_globalChunkConfig), action);
+    public void Register<T>(string topic, Chunk chunk, Action<Consumption<T>> action) 
+        where T: IEvent => Register(topic, chunk.ToPartition(_globalChunkConfig), action);
 
-        public void Register<T>(string topic, Partition partition, Action<Consumption<T>> action)
+    public void Register<T>(string topic, Partition partition, Action<Consumption<T>> action)
         where T: IEvent
+    {
+        var index = (EventType.From<T>(), partition);
+        InitTopic(index);
+
+        Action<Consumption<object>> newConsumer = o => action(new Consumption<T>((T)o.Message, o.Offset));
+        _consumers[index].Add(newConsumer);
+        _consumerOffsets[newConsumer] = 0;
+
+        var messages = _topics[index];
+        long currentOffset = _consumerOffsets[newConsumer];
+        while (currentOffset < _topicMaxOffsets[index])
         {
-            var index = (EventType.From<T>(), partition);
-            InitTopic(index);
+            if (!messages.TryGetValue(currentOffset, out var value))
+                throw new Exception("offset not existent in topic");
 
-            Action<Consumption<object>> newConsumer = o => action(new Consumption<T>((T)o.Message, o.Offset));
-            _consumers[index].Add(newConsumer);
-            _consumerOffsets[newConsumer] = 0;
-
-            var messages = _topics[index];
-            long currentOffset = _consumerOffsets[newConsumer];
-            while (currentOffset < _topicMaxOffsets[index])
-            {
-                if (!messages.TryGetValue(currentOffset, out var value))
-                    throw new Exception("offset not existent in topic");
-
-                newConsumer(value);
-                _consumerOffsets[newConsumer] = currentOffset;
-                currentOffset += 1;
-            }
+            newConsumer(value);
+            _consumerOffsets[newConsumer] = currentOffset;
+            currentOffset += 1;
         }
+    }
 
-        public Task Send<T>(string topic, T message) where T: IEvent
-        {
-            return Send<T>(topic, new Chunk(0, 0), message);
-        }
+    public Task Send<T>(string topic, T message) where T: IEvent
+    {
+        return Send<T>(topic, new Chunk(0, 0), message);
+    }
 
-        public Task Send<T>(string topic, Chunk chunk, T message) where T: IEvent =>
-            Send<T>(topic, chunk.ToPartition(_globalChunkConfig), message);
+    public Task Send<T>(string topic, Chunk chunk, T message) where T: IEvent =>
+        Send<T>(topic, chunk.ToPartition(_globalChunkConfig), message);
 
-        public Task Send<T>(string topic, Partition partition, T message) where T: IEvent
-        {
-            var index = (EventType.From<T>(), partition);
+    public Task Send<T>(string topic, Partition partition, T message) where T: IEvent
+    {
+        var index = (EventType.From<T>(), partition);
 
-            InitTopic(index);
+        InitTopic(index);
             
             
-            var currentOffset = _topicMaxOffsets[index];
-            var consumption = new Consumption<object>(message, currentOffset);
-            _topics[index].TryAdd(currentOffset, consumption);
+        var currentOffset = _topicMaxOffsets[index];
+        var consumption = new Consumption<object>(message, currentOffset);
+        _topics[index].TryAdd(currentOffset, consumption);
             
-            _scopedFabricLoggingProvider.LogDebug($"Send({topic}[{partition.Value}/{partition.ToChunk(_globalChunkConfig)}]) with {_serializer.Serialize(message)}");
+        _scopedFabricLoggingProvider.LogDebug($"Send({topic}[{partition.Value}/{partition.ToChunk(_globalChunkConfig)}]) with {_serializer.Serialize(message)}");
 
-            var newOffset = currentOffset + 1;
-            var fetchedConsumers = _consumers[index].ToArray();
-            foreach (var action in fetchedConsumers)
-            {
-                action(consumption);
-                _consumerOffsets[action] = newOffset;
-            }
-
-            _topicMaxOffsets[index] = newOffset;
-            return Task.CompletedTask;
-        }
-
-        private void InitTopic((EventType, Partition) index)
+        var newOffset = currentOffset + 1;
+        var fetchedConsumers = _consumers[index].ToArray();
+        foreach (var action in fetchedConsumers)
         {
-            _topicMaxOffsets.GetOrAdd(index, _ => 0);
-            _topics.GetOrAdd(index, _ => new ConcurrentDictionary<long, Consumption<object>>());
-            _consumers.GetOrAdd(index, _ => new List<Action<Consumption<object>>>());
+            action(consumption);
+            _consumerOffsets[action] = newOffset;
         }
+
+        _topicMaxOffsets[index] = newOffset;
+        return Task.CompletedTask;
+    }
+
+    private void InitTopic((EventType, Partition) index)
+    {
+        _topicMaxOffsets.GetOrAdd(index, _ => 0);
+        _topics.GetOrAdd(index, _ => new ConcurrentDictionary<long, Consumption<object>>());
+        _consumers.GetOrAdd(index, _ => new List<Action<Consumption<object>>>());
     }
 }

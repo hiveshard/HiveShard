@@ -1,20 +1,18 @@
 using System;
 using HiveShard.Builder;
 using HiveShard.Workers.Ticker.Builder;
-using HiveShard.Workers.Ticker.Data;
 
-namespace HiveShard.Workers.Ticker.Extensions
+namespace HiveShard.Workers.Ticker.Extensions;
+
+public static class HiveShardBuilderExtensions
 {
-    public static class HiveShardBuilderExtensions
+    public static DecentralizedHiveShardBuilder TickerWorker(
+        this DecentralizedHiveShardBuilder serviceBuilder,
+        Func<TickerWorkerBuilder, TickerWorkerBuilder> tickerWorkerBuilder)
     {
-        public static DecentralizedHiveShardBuilder TickerWorker(
-            this DecentralizedHiveShardBuilder serviceBuilder,
-            Func<TickerWorkerBuilder, TickerWorkerBuilder> tickerWorkerBuilder)
-        {
-            var workerBuilder = new TickerWorkerBuilder();
-            tickerWorkerBuilder(workerBuilder);
-            serviceBuilder.RegisterWorker(workerBuilder.Build());
-            return serviceBuilder;
-        }
+        var workerBuilder = new TickerWorkerBuilder();
+        tickerWorkerBuilder(workerBuilder);
+        serviceBuilder.RegisterWorker(workerBuilder.Build());
+        return serviceBuilder;
     }
 }

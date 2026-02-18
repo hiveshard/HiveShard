@@ -1,15 +1,14 @@
 ﻿using System;
 using HiveShard.Interface;
 
-namespace HiveShard.Edge.Events
-{
-    public class EdgeBoundNotification: IEvent
-    {
-        public EdgeBoundNotification(Uri uri)
-        {
-            Uri = uri;
-        }
+namespace HiveShard.Edge.Events;
 
-        public Uri Uri { get; }
+public class EdgeBoundNotification: IEvent
+{
+    public EdgeBoundNotification(Uri uri)
+    {
+        Uri = uri;
     }
+
+    public Uri Uri { get; }
 }

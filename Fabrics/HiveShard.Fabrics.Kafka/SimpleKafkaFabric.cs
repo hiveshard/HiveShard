@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
@@ -99,15 +100,9 @@ namespace HiveShard.Fabrics.Kafka
                 tasks.Add(CreateAdminClient(cancellationToken));
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    if (_kafkaRegistrations.TryDequeue(out var kafkaRegistration))
-                    {
-                        tasks.Add(CreateConsumer(kafkaRegistration));
-                    }
+                    if (_kafkaRegistrations.TryDequeue(out var kafkaRegistration)) tasks.Add(CreateConsumer(kafkaRegistration));
 
-                    if (_newProducers.TryDequeue(out var newProducer))
-                    {
-                        tasks.Add(CreateProducer(newProducer, cancellationToken));
-                    }
+                    if (_newProducers.TryDequeue(out var newProducer)) tasks.Add(CreateProducer(newProducer, cancellationToken));
                     await Task.Delay(100, cancellationToken);
                 }
                 
@@ -124,7 +119,6 @@ namespace HiveShard.Fabrics.Kafka
                 await Resilience.Retry(async token =>
                     {
                         if (adminClient is null)
-                        {
                             adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = _broker })
                                 .SetLogHandler((_, logMessage) =>
                                 {
@@ -133,7 +127,6 @@ namespace HiveShard.Fabrics.Kafka
                                         throw new Exception($"{logMessage.Level}: {logMessage.Name}, {logMessage.Message}");
                                 })
                                 .Build();
-                        }
                     }, "Create AdminClient", _ctsToken, _scopedLogger);
                 
                 while (!cancellationToken.IsCancellationRequested)
@@ -160,7 +153,6 @@ namespace HiveShard.Fabrics.Kafka
                 await Resilience.Retry(async token =>
                 {
                     if (producer is null)
-                    {
                         producer = new ProducerBuilder<Null, string>(_producerConfig)
                             .SetLogHandler((_, logMessage) =>
                             {
@@ -170,7 +162,6 @@ namespace HiveShard.Fabrics.Kafka
                                     _scopedLogger.LogDebug($"{logMessage.Name}: {logMessage.Message}");
                             })
                             .Build();
-                    }
                 }, $"Publish {topicPartition.Topic}", _ctsToken, _scopedLogger);
                 
                 
@@ -181,7 +172,7 @@ namespace HiveShard.Fabrics.Kafka
                     var delivery = await producer.ProduceAsync(new Confluent.Kafka.TopicPartition($"{_environmentConfig.Prefix}-{topicPartition.Topic}", new Partition(topicPartition.Chunk.ToPartition(_globalChunkConfig).Value)), 
                         new Message<Null, string> { Value = message, Headers = new Headers()
                         {
-                            new Header("message-type", System.Text.Encoding.UTF8.GetBytes(topicPartition.Topic))
+                            new Header("message-type", Encoding.UTF8.GetBytes(topicPartition.Topic))
                         }}, cancellationToken);
                     _scopedLogger.LogDebug($"Delivered to: {delivery.TopicPartitionOffset}");
                 }
@@ -214,7 +205,6 @@ namespace HiveShard.Fabrics.Kafka
                 }, "Subscribe", _ctsToken, _scopedLogger);
                 
                 while (!_ctsToken.IsCancellationRequested)
-                {
                     try
                     {
                         var result = consumer!.Consume(_ctsToken);
@@ -230,7 +220,6 @@ namespace HiveShard.Fabrics.Kafka
                         _scopedLogger.LogException(exception);
                         throw exception;
                     }
-                }
 
                 consumer?.Close();
             }, _ctsToken);

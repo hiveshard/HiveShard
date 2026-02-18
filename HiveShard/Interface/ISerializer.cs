@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace HiveShard.Interface
+namespace HiveShard.Interface;
+
+public interface ISerializer
 {
-    public interface ISerializer
-    {
-        public string Serialize<T>(T obj);
-        public T Deserialize<T>(string serializedObj);
-        object Deserialize(string tcpMessagePayload, Type type);
-    }
+    public string Serialize<T>(T obj);
+    public T Deserialize<T>(string serializedObj);
+    object Deserialize(string tcpMessagePayload, Type type);
 }

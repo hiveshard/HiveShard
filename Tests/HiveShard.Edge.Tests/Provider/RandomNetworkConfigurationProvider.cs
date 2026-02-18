@@ -1,11 +1,10 @@
-using HiveShard.Interface;
 using HiveShard.Interface.Config;
 
 namespace HiveShard.Edge.Tests.Provider;
 
 public class RandomNetworkConfigurationProvider: INetworkConfiguration
 {
-    private static Random _random = new(3000);
+    private static readonly Random _random = new(3000);
 
     private readonly int _port; 
     public RandomNetworkConfigurationProvider()

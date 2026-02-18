@@ -1,12 +1,10 @@
-using HiveShard.Builder;
-using HiveShard.Data;
 using HiveShard.Edge.Tests.Events;
 
 namespace HiveShard.Edge.Tests.Edge;
 
 public class TestEdge: BaseEdge
 {
-    private IEdgeTunnel _edgeTunnel;
+    private readonly IEdgeTunnel _edgeTunnel;
     public TestEdge(IEdgeTunnel edgeTunnel)
     {
         _edgeTunnel = edgeTunnel;

@@ -9,8 +9,8 @@ namespace HiveShard.Workers.Initializer;
 
 public class Initialization : IIsolatedEntryPoint
 {
-    private InitializerAdditionRepository _initializers;
-    private InitializationTunnel _initializationTunnel;
+    private readonly InitializerAdditionRepository _initializers;
+    private readonly InitializationTunnel _initializationTunnel;
     public Initialization(InitializerAdditionRepository initializers, InitializationTunnel initializationTunnel)
     {
         _initializers = initializers;

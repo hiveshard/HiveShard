@@ -5,26 +5,25 @@ using HiveShard.Interface;
 using Xcepto.Adapters;
 using Xcepto.HiveShard.States;
 
-namespace Xcepto.HiveShard.Adapters
+namespace Xcepto.HiveShard.Adapters;
+
+public class HiveShardClientAdapter: XceptoAdapter
 {
-    public class HiveShardClientAdapter: XceptoAdapter
+    private readonly string _compartmentIdentifier;
+
+    public HiveShardClientAdapter(String username)
     {
-        private string _compartmentIdentifier;
+        _compartmentIdentifier = $"client-{username}";
+    }
 
-        public HiveShardClientAdapter(String username)
-        {
-            _compartmentIdentifier = $"client-{username}";
-        }
+    public void Action(Func<IClientTunnel, Task> clientAction)
+    {
+        AddStep(new CompartmentalizedServiceBasedActionState<IClientTunnel>("Client Action", _compartmentIdentifier, clientAction)); 
+    }
 
-        public void Action(Func<IClientTunnel, Task> clientAction)
-        {
-            AddStep(new CompartmentalizedServiceBasedActionState<IClientTunnel>("Client Action", _compartmentIdentifier, clientAction)); 
-        }
-
-        public void Expect<T>(Predicate<T> expectation)
-            where T: IEvent
-        {
-            AddStep(new CompartmentalizedClientExpectationState<T>($"Client Expectation of {typeof(T)}", _compartmentIdentifier, expectation));
-        }
+    public void Expect<T>(Predicate<T> expectation)
+        where T: IEvent
+    {
+        AddStep(new CompartmentalizedClientExpectationState<T>($"Client Expectation of {typeof(T)}", _compartmentIdentifier, expectation));
     }
 }

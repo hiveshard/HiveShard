@@ -1,5 +1,4 @@
 using System;
-using HiveShard.Interface;
 using HiveShard.Ticker.Data;
 
 namespace HiveShard.Ticker;

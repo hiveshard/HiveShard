@@ -9,10 +9,10 @@ namespace HiveShard.Repository;
 
 public class EventRepository: IEventRepository
 {
-    private Dictionary<string, int> _totalOrder = new Dictionary<string, int>();
-    private Dictionary<string, ISet<IEventEmitterType>> _eventShards = new Dictionary<string, ISet<IEventEmitterType>>();
-    private Dictionary<EmitterIdentity, ISet<string>> _topicsByEmitter = new();
-    private ISet<string> _initializationEvents = new HashSet<string>();
+    private readonly Dictionary<string, int> _totalOrder = new();
+    private readonly Dictionary<string, ISet<IEventEmitterType>> _eventShards = new();
+    private readonly Dictionary<EmitterIdentity, ISet<string>> _topicsByEmitter = new();
+    private readonly ISet<string> _initializationEvents = new HashSet<string>();
     private int _current = 0;
     public int RegisterEvent<T>(IEventEmitterType shardType)
         where T : IEvent

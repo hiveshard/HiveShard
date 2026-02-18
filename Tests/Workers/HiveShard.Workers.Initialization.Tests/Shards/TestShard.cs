@@ -7,8 +7,8 @@ namespace HiveShard.Workers.Initialization.Tests.Shards;
 
 public class TestShard: IHiveShard
 {
-    private TestRepository _testRepository = new();
-    private IScopedShardTunnel _scopedShardTunnel;
+    private readonly TestRepository _testRepository = new();
+    private readonly IScopedShardTunnel _scopedShardTunnel;
 
     public TestShard(IScopedShardTunnel scopedShardTunnel)
     {
@@ -19,10 +19,7 @@ public class TestShard: IHiveShard
 
     public void Process()
     {
-        while (_testRepository.TryGet(out int increment))
-        {
-            ReceivedIncrements += increment;
-        }
+        while (_testRepository.TryGet(out int increment)) ReceivedIncrements += increment;
     }
 
     public void Initialize()

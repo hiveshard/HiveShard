@@ -1,12 +1,9 @@
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Data;
-using HiveShard.Interface;
 using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
 using HiveShard.Util;
-using HiveShard.Workers.Shard;
 using HiveShard.Workers.Shard.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.States;
@@ -19,7 +16,7 @@ public class ShardOnWorkerActionState<TService>: XceptoState
     private readonly string _compartmentIdentifier;
     private readonly HiveShardIdentity _hiveShardIdentity;
     private readonly Action<TService> _action;
-    private string _name;
+    private readonly string _name;
 
     public ShardOnWorkerActionState(string name, string compartmentIdentifier, HiveShardIdentity hiveShardIdentity, Action<TService> action) : base(name)
     {

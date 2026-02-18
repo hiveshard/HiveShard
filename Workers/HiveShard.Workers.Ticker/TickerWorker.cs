@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Providers;
 using HiveShard.Interface.Repository;
@@ -16,11 +12,11 @@ namespace HiveShard.Workers.Ticker;
 
 public class TickerWorker: IIsolatedEntryPoint
 {
-    private TickerRepository _tickerRepository;
-    private TickerAdditionRepository _tickerAdditionRepository;
-    private ICancellationProvider _cancellationProvider;
-    private ISimpleFabric _simpleFabric;
-    private IEventRepository _eventRepository;
+    private readonly TickerRepository _tickerRepository;
+    private readonly TickerAdditionRepository _tickerAdditionRepository;
+    private readonly ICancellationProvider _cancellationProvider;
+    private readonly ISimpleFabric _simpleFabric;
+    private readonly IEventRepository _eventRepository;
 
     public TickerWorker(
         TickerRepository tickerRepository, 

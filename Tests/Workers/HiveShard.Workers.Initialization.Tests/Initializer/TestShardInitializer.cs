@@ -1,5 +1,4 @@
 using HiveShard.Initializer.Interfaces;
-using HiveShard.Interface;
 
 namespace HiveShard.Workers.Initialization.Tests.Initializer;
 

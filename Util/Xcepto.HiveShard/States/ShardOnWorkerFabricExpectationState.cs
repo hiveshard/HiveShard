@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Interface;
@@ -18,12 +17,12 @@ namespace Xcepto.HiveShard.States;
 public class ShardOnWorkerFabricExpectationState<TEvent>: XceptoState
 where TEvent: IEvent
 {
-    private string _compartmentIdentifier;
-    private HiveShardIdentity _hiveShardIdentity;
-    private Predicate<TEvent> _expectation;
+    private readonly string _compartmentIdentifier;
+    private readonly HiveShardIdentity _hiveShardIdentity;
+    private readonly Predicate<TEvent> _expectation;
 
-    private ConcurrentQueue<TEvent> _events = new();
-    private string _name;
+    private readonly ConcurrentQueue<TEvent> _events = new();
+    private readonly string _name;
 
     public ShardOnWorkerFabricExpectationState(string name, string compartmentIdentifier, HiveShardIdentity hiveShardIdentity, Predicate<TEvent> expectation) : base(name)
     {
@@ -36,10 +35,8 @@ where TEvent: IEvent
     public override Task<bool> EvaluateConditionsForTransition(IServiceProvider serviceProvider)
     {
         while (_events.TryDequeue(out TEvent e))
-        {
             if (_expectation(e))
                 return Task.FromResult(true);
-        }
         return Task.FromResult(false);
     }
 

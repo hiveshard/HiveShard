@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace HiveShard.Interface.Config
+namespace HiveShard.Interface.Config;
+
+public interface IIdentityConfig
 {
-    public interface IIdentityConfig
-    {
-        public Guid GetIdentity();
-        public string GetIdentityString();
-    }
+    public Guid GetIdentity();
+    public string GetIdentityString();
 }

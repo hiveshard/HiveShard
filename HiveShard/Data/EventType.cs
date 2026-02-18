@@ -16,8 +16,8 @@ public class EventType
 
     public static EventType From<T>()
         where T : IEvent => From(typeof(T));
-    public static EventType From(Type eventType) =>
-        new EventType(eventType.FullName!);
+
+    private static EventType From(Type eventType) => new(eventType.FullName!);
 
     protected bool Equals(EventType other)
     {
@@ -28,8 +28,7 @@ public class EventType
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((EventType)obj);
+        return obj.GetType() == GetType() && Equals((EventType)obj);
     }
 
     public override int GetHashCode()

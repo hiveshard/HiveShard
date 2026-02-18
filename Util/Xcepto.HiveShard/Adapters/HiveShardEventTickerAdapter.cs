@@ -1,6 +1,5 @@
 using HiveShard.Data;
 using HiveShard.Event;
-using HiveShard.Interface;
 using HiveShard.Interface.Repository;
 using HiveShard.Ticker.Data;
 using Xcepto.Adapters;
@@ -10,10 +9,10 @@ namespace Xcepto.HiveShard.Adapters;
 
 public class HiveShardEventTickerAdapter: XceptoAdapter
 {
-    private IEventRepository _eventRepository;
-    private DistributedTickerIdentity _tickerIdentity;
-    private EmitterIdentity _emitterIdentity;
-    private Partition _partition;
+    private readonly IEventRepository _eventRepository;
+    private readonly DistributedTickerIdentity _tickerIdentity;
+    private readonly EmitterIdentity _emitterIdentity;
+    private readonly Partition _partition;
 
     public HiveShardEventTickerAdapter(DistributedTickerIdentity tickerIdentity, IEventRepository eventRepository)
     {

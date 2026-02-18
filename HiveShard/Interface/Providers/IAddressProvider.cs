@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace HiveShard.Interface.Providers
+namespace HiveShard.Interface.Providers;
+
+public interface IAddressProvider
 {
-    public interface IAddressProvider
-    {
-        public Uri GetUri();
-    }
+    public Uri GetUri();
 }

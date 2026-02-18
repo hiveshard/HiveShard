@@ -1,8 +1,7 @@
-﻿namespace HiveShard.Interface
+﻿namespace HiveShard.Interface;
+
+public interface IHiveShard
 {
-    public interface IHiveShard
-    {
-        public void Process();
-        public void Initialize();
-    }
+    public void Process();
+    public void Initialize();
 }

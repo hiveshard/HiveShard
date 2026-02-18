@@ -1,13 +1,4 @@
-﻿using System.Collections.Concurrent;
-using HiveShard.Config;
-using HiveShard.Data;
-using HiveShard.Fabrics.Kafka.Tests.Data;
-using HiveShard.Provider;
-using HiveShard.Repository;
-using HiveShard.Serializer;
-using Xcepto.HiveShard.Providers;
-
-namespace HiveShard.Fabrics.Kafka.Tests;
+﻿namespace HiveShard.Fabrics.Kafka.Tests;
 
 [TestFixture]
 public class SimpleKafkaFabricTests

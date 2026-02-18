@@ -4,39 +4,38 @@ using HiveShard.Data;
 using HiveShard.Interface;
 using Newtonsoft.Json;
 
-namespace HiveShard.Event
+namespace HiveShard.Event;
+
+public class CompletedTick: ITickEvent
 {
-    public class CompletedTick: ITickEvent
+    [JsonConstructor]
+    public CompletedTick(EmitterIdentity emitterIdentity, long tick, string eventType,
+        IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
     {
-        [JsonConstructor]
-        public CompletedTick(EmitterIdentity emitterIdentity, long tick, string eventType,
-            IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
-        {
-            TopicPartitionOffsets = topicPartitionOffsets;
-            EmitterIdentity = emitterIdentity;
-            Tick = tick;
-            EventType = eventType;
-        }
-
-        public static CompletedTick From<T>(IEventEmitterType emitter, long tick, 
-            IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
-            where T : IEvent => From(typeof(T), emitter, tick, topicPartitionOffsets);
-        
-        public static CompletedTick From(Type eventType, IEventEmitterType emitter, long tick,
-            IEnumerable<TopicPartitionOffset> topicPartitionOffsets) =>
-            From(eventType.FullName!, emitter, tick, topicPartitionOffsets);
-        
-        public static CompletedTick From(string eventType, IEventEmitterType emitter, long tick,
-            IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
-        {
-            if (emitter.InitializationTickOnly && tick != 2)
-                throw new InvalidOperationException();
-
-            return new CompletedTick(emitter.Identity, tick, eventType, topicPartitionOffsets);
-        }
-        public EmitterIdentity EmitterIdentity { get; }
-        public long Tick { get; }
-        public string EventType { get; }
-        public IEnumerable<TopicPartitionOffset> TopicPartitionOffsets { get; }
+        TopicPartitionOffsets = topicPartitionOffsets;
+        EmitterIdentity = emitterIdentity;
+        Tick = tick;
+        EventType = eventType;
     }
+
+    public static CompletedTick From<T>(IEventEmitterType emitter, long tick, 
+        IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
+        where T : IEvent => From(typeof(T), emitter, tick, topicPartitionOffsets);
+        
+    public static CompletedTick From(Type eventType, IEventEmitterType emitter, long tick,
+        IEnumerable<TopicPartitionOffset> topicPartitionOffsets) =>
+        From(eventType.FullName!, emitter, tick, topicPartitionOffsets);
+        
+    public static CompletedTick From(string eventType, IEventEmitterType emitter, long tick,
+        IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
+    {
+        if (emitter.InitializationTickOnly && tick != 2)
+            throw new InvalidOperationException();
+
+        return new CompletedTick(emitter.Identity, tick, eventType, topicPartitionOffsets);
+    }
+    public EmitterIdentity EmitterIdentity { get; }
+    public long Tick { get; }
+    public string EventType { get; }
+    public IEnumerable<TopicPartitionOffset> TopicPartitionOffsets { get; }
 }

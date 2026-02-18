@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using HiveShard.Event;
 using HiveShard.Interface;
 using HiveShard.Ticker.Data;
 using HiveShard.Workers.Ticker.Data;
@@ -10,8 +9,8 @@ namespace HiveShard.Workers.Ticker.Builder;
 
 public class TickerWorkerBuilder
 {
-    private List<TickerIsolatedEnvironment> _tickers = new();
-    private List<GlobalTickerIsolatedEnvironment> _globalTickers = new();
+    private readonly List<TickerIsolatedEnvironment> _tickers = [];
+    private readonly List<GlobalTickerIsolatedEnvironment> _globalTickers = [];
     private string _tickerIdentifier;
 
     internal IsolatedEnvironment Build()

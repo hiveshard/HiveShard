@@ -1,6 +1,3 @@
-﻿namespace HiveShard.Interface
-{
-    public interface IFabric
-    {
-    }
-}
+﻿namespace HiveShard.Interface;
+
+public interface IFabric;

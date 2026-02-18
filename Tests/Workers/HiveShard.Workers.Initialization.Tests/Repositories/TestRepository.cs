@@ -4,7 +4,7 @@ namespace HiveShard.Workers.Initialization.Tests.Repositories;
 
 public class TestRepository
 {
-    private ConcurrentQueue<int> _ints = new();
+    private readonly ConcurrentQueue<int> _ints = new();
 
     public void AddInt(int integer)
     {

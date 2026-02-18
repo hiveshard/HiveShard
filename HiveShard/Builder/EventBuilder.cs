@@ -1,14 +1,11 @@
-using System;
-using HiveShard.Data;
 using HiveShard.Interface;
-using HiveShard.Interface.Repository;
 using HiveShard.Repository;
 
 namespace HiveShard.Builder;
 
 public class EventBuilder
 {
-    private EventRepository _eventRepository;
+    private readonly EventRepository _eventRepository;
 
     public EventBuilder(EventRepository eventRepository)
     {
@@ -20,10 +17,5 @@ public class EventBuilder
     {
         _eventRepository.RegisterEvent<TEvent>(shardType);
         return this;
-    }
-
-    public EventBuilder InferAllEvents()
-    {
-        throw new NotImplementedException();
     }
 }

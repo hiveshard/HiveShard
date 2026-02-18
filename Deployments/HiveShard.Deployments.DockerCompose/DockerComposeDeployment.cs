@@ -1,8 +1,6 @@
 ﻿using HiveShard.Data;
 using HiveShard.Interface;
-using HiveShard.Interface.Repository;
-
-namespace HiveShard.Deployments.DockerCompose;
+using HiveShard.Interface.Repository;namespace HiveShard.Deployments.DockerCompose;
 
 public class DockerComposeDeployment: IDeployment
 {

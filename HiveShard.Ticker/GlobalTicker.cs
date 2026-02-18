@@ -12,9 +12,9 @@ namespace HiveShard.Ticker;
 
 public class GlobalTicker
 {
-    private GlobalTickerIdentity _globalTickerIdentity;
-    private ISimpleFabric _simpleFabric;
-    private IEventRepository _eventRepository;
+    private readonly GlobalTickerIdentity _globalTickerIdentity;
+    private readonly ISimpleFabric _simpleFabric;
+    private readonly IEventRepository _eventRepository;
 
     public GlobalTicker(GlobalTickerIdentity globalTickerIdentity, ISimpleFabric simpleFabric, IEventRepository eventRepository)
     {
@@ -32,16 +32,13 @@ public class GlobalTicker
         _currentTick = 0;
         
         
-        foreach (var eventOrder in _eventRepository.GetTotalOrder())
-        {
-            _simpleFabric.Register<CompletedTick>("completed-ticks", new Partition(eventOrder.Value), HandleEventCompletedTick);
-        }
-        
+        foreach (var eventOrder in _eventRepository.GetTotalOrder()) _simpleFabric.Register<CompletedTick>("completed-ticks", new Partition(eventOrder.Value), HandleEventCompletedTick);
+
         return Task.CompletedTask;
     }
 
 
-    private Dictionary<long, ISet<string>> _completedTicks = new();
+    private readonly Dictionary<long, ISet<string>> _completedTicks = new();
     private void HandleEventCompletedTick(Consumption<CompletedTick> consumption)
     {
         var messageTick = consumption.Message.Tick;

@@ -9,7 +9,6 @@ using HiveShard.Data;
 using HiveShard.Edge;
 using HiveShard.Edge.Interfaces;
 using HiveShard.Fabrics.InMemory;
-using HiveShard.Initializer.Interfaces;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
@@ -37,8 +36,8 @@ namespace HiveShard.Deployments.InMemory;
 
 public class InMemoryDeployment: IDeployment
 {
-    private readonly List<CompartmentEnvironment> _isolatedEnvironments = new();
-    private readonly List<(string, Type, string)> _entryPointLocations = new();
+    private readonly List<CompartmentEnvironment> _isolatedEnvironments = [];
+    private readonly List<(string, Type, string)> _entryPointLocations = [];
 
     private void AddEntryPoint<T>(string compartment, string compartmentType)
     where T: class
@@ -69,21 +68,27 @@ public class InMemoryDeployment: IDeployment
         
         
         foreach (var isolatedEnvironment in workers)
-        {
-            if (isolatedEnvironment is EdgeWorkerIsolatedEnvironment edgeWorkerEnvironment)
-                BuildEdgeWorker(edgeWorkerEnvironment);
-            else if(isolatedEnvironment is ClientIsolatedEnvironment clientIsolatedEnvironment)
-                BuildClient(clientIsolatedEnvironment);
-            else if (isolatedEnvironment is TickerWorkerIsolatedEnvironment tickerWorkerIsolatedEnvironment)
-                BuildTickerWorker(tickerWorkerIsolatedEnvironment);
-            else if (isolatedEnvironment is ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment)
-                BuildShardWorker(shardWorkerIsolatedEnvironment);
-            else if (isolatedEnvironment is InitializerIsolatedEnvironment initializationIsolatedEnvironment)
-                BuildInitializationWorker(initializationIsolatedEnvironment);
-            else
-                throw new NotImplementedException(
-                    $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
-        }
+            switch (isolatedEnvironment)
+            {
+                case EdgeWorkerIsolatedEnvironment edgeWorkerEnvironment:
+                    BuildEdgeWorker(edgeWorkerEnvironment);
+                    break;
+                case ClientIsolatedEnvironment clientIsolatedEnvironment:
+                    BuildClient(clientIsolatedEnvironment);
+                    break;
+                case TickerWorkerIsolatedEnvironment tickerWorkerIsolatedEnvironment:
+                    BuildTickerWorker(tickerWorkerIsolatedEnvironment);
+                    break;
+                case ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment:
+                    BuildShardWorker(shardWorkerIsolatedEnvironment);
+                    break;
+                case InitializerIsolatedEnvironment initializationIsolatedEnvironment:
+                    BuildInitializationWorker(initializationIsolatedEnvironment);
+                    break;
+                default:
+                    throw new NotImplementedException(
+                        $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
+            }
 
         return new ServiceEnvironment(globalChunkConfig, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable(), eventRepository);
     }
@@ -96,13 +101,10 @@ public class InMemoryDeployment: IDeployment
         InitializerAdditionRepository initializerAdditionRepository = new InitializerAdditionRepository();
         serviceCollection.AddSingleton(initializerAdditionRepository);
         
-        foreach (var initializer in initializationIsolatedEnvironment.Initializers)
-        {
-            initializerAdditionRepository.AddInitializer(initializer);
-        }
-        
+        foreach (var initializer in initializationIsolatedEnvironment.Initializers) initializerAdditionRepository.AddInitializer(initializer);
+
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"initializer", 
+            "initializer", 
             serviceCollection, 
             new DependencyBuilder()
                 .Add<ISimpleFabric>()
@@ -121,11 +123,8 @@ public class InMemoryDeployment: IDeployment
         ShardAdditionRepository repository = new ShardAdditionRepository();
         serviceCollection.AddSingleton<ShardAdditionRepository>(repository);
         
-        foreach (var hiveShardIdentity in shardWorkerIsolatedEnvironment.HiveShards)
-        {
-            repository.Add(new ShardAdditionRequest(hiveShardIdentity));
-        }
-        
+        foreach (var hiveShardIdentity in shardWorkerIsolatedEnvironment.HiveShards) repository.Add(new ShardAdditionRequest(hiveShardIdentity));
+
         var compartmentEnvironment = new CompartmentEnvironment(
             $"shardWorker-{shardWorkerIsolatedEnvironment.Identifier}", 
             serviceCollection, 
@@ -190,14 +189,8 @@ public class InMemoryDeployment: IDeployment
         serviceCollection.AddSingleton<TickerRepository>();
         var tickerAdditionRepository = new TickerAdditionRepository();
         serviceCollection.AddSingleton<TickerAdditionRepository>(tickerAdditionRepository);
-        foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers)
-        {
-            tickerAdditionRepository.RequestEventTickerAddition(tickerIsolatedEnvironment.Identity);
-        }
-        foreach (var globalTickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.GlobalTickers)
-        {
-            tickerAdditionRepository.RequestGlobalTickerAddition(globalTickerIsolatedEnvironment.GlobalTickerIdentity);
-        }
+        foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers) tickerAdditionRepository.RequestEventTickerAddition(tickerIsolatedEnvironment.Identity);
+        foreach (var globalTickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.GlobalTickers) tickerAdditionRepository.RequestGlobalTickerAddition(globalTickerIsolatedEnvironment.GlobalTickerIdentity);
         AddEntryPoint<TickerWorker>(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, "tickerWorker");
 
         var compartmentEnvironment = new CompartmentEnvironment(

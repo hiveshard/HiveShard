@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using HiveShard.Data;
-using HiveShard.Interface;
 using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
 using HiveShard.Util;
@@ -17,11 +14,11 @@ namespace Xcepto.HiveShard.States;
 public class ShardOnWorkerServiceExpectationState<TService>: XceptoState
 where TService: notnull
 {
-    private string _compartmentIdentifier;
-    private HiveShardIdentity _hiveShardIdentity;
-    private Predicate<TService> _expectation;
+    private readonly string _compartmentIdentifier;
+    private readonly HiveShardIdentity _hiveShardIdentity;
+    private readonly Predicate<TService> _expectation;
     private TService? _service;
-    private string _name;
+    private readonly string _name;
 
 
     public ShardOnWorkerServiceExpectationState(string name, string compartmentIdentifier, HiveShardIdentity hiveShardIdentity, Predicate<TService> expectation) : base(name)

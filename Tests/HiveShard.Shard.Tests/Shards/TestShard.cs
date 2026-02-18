@@ -6,7 +6,7 @@ namespace HiveShard.Shard.Tests.Shards;
 
 public class TestShard: IHiveShard
 {
-    private IScopedShardTunnel _tunnel;
+    private readonly IScopedShardTunnel _tunnel;
     private TestEvent _testEvent;
 
     public TestShard(IScopedShardTunnel tunnel)

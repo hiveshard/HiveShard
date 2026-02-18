@@ -2,10 +2,6 @@ using HiveShard.Ticker.Util;
 
 namespace HiveShard.Ticker.Tests.Test;
 
-using System.Linq;
-using System.Threading.Tasks;
-using NUnit.Framework;
-
 [TestFixture]
 public class ConcurrentHashSetTests
 {

@@ -5,7 +5,7 @@ namespace HiveShard.Workers.Initializer.Repositories;
 
 public class InitializerAdditionRepository
 {
-    private ConcurrentQueue<Type> _initializersToBeAdded = new();
+    private readonly ConcurrentQueue<Type> _initializersToBeAdded = new();
 
     public void AddInitializer(Type type)
     {

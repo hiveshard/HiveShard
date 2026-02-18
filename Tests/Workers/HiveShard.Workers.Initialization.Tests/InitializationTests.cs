@@ -3,7 +3,6 @@ using HiveShard.Deployments.InMemory;
 using HiveShard.Factory;
 using HiveShard.Interface;
 using HiveShard.Workers.Initialization.Tests.Initializer;
-using HiveShard.Workers.Initialization.Tests.Repositories;
 using HiveShard.Workers.Initialization.Tests.Shards;
 using HiveShard.Workers.Initializer.Extensions;
 using HiveShard.Workers.Shard.Extensions;

@@ -1,3 +1,3 @@
 namespace HiveShard.Interface;
 
-public interface ITickEvent: IEvent { }
+public interface ITickEvent: IEvent;

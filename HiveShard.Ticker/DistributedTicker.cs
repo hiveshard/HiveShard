@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
@@ -12,9 +11,9 @@ namespace HiveShard.Ticker;
 
 public class DistributedTicker
 {
-    private DistributedTickerConfig _config;
-    private ISimpleFabric _simpleFabric;
-    private IEventRepository _eventRepository;
+    private readonly DistributedTickerConfig _config;
+    private readonly ISimpleFabric _simpleFabric;
+    private readonly IEventRepository _eventRepository;
     public DistributedTicker(DistributedTickerConfig config, ISimpleFabric simpleFabric, IEventRepository eventRepository)
     {
         _config = config;
@@ -31,9 +30,9 @@ public class DistributedTicker
         return Task.CompletedTask;
     }
 
-    private ConcurrentDictionary<long, ConcurrentHashSet<EmitterIdentity>> _completedEventTicks = new();
+    private readonly ConcurrentDictionary<long, ConcurrentHashSet<EmitterIdentity>> _completedEventTicks = new();
 
-    private bool _currentRoundOngoing = false;
+    private readonly bool _currentRoundOngoing = false;
     
     // initialized without tick
     private long _currentTick = -1;
@@ -75,12 +74,10 @@ public class DistributedTicker
         hashSet.Add(consumption.Message.EmitterIdentity);
 
         foreach (var eventEmitterType in _eventRepository.GetEmitters(_config.EventType.FullName!))
-        {
             // not done yet
             if(!hashSet.Contains(eventEmitterType.Identity))
                 return;
-        }
-        
+
         FinalizeTick();
     }
 

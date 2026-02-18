@@ -4,13 +4,12 @@ using System.Linq;
 using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Workers.Shard.Data;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace HiveShard.Workers.Shard.Builder;
 
 public class ShardWorkerBuilder
 {
-    private List<HiveShardIdentity> _hiveShards = new();
+    private readonly List<HiveShardIdentity> _hiveShards = new();
     private string _identifier = Guid.NewGuid().ToString();
     
     public ShardWorkerBuilder AddShard<T>(Chunk chunk, Guid identity)

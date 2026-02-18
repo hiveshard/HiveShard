@@ -1,8 +1,6 @@
-﻿namespace HiveShard.Interface.Repository
+﻿namespace HiveShard.Interface.Repository;
+
+public interface ITickRepository
 {
-    public interface ITickRepository
-    {
-        public long GetLatestTick();
-        public void SetLatestTick(long newTick);
-    }
+    public void SetLatestTick(long newTick);
 }

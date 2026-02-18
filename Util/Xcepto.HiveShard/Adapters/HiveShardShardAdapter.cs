@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Interface;
 using Xcepto.Adapters;
@@ -9,8 +8,8 @@ namespace Xcepto.HiveShard.Adapters;
 
 public class HiveShardShardAdapter: XceptoAdapter
 {
-    private HiveShardIdentity _hiveShardIdentity;
-    private string _compartmentIdentifier;
+    private readonly HiveShardIdentity _hiveShardIdentity;
+    private readonly string _compartmentIdentifier;
     public HiveShardShardAdapter(string worker, HiveShardIdentity hiveShardIdentity)
     {
         _compartmentIdentifier = $"shardWorker-{worker}";

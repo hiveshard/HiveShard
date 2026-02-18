@@ -16,13 +16,13 @@ public class Partition
 
         var cols = max.YCoord - min.YCoord + 1;
 
-        int x = min.XCoord + (Value / cols);
-        int y = min.YCoord + (Value % cols);
+        var x = min.XCoord + Value / cols;
+        var y = min.YCoord + Value % cols;
 
         return new Chunk(x, y);
     }
 
-    protected bool Equals(Partition other)
+    private bool Equals(Partition other)
     {
         return Value == other.Value;
     }
@@ -31,8 +31,7 @@ public class Partition
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((Partition)obj);
+        return obj.GetType() == GetType() && Equals((Partition)obj);
     }
 
     public override int GetHashCode()

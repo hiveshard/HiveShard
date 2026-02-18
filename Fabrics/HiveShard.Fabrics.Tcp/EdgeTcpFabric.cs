@@ -19,12 +19,12 @@ namespace HiveShard.Fabrics.Tcp
 {
     public class EdgeTcpFabric: IEdgeTunnelServerEndpoint
     {
-        private TcpListener _tcpListener;
-        private ConcurrentDictionary<HiveShard.Data.HiveShardClient, ConnectedClient> _boundClients = new ConcurrentDictionary<HiveShard.Data.HiveShardClient, ConnectedClient>();
-        private ConcurrentDictionary<TcpClient, ConnectedClient> _unboundClients = new ConcurrentDictionary<TcpClient, ConnectedClient>();
-        private Dictionary<string, Action<string, HiveShard.Data.HiveShardClient>> _eventRegistrations = new();
-        private IAddressProvider _edgeIdentityProvider;
-        private ISerializer _serializer;
+        private readonly TcpListener _tcpListener;
+        private readonly ConcurrentDictionary<HiveShardClient, ConnectedClient> _boundClients = new();
+        private readonly ConcurrentDictionary<TcpClient, ConnectedClient> _unboundClients = new();
+        private readonly Dictionary<string, Action<string, HiveShardClient>> _eventRegistrations = new();
+        private readonly IAddressProvider _edgeIdentityProvider;
+        private readonly ISerializer _serializer;
         private Action<HiveShardClient> _clientConnectedCallback = client => { };
         private volatile int _ready;
 
@@ -56,10 +56,7 @@ namespace HiveShard.Fabrics.Tcp
         }
 
         public async Task WaitForReady() {
-            while (_ready < 1)
-            {
-                await Task.Delay(100);
-            }
+            while (_ready < 1) await Task.Delay(100);
         }
 
         private void SendTcpMessage(object message, Type messageType, NetworkStream stream)
@@ -102,7 +99,7 @@ namespace HiveShard.Fabrics.Tcp
         {
             _ = Task.Run(async () =>
             {
-                HiveShard.Data.HiveShardClient hiveShardClient = null;
+                HiveShardClient hiveShardClient = null;
                 var tcpClient = connectedClient.TcpClient;
                 var stream = connectedClient.Stream;
                 try
@@ -152,13 +149,9 @@ namespace HiveShard.Fabrics.Tcp
                     tcpClient.Client.Shutdown(SocketShutdown.Send);
                     tcpClient.Close();
                     if(hiveShardClient is null)
-                    {
                         Console.WriteLine($"Unknown client disconnected: {remoteEndPoint.Address}:{remoteEndPoint.Port}");
-                    }
                     else
-                    {
                         Console.WriteLine($"Client disconnected: {hiveShardClient.Username}, {remoteEndPoint.Address}:{remoteEndPoint.Port}");
-                    }
                 }
             }, token);
         }

@@ -14,140 +14,140 @@ using HiveShard.Shard.Data;
 using HiveShard.Shard.Interfaces;
 using HiveShard.Util;
 
-namespace HiveShard.Shard
+namespace HiveShard.Shard;
+
+public class ScopedShardTunnel: IScopedShardTunnel
 {
-    public class ScopedShardTunnel: IScopedShardTunnel
+    private readonly HiveShardIdentity _hiveShardIdentity;
+    private readonly ISimpleFabric _simpleFabric;
+    private readonly IHiveShardTelemetry _loggingProvider;
+    private readonly ICancellationProvider _cancellationProvider;
+    private readonly Dictionary<TopicPartition, BlockingCollection<Caster>> _events = new();
+    private readonly BlockingCollection<Consumption<Tick>> _ticks = new(50);
+    private readonly Dictionary<TopicPartition, long> _eventQueueOffsets = new();
+    private readonly ITickRepository _tickRepository;
+    private readonly GlobalChunkConfig _globalChunkConfig;
+    private readonly IEventRepository _eventRepository;
+
+    private long _lastTick = -1;
+    private volatile int _ready;
+    private IHiveShard? _hiveShard;
+        
+    public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IHiveShardTelemetry loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository, ICancellationProvider cancellationProvider, GlobalChunkConfig globalChunkConfig, IEventRepository eventRepository)
     {
-        private readonly HiveShardIdentity _hiveShardIdentity;
-        private readonly ISimpleFabric _simpleFabric;
-        private readonly IHiveShardTelemetry _loggingProvider;
-        private readonly ICancellationProvider _cancellationProvider;
-        private readonly Dictionary<TopicPartition, BlockingCollection<Caster>> _events = new();
-        private readonly BlockingCollection<Consumption<Tick>> _ticks = new(50);
-        private readonly Dictionary<TopicPartition, long> _eventQueueOffsets = new();
-        private ITickRepository _tickRepository;
-        private GlobalChunkConfig _globalChunkConfig;
-        private IEventRepository _eventRepository;
-
-        private long _lastTick = -1;
-        private volatile int _ready;
-        private IHiveShard? _hiveShard;
-        
-        public ScopedShardTunnel(HiveShardIdentity hiveShardIdentity, IHiveShardTelemetry loggingProvider, ISimpleFabric simpleFabric, ITickRepository tickRepository, ICancellationProvider cancellationProvider, GlobalChunkConfig globalChunkConfig, IEventRepository eventRepository)
-        {
-            _simpleFabric = simpleFabric;
-            _tickRepository = tickRepository;
-            _cancellationProvider = cancellationProvider;
-            _globalChunkConfig = globalChunkConfig;
-            _eventRepository = eventRepository;
-            _hiveShardIdentity = hiveShardIdentity;
-            _loggingProvider = loggingProvider;
+        _simpleFabric = simpleFabric;
+        _tickRepository = tickRepository;
+        _cancellationProvider = cancellationProvider;
+        _globalChunkConfig = globalChunkConfig;
+        _eventRepository = eventRepository;
+        _hiveShardIdentity = hiveShardIdentity;
+        _loggingProvider = loggingProvider;
             
-            simpleFabric.Register<Tick>("ticks", x =>
-            {
-                _ticks.Add(new Consumption<Tick>(x.Message, x.Offset));
-            });
-        }
+        simpleFabric.Register<Tick>("ticks", x =>
+        {
+            _ticks.Add(new Consumption<Tick>(x.Message, x.Offset));
+        });
+    }
         
-        public void Initialize<T>(T hiveShard) 
-            where T : class, IHiveShard
+    public void Initialize<T>(T hiveShard) 
+        where T : class, IHiveShard
+    {
+        _hiveShard = hiveShard;
+        _hiveShard.Initialize();
+    }
+
+
+
+    public Task Start()
+    {
+        if (_hiveShard is null)
+            throw new Exception("Not initialized with HiveShard yet");
+        return Task.Run(() =>
         {
-            _hiveShard = hiveShard;
-            _hiveShard.Initialize();
-        }
-
-
-
-        public Task Start()
-        {
-            if (_hiveShard is null)
-                throw new Exception("Not initialized with HiveShard yet");
-            return Task.Run(() =>
+            Interlocked.Increment(ref _ready);
+            foreach (var tick in _ticks.GetConsumingEnumerable())
             {
-                Interlocked.Increment(ref _ready);
-                foreach (var tick in _ticks.GetConsumingEnumerable())
-                {
-                    if(tick.Message.TickNumber <= _lastTick)
-                        continue;
-                    _lastTick = tick.Message.TickNumber;
-                    _loggingProvider.LogDebug($"Tick: {tick.Message.TickNumber}");
-                    _tickRepository.SetLatestTick(tick.Message.TickNumber);
-                    var offsets = tick.Message.ChunkOffsets
-                        .ToDictionary(x => new TopicPartition(x.Topic, x.Partition), x => x.Offset);
-                    foreach (var key in _events.Keys)
-                        if (!offsets.ContainsKey(key))
-                            offsets[key] = 0;
+                if(tick.Message.TickNumber <= _lastTick)
+                    continue;
+                _lastTick = tick.Message.TickNumber;
+                _loggingProvider.LogDebug($"Tick: {tick.Message.TickNumber}");
+                _tickRepository.SetLatestTick(tick.Message.TickNumber);
+                var offsets = tick.Message.ChunkOffsets
+                    .ToDictionary(x => new TopicPartition(x.Topic, x.Partition), x => x.Offset);
+                foreach (var key in _events.Keys)
+                    if (!offsets.ContainsKey(key))
+                        offsets[key] = 0;
 
-                    foreach (var eventTopic in _events)
+                foreach (var eventTopic in _events)
+                {
+                    _loggingProvider.LogDebug($"Handle {eventTopic.Key.Topic}:{eventTopic.Key.Chunk.Topic} events");
+                    try
                     {
-                        _loggingProvider.LogDebug($"Handle {eventTopic.Key.Topic}:{eventTopic.Key.Chunk.Topic} events");
-                        try
+                        while (_eventQueueOffsets[eventTopic.Key] < offsets[eventTopic.Key])
                         {
-                            while (_eventQueueOffsets[eventTopic.Key] < offsets[eventTopic.Key])
-                            {
-                                var caster = eventTopic.Value.Take();
-                                caster.Handler(caster.Consumption);
-                                _eventQueueOffsets[eventTopic.Key] += 1;
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            _loggingProvider.LogException(e);
-                            throw;
+                            var caster = eventTopic.Value.Take();
+                            caster.Handler(caster.Consumption);
+                            _eventQueueOffsets[eventTopic.Key] += 1;
                         }
                     }
-                    
-                    _hiveShard.Process();
-                    var topicsOfEmitter = _eventRepository.GetTopicsOfEmitter(_hiveShardIdentity);
-                    foreach (var topic in topicsOfEmitter)
+                    catch (Exception e)
                     {
-                        List<TopicPartitionOffset> topicOffsets = new(); 
-                        foreach (var chunk in _hiveShardIdentity.Chunk.GetNeighboursAndSelf(_globalChunkConfig))
-                        {
-                            var topicPartition = new TopicPartition(topic, chunk);
-                            if (!_eventQueueOffsets.ContainsKey(topicPartition))
-                            {
-                                topicOffsets.Add(new TopicPartitionOffset(topic, chunk, 0));
-                                continue;
-                            }
-
-                            var eventQueueOffset = _eventQueueOffsets[topicPartition];
-                            topicOffsets.Add(new TopicPartitionOffset(topic, chunk, eventQueueOffset));
-                        }
-                        var completedTick = CompletedTick.From(topic, _hiveShardIdentity, tick.Message.TickNumber, topicOffsets);
-                        _simpleFabric.Send<CompletedTick>("completed-ticks", new Partition(_eventRepository.GetEventOrder(topic)), completedTick);
+                        _loggingProvider.LogException(e);
+                        throw;
                     }
                 }
+                    
+                _hiveShard.Process();
+                var topicsOfEmitter = _eventRepository.GetTopicsOfEmitter(_hiveShardIdentity);
+                foreach (var topic in topicsOfEmitter)
+                {
+                    List<TopicPartitionOffset> topicOffsets = new(); 
+                    foreach (var chunk in _hiveShardIdentity.Chunk.GetNeighboursAndSelf(_globalChunkConfig))
+                    {
+                        var topicPartition = new TopicPartition(topic, chunk);
+                        if (!_eventQueueOffsets.ContainsKey(topicPartition))
+                        {
+                            topicOffsets.Add(new TopicPartitionOffset(topic, chunk, 0));
+                            continue;
+                        }
+
+                        var eventQueueOffset = _eventQueueOffsets[topicPartition];
+                        topicOffsets.Add(new TopicPartitionOffset(topic, chunk, eventQueueOffset));
+                    }
+                    var completedTick = CompletedTick.From(topic, _hiveShardIdentity, tick.Message.TickNumber, topicOffsets);
+                    _simpleFabric.Send<CompletedTick>("completed-ticks", new Partition(_eventRepository.GetEventOrder(topic)), completedTick);
+                }
+            }
+        });
+    }
+
+    public Task Register<TEvent>(Action<TEvent> handler) where TEvent: IEvent
+    {
+        var fullName = typeof(TEvent).FullName;
+        if (fullName is null)
+            throw new Exception("event name was null");
+        
+        foreach (var neighbour in _hiveShardIdentity.Chunk.GetNeighboursAndSelf(_globalChunkConfig))
+        {
+            var topicPartition = new TopicPartition(fullName, neighbour);
+            _eventQueueOffsets[topicPartition] = 0;
+            _events[topicPartition] = new BlockingCollection<Caster>(50);
+            _simpleFabric.Register<TEvent>(topicPartition.Topic, topicPartition.Chunk, x =>
+            {
+                var consumption = new Consumption<object>(x.Message, x.Offset);
+                _events[topicPartition].Add(new Caster(consumption, o =>
+                {
+                    var wrappedValue = (Consumption<object>)o;
+                    handler((TEvent)wrappedValue.Message);
+                }));
             });
         }
+        return Task.CompletedTask;
+    }
 
-        public Task Register<TEvent>(Action<TEvent> handler) where TEvent: IEvent
-        {
-            var fullName = typeof(TEvent).FullName;
-            if (fullName is null)
-                throw new Exception("event name was null");
-        
-            foreach (var neighbour in _hiveShardIdentity.Chunk.GetNeighboursAndSelf(_globalChunkConfig))
-            {
-                var topicPartition = new TopicPartition(fullName, neighbour);
-                _eventQueueOffsets[topicPartition] = 0;
-                _events[topicPartition] = new BlockingCollection<Caster>(50);
-                _simpleFabric.Register<TEvent>(topicPartition.Topic, topicPartition.Chunk, x =>
-                {
-                    var consumption = new Consumption<object>(x.Message, x.Offset);
-                    _events[topicPartition].Add(new Caster(consumption, o =>
-                    {
-                        var wrappedValue = (Consumption<object>)o;
-                        handler((TEvent)wrappedValue.Message);
-                    }));
-                });
-            }
-            return Task.CompletedTask;
-        }
-
-        public Task Send<TEvent>(TEvent message) where TEvent: IEvent
-        {
-            return Resilience.Retry(_ =>
+    public Task Send<TEvent>(TEvent message) where TEvent: IEvent
+    {
+        return Resilience.Retry(_ =>
             {
                 if (_ready < 1)
                     throw new Exception($"{nameof(ScopedShardTunnel)} is not ready yet");
@@ -155,14 +155,10 @@ namespace HiveShard.Shard
             }, 
             $"{nameof(ScopedShardTunnel)} from {_hiveShardIdentity}", _cancellationProvider.GetToken(), _loggingProvider);
 
-        }
+    }
 
-        public async Task WaitForReady()
-        {
-            while (_ready < 1)
-            {
-                await Task.Delay(100);
-            }
-        }
+    public async Task WaitForReady()
+    {
+        while (_ready < 1) await Task.Delay(100);
     }
 }

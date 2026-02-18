@@ -1,14 +1,12 @@
-using System;
 using System.Collections.Concurrent;
 using HiveShard.Ticker.Data;
-using HiveShard.Workers.Ticker.Data;
 
 namespace HiveShard.Workers.Ticker.Repository;
 
 public class TickerAdditionRepository
 {
-    private ConcurrentQueue<DistributedTickerIdentity> _eventTickersToBeAdded = new();
-    private ConcurrentQueue<GlobalTickerIdentity> _globalTickersToBeAdded = new();
+    private readonly ConcurrentQueue<DistributedTickerIdentity> _eventTickersToBeAdded = new();
+    private readonly ConcurrentQueue<GlobalTickerIdentity> _globalTickersToBeAdded = new();
 
     public void RequestEventTickerAddition(DistributedTickerIdentity type)
     {

@@ -1,7 +1,6 @@
-namespace HiveShard.Interface.Config
+namespace HiveShard.Interface.Config;
+
+public interface INetworkConfiguration
 {
-    public interface INetworkConfiguration
-    {
-        public int Port();
-    }
+    public int Port();
 }

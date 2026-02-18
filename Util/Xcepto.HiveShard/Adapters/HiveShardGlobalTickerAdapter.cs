@@ -1,9 +1,5 @@
-using System;
-using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
-using HiveShard.Interface;
-using Microsoft.Extensions.DependencyInjection;
 using Xcepto.Adapters;
 using Xcepto.HiveShard.States;
 
@@ -11,7 +7,7 @@ namespace Xcepto.HiveShard.Adapters;
 
 public class HiveShardGlobalTickerAdapter: XceptoAdapter
 {
-    private EmitterIdentity _emitterIdentity;
+    private readonly EmitterIdentity _emitterIdentity;
     public HiveShardGlobalTickerAdapter(EmitterIdentity emitterIdentity)
     {
         _emitterIdentity = emitterIdentity;
