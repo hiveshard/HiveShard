@@ -49,12 +49,6 @@ public class EventTickerTests<T>
         var globalChunkConfig = environment.GlobalChunkConfig;
         var eventConfig = environment.EventRepository;
         
-        var testEventName = typeof(TestEvent).FullName!;
-        var testEventPartition = new Partition(eventConfig.GetEventOrder<TestEvent>());
-        
-        var tickEventName = typeof(Tick).FullName!;
-        var tickEventPartition = new Partition(0);
-
         var initializationEventName = typeof(InitializationEvent).FullName!;
         var initializationEventPartition = new Partition(eventConfig.GetEventOrder<InitializationEvent>());
         
@@ -80,12 +74,8 @@ public class EventTickerTests<T>
 
 
             // Completed 0
-            testFabricAccess.FabricExpectation<CompletedTick>(x => 
-                x.Tick == 0 && x.EventType == testEventName, 
-                "completed-ticks", testEventPartition);
-            testFabricAccess.FabricExpectation<CompletedTick>(x => 
-                x.Tick == 0 && x.EventType == initializationEventName, 
-                "completed-ticks", initializationEventPartition);
+            testEventTicker.ExpectCompletedTick(0);
+            initEventTicker.ExpectCompletedTick(0);
             
             // Tick 1 (Publish Initialize)
             globalTicker.ExpectTick(1);
@@ -100,9 +90,8 @@ public class EventTickerTests<T>
                     [new TopicPartitionOffset(initializationEventName, onlyChunk, 1)])));
             
             // Completed 1
-            testFabricAccess.FabricExpectation<CompletedTick>(x => 
-                    x.Tick == 1 && x.EventType == tickEventName, 
-                "ticks", tickEventPartition);
+            testEventTicker.ExpectCompletedTick(1);
+            initEventTicker.ExpectCompletedTick(1);
 
             // Tick 2 (Shard Init Response)
             globalTicker.ExpectTick(2);

@@ -9,25 +9,29 @@ using Xcepto.States;
 
 namespace Xcepto.HiveShard.States;
 
-public class TickerTickExpectationState: XceptoState
+public class TickerExpectationState<TTickEvent>: XceptoState
+where TTickEvent : ITickEvent
 {
-    public TickerTickExpectationState(string name, Partition partition, Predicate<Tick> predicate) : base(name)
+    public TickerExpectationState(string name, string topic, Partition partition, Predicate<TTickEvent> predicate) : base(name)
     {
+        _topic = topic;
         _partition = partition;
         _predicate = predicate;
     }
 
     
     private Partition _partition;
-    private Predicate<Tick> _predicate;
+    private Predicate<TTickEvent> _predicate;
 
-    private ConcurrentQueue<Tick> _messages = new ConcurrentQueue<Tick>();
+    private ConcurrentQueue<TTickEvent> _messages = new ConcurrentQueue<TTickEvent>();
+    private string _topic;
+
     public override Task Initialize(IServiceProvider serviceProvider)
     {
         var fabric = serviceProvider.GetRequiredService<ISimpleFabric>();
-        fabric.Register<Tick>("ticks", _partition, x =>
+        fabric.Register<TTickEvent>(_topic, _partition, x =>
         {
-            _messages.Enqueue(((Consumption<Tick>)x).Message);
+            _messages.Enqueue(((Consumption<TTickEvent>)x).Message);
         });
         return Task.CompletedTask;
     }

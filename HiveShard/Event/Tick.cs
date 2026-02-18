@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace HiveShard.Event
 {
-    public class Tick: IEvent
+    public class Tick: ITickEvent
     {
         [JsonConstructor]
         public Tick(long tickNumber, IEnumerable<TopicPartitionOffset> chunkOffsets, DateTime tickDateTime, string tickEventType, EmitterIdentity emitter)

@@ -22,7 +22,7 @@ public class SimpleKafkaFabricTests
             new IdentityConfig(Guid.NewGuid(), "test"),
             cancellationProvider,
             new NewtonsoftSerializer(),
-            new FabricLoggingProvider(new SimpleTelemetryProvider(new LoggingProvider()), new TickRepository()),
+            new FabricLoggingProvider(new SimpleTelemetryProvider(new ConsoleLoggingProvider()), new TickRepository()),
             new EnvironmentConfig(Guid.NewGuid()),
             new GlobalChunkConfig(new Chunk(0,0), new Chunk(0,0))
             );

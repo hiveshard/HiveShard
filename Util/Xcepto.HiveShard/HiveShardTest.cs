@@ -3,13 +3,14 @@ using System.Threading.Tasks;
 using HiveShard.Builder;
 using HiveShard.Data;
 using Xcepto.Builder;
+using Xcepto.Config;
 using Xcepto.HiveShard.Scenario;
 
 namespace Xcepto.HiveShard
 {
     public class HiveShardTest
     {
-        private static TimeSpan DefaultTimeout => TimeSpan.FromSeconds(10);
+        private static TimeoutConfig DefaultTimeout => TimeoutConfig.FromSeconds(10);
         public static async Task Given(ServiceEnvironment environment, Action<TransitionBuilder> xceptoBuilder)
         {
             await XceptoTest.Given(new HiveShardScenario(environment), DefaultTimeout, xceptoBuilder);

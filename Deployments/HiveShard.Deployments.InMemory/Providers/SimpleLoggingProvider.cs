@@ -8,21 +8,21 @@ public class SimpleLoggingProvider: IWorkerLoggingProvider, IHiveShardSimpleLogg
 {
     public void LogDebug(string message, LogOrigin logOrigin)
     {
-        WriteColored($"[DEBUG] [{logOrigin}] {message}", ConsoleColor.Gray);
+        Write($"[DEBUG] [{logOrigin}] {message}");
     }
 
     public void LogDebug(string message)
     {
-        WriteColored($"[DEBUG] {message}", ConsoleColor.Gray);
+        Write($"[DEBUG] {message}");
     }
     public void LogWarning(string message, LogOrigin logOrigin)
     {
-        WriteColored($"[WARN][{logOrigin}] {message}", ConsoleColor.Yellow);
+        Write($"[WARN][{logOrigin}] {message}");
     }
 
     public void LogWarning(string message)
     {
-        WriteColored($"[WARN] {message}", ConsoleColor.Yellow);
+        Write($"[WARN] {message}");
     }
 
     public void LogWarning(string warning, string name = "")
@@ -32,33 +32,23 @@ public class SimpleLoggingProvider: IWorkerLoggingProvider, IHiveShardSimpleLogg
 
     public void LogError(string message)
     {
-        WriteColored($"[ERROR] {message}", ConsoleColor.Red);
+        Write($"[ERROR] {message}");
     }
 
     public void LogError(string message, LogOrigin logOrigin)
     {
-        WriteColored($"[ERROR][{logOrigin}] {message}", ConsoleColor.Red);
+        Write($"[ERROR][{logOrigin}] {message}");
     }
 
     public void LogError(Exception exception, LogOrigin logOrigin)
     {
-        WriteColored($"[ERROR][{logOrigin}] {exception}", ConsoleColor.Red);
+        Write($"[ERROR][{logOrigin}] {exception}");
     }
 
     
-    private void WriteColored(string message, ConsoleColor color)
+    private void Write(string message)
     {
-        string ansiColor = color switch
-        {
-            ConsoleColor.Gray or ConsoleColor.White => "\u001b[37m",
-            ConsoleColor.Red                      => "\u001b[31m",
-            ConsoleColor.Yellow                   => "\u001b[33m",
-            _                                     => "\u001b[37m"
-        };
-
-        const string reset = "\u001b[0m";
-
-        Console.WriteLine($"{ansiColor}{message}{reset}");
+        Console.WriteLine($"{message}");
     }
 
 
