@@ -15,6 +15,7 @@ public class IdentityConfig: IIdentityConfig
     }
 
     public Guid GetIdentity() => _id;
+    public string GetServiceType() => _serviceType;
 
     public string GetIdentityString() => $"{_serviceType}-{_id}";
 }

@@ -26,5 +26,7 @@ namespace HiveShard.Telemetry.Console
         {
             throw new NotImplementedException();
         }
+
+        public void Dispose() { }
     }
 }

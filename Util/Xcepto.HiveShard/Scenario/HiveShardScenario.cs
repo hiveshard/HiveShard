@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Interface;
+using HiveShard.Interface.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Xcepto.Builder;
 using Xcepto.Data;
+using Xcepto.HiveShard.Providers;
 using Xcepto.Interfaces;
 using Xcepto.Provider;
 using Xcepto.Scenarios;
@@ -28,7 +31,7 @@ public class HiveShardScenario: CompartmentalizedXceptoScenario
             
         var sharedServices = _environment.Outer
             .AddSingleton<ServiceEnvironment>(_environment)
-            .AddSingleton<ILoggingProvider, XceptoBasicLoggingProvider>();
+            .AddSingleton<ILoggingProvider, HiveShardTestTelemetryProvider>();
             
         var compartmentBuilder = Compartment.From(sharedServices);
         string outerIdentification = "outer";
@@ -65,4 +68,12 @@ public class HiveShardScenario: CompartmentalizedXceptoScenario
             
         return Task.FromResult(compartments.Values.AsEnumerable());
     }
+
+    protected override ScenarioCleanup Cleanup(ScenarioCleanupBuilder builder) => builder
+        .Do(x =>
+        {
+            var telemetry = x.GetRequiredService<IHiveShardTelemetry>();
+            telemetry.Dispose();
+        })
+        .Build();
 }

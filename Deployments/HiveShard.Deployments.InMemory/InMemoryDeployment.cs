@@ -8,6 +8,7 @@ using HiveShard.Config;
 using HiveShard.Data;
 using HiveShard.Edge;
 using HiveShard.Edge.Interfaces;
+using HiveShard.Environment;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
@@ -18,6 +19,7 @@ using HiveShard.Provider;
 using HiveShard.Repository;
 using HiveShard.Serializer;
 using HiveShard.Telemetry.Console;
+using HiveShard.Telemetry.HiveShardEE;
 using HiveShard.Util;
 using HiveShard.Workers.Edge;
 using HiveShard.Workers.Edge.Data;
@@ -44,11 +46,19 @@ public class InMemoryDeployment: IDeployment
     {
         _entryPointLocations.Add((compartment, typeof(T), compartmentType));
     }
-
+    
     public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, 
         IEnumerable<IsolatedEnvironment> workers,
         IEventRepository eventRepository)
     {
+        TelemetryConfig telemetryConfig = new TelemetryConfig(
+            new Uri(HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENDPOINT")),
+            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_TOKEN"),
+            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ORGANIZATION"),
+            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_PROJECT"),
+            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE")
+        );
+        
         var globalChunkConfig = new GlobalChunkConfig(minChunk, maxChunk);
         CancellationProvider cancellationProvider = new CancellationProvider();
         IServiceCollection topLevelServices = new ServiceCollection()
@@ -59,7 +69,8 @@ public class InMemoryDeployment: IDeployment
             .AddSingleton<ITickRepository, TickRepository>()
             .AddSingleton<ICancellationProvider>(cancellationProvider)
             .AddSingleton(cancellationProvider)
-            .AddSingleton<IHiveShardTelemetry, SimpleConsoleTelemetry>()
+            .AddSingleton<IHiveShardTelemetry, HiveShardEETelemetry>()
+            .AddSingleton<TelemetryConfig>(telemetryConfig)
             .AddSingleton<ISimpleFabric, InMemorySimpleFabric>()
             .AddSingleton<InMemoryEdgeFabric>()
             .AddSingleton<IEdgeTunnelClientEndpoint>(x => x.GetRequiredService<InMemoryEdgeFabric>())

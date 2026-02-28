@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="HiveShardEE.API.Contracts" Version="3.9.1" />
+      <PackageReference Include="System.Net.Http.Json" Version="9.0.13" />
+    </ItemGroup>
+
+</Project>
