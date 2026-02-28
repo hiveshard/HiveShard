@@ -33,7 +33,11 @@ jobs:
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=lcov
         env:
-          RABBITMQ_URL: localhost
+          HIVESHARD_TELEMETRY_ENDPOINT: ${{ secrets.HIVESHARD_TELEMETRY_ENDPOINT }}
+          HIVESHARD_TELEMETRY_TOKEN: ${{ secrets.HIVESHARD_TELEMETRY_TOKEN }}
+          HIVESHARD_TELEMETRY_ORGANIZATION: ${{ secrets.HIVESHARD_TELEMETRY_ORGANIZATION }}
+          HIVESHARD_TELEMETRY_PROJECT: ${{ secrets.HIVESHARD_TELEMETRY_PROJECT }}
+          HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE: ${{ secrets.HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE }}
 
       - name: upload coverage
         if: github.ref == 'refs/heads/main'
