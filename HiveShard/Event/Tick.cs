@@ -17,7 +17,7 @@ public class Tick: ITickEvent
         TickEventType = tickEventType;
         Emitter = emitter;
     }
-
+    
     public long TickNumber { get; }
     public DateTime TickDateTime { get; }
     public IEnumerable<TopicPartitionOffset> ChunkOffsets { get; }

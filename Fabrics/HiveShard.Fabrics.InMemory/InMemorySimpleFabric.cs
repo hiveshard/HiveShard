@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Interface;
@@ -87,6 +88,22 @@ public class InMemorySimpleFabric: ISimpleFabric
 
         _topicMaxOffsets[index] = newOffset;
         return Task.CompletedTask;
+    }
+
+    public IEnumerable<Message<object>> FetchTopic(TopicPartition topicPartition, long fromOffset, long toOffsetExclusive)
+    {
+        var index = (new EventType(topicPartition.Topic), topicPartition.Chunk.ToPartition(_globalChunkConfig));
+        if (!_topics.TryGetValue(index, out var concurrentDictionary))
+            throw new Exception($"{index} did not exist in topics");
+
+        List<Message<object>> messages = new();
+        for (long i = fromOffset; i < toOffsetExclusive; i++)
+        {
+            var consumption = concurrentDictionary[i];
+            messages.Add(new Message<object>(consumption.Message, topicPartition.Chunk));
+        }
+
+        return messages;
     }
 
     private void InitTopic((EventType, Partition) index)

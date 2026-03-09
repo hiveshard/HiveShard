@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using HiveShard.Data;
 
@@ -12,4 +13,5 @@ public interface ISimpleFabric: IFabric
     Task Send<T>(string topic, T message) where T: IEvent;
     Task Send<T>(string topic, Chunk chunk, T message) where T: IEvent;
     Task Send<T>(string topic, Partition partition, T message) where T: IEvent;
+    IEnumerable<Message<object>> FetchTopic(TopicPartition topicPartition, long fromOffset, long toOffsetExclusive);
 }

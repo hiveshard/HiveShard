@@ -92,6 +92,11 @@ namespace HiveShard.Fabrics.Kafka
         public Task Send<T>(string topic, Data.Partition partition, T message) where T: IEvent =>
             Send(topic, partition.ToChunk(_globalChunkConfig), message);
 
+        public IEnumerable<Message<object>> FetchTopic(TopicPartition topicPartition, long fromOffset, long toOffsetExclusive)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task Start(CancellationToken cancellationToken)
         {
             return Task.Run(async () =>

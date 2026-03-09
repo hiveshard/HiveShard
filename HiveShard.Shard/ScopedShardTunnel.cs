@@ -53,7 +53,7 @@ public class ScopedShardTunnel: IScopedShardTunnel
         where T : class, IHiveShard
     {
         _hiveShard = hiveShard;
-        _hiveShard.Initialize();
+        _hiveShard.Initialize(_hiveShardIdentity.Chunk);
     }
 
 

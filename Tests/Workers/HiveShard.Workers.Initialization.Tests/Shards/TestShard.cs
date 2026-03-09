@@ -1,3 +1,4 @@
+using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Shard.Interfaces;
 using HiveShard.Workers.Initialization.Tests.Events;
@@ -17,7 +18,7 @@ public class TestShard: IHiveShard
 
     public int ReceivedIncrements { get; private set; } = 0;
 
-    public void Initialize()
+    public void Initialize(Chunk chunk)
     {
         _scopedShardTunnel.Register<InitialDataEvent>(x =>
         {

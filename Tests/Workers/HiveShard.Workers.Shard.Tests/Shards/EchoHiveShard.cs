@@ -1,3 +1,4 @@
+using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Shard.Interfaces;
 using HiveShard.Worker.Tests.Events;
@@ -13,7 +14,7 @@ public class EchoHiveShard: IHiveShard
         _scopedShardTunnel = scopedShardTunnel;
     }
 
-    public void Initialize()
+    public void Initialize(Chunk chunk)
     {
         _scopedShardTunnel.Register<TestEvent>(HandleTestEvent);
     }
