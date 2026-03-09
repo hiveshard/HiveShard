@@ -19,8 +19,8 @@ public class EchoHiveShard: IHiveShard
         _scopedShardTunnel.Register<TestEvent>(HandleTestEvent);
     }
 
-    private void HandleTestEvent(TestEvent obj)
+    private void HandleTestEvent(Message<TestEvent> obj)
     {
-        _scopedShardTunnel.Send(new TestEventResponse(obj.Number));
+        _scopedShardTunnel.Send(new TestEventResponse(obj.Payload.Number));
     }
 }

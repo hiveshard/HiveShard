@@ -52,7 +52,7 @@ where TEvent: IEvent
                 throw new Exception($"HiveShard {_hiveShardIdentity.ShardType.GetShardType().Name} " +
                                     $"not found on {_compartmentIdentifier}");
             var scopedShardTunnel = provider.GetRequiredService<IScopedShardTunnel>();
-            scopedShardTunnel.Register<TEvent>(e => _events.Enqueue(e));
+            scopedShardTunnel.Register<TEvent>(e => _events.Enqueue(e.Payload));
             return Task.CompletedTask;
         }, $"{nameof(ShardOnWorkerFabricExpectationState<TEvent>)}: {_name}", cancellationProvider.GetToken(), debugLoggingProvider);
     }

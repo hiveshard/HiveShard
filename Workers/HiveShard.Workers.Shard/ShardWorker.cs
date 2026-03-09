@@ -25,7 +25,7 @@ public class ShardWorker: IIsolatedEntryPoint
     private readonly GlobalChunkConfig _globalChunkConfig;
     private readonly IEventRepository _eventRepository;
         
-    private readonly Dictionary<HiveShardIdentity, Task> _tunnels = new();
+    private readonly Dictionary<HiveShardIdentity, IScopedShardTunnel> _tunnels = new();
 
     public ShardWorker(
         ISimpleFabric fabric, 
@@ -70,9 +70,9 @@ public class ShardWorker: IIsolatedEntryPoint
             ScopedShardTunnel tunnel = (ScopedShardTunnel)shardServiceProvider.GetRequiredService<IScopedShardTunnel>();
             var hiveShard = (IHiveShard)shardServiceProvider.GetRequiredService(shardType);
             hiveShard.Initialize(shardChunk);
-            tunnel.Initialize(hiveShard);
+            tunnel.Initialize(hiveShard, request.ShardIdentity);
             _hiveShardRepository.AddHiveShard(request.ShardIdentity, shardServiceProvider);
-            _tunnels.Add(request.ShardIdentity, tunnel.Start());
+            _tunnels.Add(request.ShardIdentity, tunnel);
         }
 
         return Task.CompletedTask;

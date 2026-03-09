@@ -9,10 +9,10 @@ namespace HiveShard.Shard.Tests.Shards;
 
 public class TestShard: IHiveShard
 {
-    private readonly IScopedShardTunnel2 _tunnel;
+    private readonly IScopedShardTunnel _tunnel;
     public int Sum { get; private set; } = 0;
 
-    public TestShard(IScopedShardTunnel2 tunnel)
+    public TestShard(IScopedShardTunnel tunnel)
     {
         _tunnel = tunnel;
     }

@@ -20,7 +20,7 @@ public class SingleChunkScopedTunnel2Tests
         chunk = new Chunk(0,0);
         GlobalChunkConfig chunkConfig = new GlobalChunkConfig(chunk, chunk);
         fabric = CreateTunnel(chunkConfig);
-        ScopedShardTunnel2 tunnel = new ScopedShardTunnel2(fabric, chunkConfig);
+        ScopedShardTunnel tunnel = new ScopedShardTunnel(fabric, chunkConfig);
         shard = new TestShard(tunnel);
         var identity = new HiveShardIdentity(chunk, ShardType.From<TestShard>(), Guid.NewGuid());
         tunnel.Initialize(shard, identity);
