@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using HiveShard.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.Repositories;
 using Xcepto.States;
@@ -10,10 +11,10 @@ public class CompartmentalizedServiceBasedActionState<T>: XceptoState
     where T: class
 {
     private readonly Func<T, Task> _action;
-    private readonly string _compartmentIdentifier;
+    private readonly CompartmentIdentifier _compartmentIdentifier;
 
     public CompartmentalizedServiceBasedActionState(string name, 
-        string compartmentIdentifier, Func<T, Task> action) : base(name)
+        CompartmentIdentifier compartmentIdentifier, Func<T, Task> action) : base(name)
     {
         _compartmentIdentifier = compartmentIdentifier;
         this._action = action;
@@ -25,7 +26,7 @@ public class CompartmentalizedServiceBasedActionState<T>: XceptoState
     public override async Task OnEnter(IServiceProvider serviceProvider)
     {
         var compartmentRepository = serviceProvider.GetRequiredService<CompartmentRepository>();
-        var compartment = compartmentRepository.GetCompartment(_compartmentIdentifier);
+        var compartment = compartmentRepository.GetCompartment(_compartmentIdentifier.ToString());
         var service = compartment.Services.GetRequiredService<T>();
         await _action(service);
     }

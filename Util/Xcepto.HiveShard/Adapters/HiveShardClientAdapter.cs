@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using HiveShard.Client.Interfaces;
+using HiveShard.Data;
 using HiveShard.Interface;
 using Xcepto.Adapters;
 using Xcepto.HiveShard.States;
@@ -9,11 +10,11 @@ namespace Xcepto.HiveShard.Adapters;
 
 public class HiveShardClientAdapter: XceptoAdapter
 {
-    private readonly string _compartmentIdentifier;
+    private readonly CompartmentIdentifier _compartmentIdentifier;
 
-    public HiveShardClientAdapter(String username)
+    public HiveShardClientAdapter(HiveShardClient client)
     {
-        _compartmentIdentifier = $"client-{username}";
+        _compartmentIdentifier = new CompartmentIdentifier(client.UserId, CompartmentType.Client);
     }
 
     public void Action(Func<IClientTunnel, Task> clientAction)

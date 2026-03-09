@@ -30,9 +30,9 @@ public class DecentralizedHiveShardBuilder
         _maxChunk = max;
         return this;
     }
-    internal ServiceEnvironment Build()
+    internal ServiceEnvironment Build(string environmentName)
     {
-        return _deployment.Build(_minChunk, _maxChunk, _workers.AsEnumerable(), _eventRepository);
+        return _deployment.Build(_minChunk, _maxChunk, _workers.AsEnumerable(), _eventRepository, environmentName);
     }
 
     private readonly ISet<Type> _isolatedEnvironment = new HashSet<Type>();

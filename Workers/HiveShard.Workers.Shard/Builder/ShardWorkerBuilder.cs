@@ -10,7 +10,7 @@ namespace HiveShard.Workers.Shard.Builder;
 public class ShardWorkerBuilder
 {
     private readonly List<HiveShardIdentity> _hiveShards = new();
-    private string _identifier = Guid.NewGuid().ToString();
+    private Guid _identifier = Guid.NewGuid();
     
     public ShardWorkerBuilder AddShard<T>(Chunk chunk, Guid identity)
         where T : class, IHiveShard
@@ -25,9 +25,9 @@ public class ShardWorkerBuilder
         return this;
     }
 
-    public ShardWorkerBuilder Identify(string identifier)
+    public ShardWorkerBuilder Identify(Guid id)
     {
-        _identifier = identifier;
+        _identifier = id;
         return this;
     }
     

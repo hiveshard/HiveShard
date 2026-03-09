@@ -3,39 +3,48 @@
 namespace HiveShard.Data;
 
 [Serializable]
-public class HiveShardClient
+public class HiveShardClient: IEquatable<HiveShardClient>
 {
-    public HiveShardClient(string username)
+
+    public HiveShardClient(string username, Guid userId)
     {
+        UserId = userId;
         Username = username;
     }
 
     public string Username { get; }
+    public Guid UserId { get; }
 
-    protected bool Equals(HiveShardClient other)
+    public bool Equals(HiveShardClient? other)
     {
-        return Username == other.Username;
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Username == other.Username && UserId.Equals(other.UserId);
     }
 
     public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        return obj.GetType() == GetType() && Equals((HiveShardClient)obj);
+        if (obj.GetType() != GetType()) return false;
+        return Equals((HiveShardClient)obj);
     }
 
     public override int GetHashCode()
     {
-        return Username.GetHashCode();
+        unchecked
+        {
+            return (Username.GetHashCode() * 397) ^ UserId.GetHashCode();
+        }
     }
-        
+
     public static bool operator ==(HiveShardClient a, HiveShardClient? b)
     {
-        throw new InvalidOperationException("Use .Equals instead of ==.");
+        return a.Equals(b);
     }
 
     public static bool operator !=(HiveShardClient a, HiveShardClient b)
     {
-        throw new InvalidOperationException("Use .Equals instead of !=.");
+        return !a.Equals(b);
     }
 }

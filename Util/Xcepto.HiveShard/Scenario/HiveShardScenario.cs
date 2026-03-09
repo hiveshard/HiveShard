@@ -50,7 +50,7 @@ public class HiveShardScenario: CompartmentalizedXceptoScenario
             innerServiceCollection.AddSingleton<GenericEntryPoint>(genericEntryPoint);
 
             var innerCompartmentBuilder = Compartment.From(innerServiceCollection);
-            innerCompartmentBuilder.Identify(compartmentEnvironment.Identifier);
+            innerCompartmentBuilder.Identify(compartmentEnvironment.Identifier.ToString());
             foreach (var dependency in compartmentEnvironment.Dependencies) innerCompartmentBuilder.DependsOn(dependency);
 
             innerCompartmentBuilder.SetEntryPoint(typeof(GenericEntryPoint));
@@ -63,7 +63,7 @@ public class HiveShardScenario: CompartmentalizedXceptoScenario
                     throw new Exception("Incorrectly registered entryPoint");
                 return isolatedEntryPoint;
             });
-            compartments.Add(compartmentEnvironment.Identifier, compartment);
+            compartments.Add(compartmentEnvironment.Identifier.ToString(), compartment);
         }
             
         return Task.FromResult(compartments.Values.AsEnumerable());

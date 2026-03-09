@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="HiveShardEE.API.Contracts" Version="3.9.1" />
+      <PackageReference Include="HiveShardEE.API.Contracts" Version="2.0.0" />
       <PackageReference Include="System.Net.Http.Json" Version="9.0.13" />
     </ItemGroup>
 

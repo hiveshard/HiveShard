@@ -13,10 +13,6 @@ public class EchoHiveShard: IHiveShard
         _scopedShardTunnel = scopedShardTunnel;
     }
 
-    public void Process()
-    {
-    }
-
     public void Initialize()
     {
         _scopedShardTunnel.Register<TestEvent>(HandleTestEvent);

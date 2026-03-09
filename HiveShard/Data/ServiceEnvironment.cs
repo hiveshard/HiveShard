@@ -7,7 +7,7 @@ namespace HiveShard.Data;
 
 public class ServiceEnvironment
 {
-    private readonly IEnumerable<(string, Type, string)> _entryPointLocations;
+    private readonly IEnumerable<(Type, CompartmentIdentifier)> _entryPointLocations;
     public GlobalChunkConfig GlobalChunkConfig { get; }
     public IServiceCollection Outer { get; }
     public IEnumerable<CompartmentEnvironment> Inner { get; }
@@ -15,7 +15,8 @@ public class ServiceEnvironment
 
     public ServiceEnvironment(GlobalChunkConfig globalChunkConfig,
         IServiceCollection serviceCollection,
-        IEnumerable<CompartmentEnvironment> inner, IEnumerable<(string, Type, string)> entryPointLocations, IEventRepository eventRepository)
+        IEnumerable<CompartmentEnvironment> inner, 
+        IEnumerable<(Type, CompartmentIdentifier)> entryPointLocations, IEventRepository eventRepository)
     {
         _entryPointLocations = entryPointLocations;
         EventRepository = eventRepository;

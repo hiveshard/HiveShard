@@ -1,12 +1,15 @@
+using System;
+using HiveShard.Data;
+
 namespace HiveShard.Client.Data;
 
 public class ClientIsolatedEnvironment: IsolatedEnvironment
 {
-    internal ClientIsolatedEnvironment(string username)
+    internal ClientIsolatedEnvironment(HiveShardClient user)
     {
-        Username = username;
+        User = user;
     }
 
-    public string Username { get; }
+    public HiveShardClient User { get; }
     public override bool IsUnique => false;
 }

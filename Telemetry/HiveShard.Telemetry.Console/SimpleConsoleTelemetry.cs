@@ -1,4 +1,5 @@
 ﻿using System;
+using HiveShard.Data;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
 
@@ -20,6 +21,11 @@ namespace HiveShard.Telemetry.Console
         {
             System.Console.WriteLine($"[ERROR] {exception}");
             System.Console.Error.WriteLine(exception);
+        }
+
+        public void Cause(TransitionCause cause)
+        {
+            System.Console.WriteLine($"[Cause] {cause.InboundEventType} => {cause.ShardType} => {cause.OutboundEventType}");
         }
 
         public IHiveShardTelemetry GetScopedLogger<T>(IIdentityConfig identityConfig)

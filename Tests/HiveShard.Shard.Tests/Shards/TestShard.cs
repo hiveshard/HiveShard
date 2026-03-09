@@ -14,11 +14,6 @@ public class TestShard: IHiveShard
         _tunnel = tunnel;
     }
 
-    public void Process()
-    {
-        _tunnel.Send(new TestEventResponse(_testEvent.Number));
-    }
-
     public void Initialize()
     {
         _tunnel.Register<TestEvent>(e =>

@@ -17,14 +17,14 @@ namespace Xcepto.HiveShard.States;
 public class ShardOnWorkerFabricExpectationState<TEvent>: XceptoState
 where TEvent: IEvent
 {
-    private readonly string _compartmentIdentifier;
+    private readonly CompartmentIdentifier _compartmentIdentifier;
     private readonly HiveShardIdentity _hiveShardIdentity;
     private readonly Predicate<TEvent> _expectation;
 
     private readonly ConcurrentQueue<TEvent> _events = new();
     private readonly string _name;
 
-    public ShardOnWorkerFabricExpectationState(string name, string compartmentIdentifier, HiveShardIdentity hiveShardIdentity, Predicate<TEvent> expectation) : base(name)
+    public ShardOnWorkerFabricExpectationState(string name, CompartmentIdentifier compartmentIdentifier, HiveShardIdentity hiveShardIdentity, Predicate<TEvent> expectation) : base(name)
     {
         _name = name;
         _expectation = expectation;
@@ -47,7 +47,7 @@ where TEvent: IEvent
         return Resilience.Retry(_ =>
         {
             var hiveShardRepository =
-                serviceProvider.GetCompartmentalizedService<HiveShardRepository>(_compartmentIdentifier);
+                serviceProvider.GetCompartmentalizedService<HiveShardRepository>(_compartmentIdentifier.ToString());
             if (!hiveShardRepository.TryGetHiveShard(_hiveShardIdentity, out var provider))
                 throw new Exception($"HiveShard {_hiveShardIdentity.ShardType.GetShardType().Name} " +
                                     $"not found on {_compartmentIdentifier}");

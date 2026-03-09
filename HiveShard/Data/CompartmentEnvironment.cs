@@ -6,7 +6,7 @@ namespace HiveShard.Data;
 
 public class CompartmentEnvironment
 {
-    public CompartmentEnvironment(string identifier, IServiceCollection services, IEnumerable<Type> dependencies, Type entryPointType)
+    public CompartmentEnvironment(CompartmentIdentifier identifier, IServiceCollection services, IEnumerable<Type> dependencies, Type entryPointType)
     {
         Services = services;
         Dependencies = dependencies;
@@ -16,6 +16,6 @@ public class CompartmentEnvironment
 
     public IServiceCollection Services { get; }
     public IEnumerable<Type> Dependencies { get; }
-    public string Identifier { get; }
+    public CompartmentIdentifier Identifier { get; }
     public Type EntryPointType { get; }
 }

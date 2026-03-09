@@ -97,7 +97,6 @@ public class ScopedShardTunnel: IScopedShardTunnel
                     }
                 }
                     
-                _hiveShard.Process();
                 var topicsOfEmitter = _eventRepository.GetTopicsOfEmitter(_hiveShardIdentity);
                 foreach (var topic in topicsOfEmitter)
                 {
@@ -147,6 +146,16 @@ public class ScopedShardTunnel: IScopedShardTunnel
 
     public Task Send<TEvent>(TEvent message) where TEvent: IEvent
     {
+        // _loggingProvider.Cause(new TransitionCause(
+        //     tick: _lastTick, 
+        //     shardType: _hiveShardIdentity.Identity.EmitterIdentityString, 
+        //     converge: 0, 
+        //     shardX: _hiveShardIdentity.Chunk.XCoord,
+        //     shardY: _hiveShardIdentity.Chunk.YCoord,
+        //     shardReplica: _hiveShardIdentity.Identity.GetHashCode(),
+        //     inboundEvent: ,
+        //     inboundEventType: ,
+        // ));
         return Resilience.Retry(_ =>
             {
                 if (_ready < 1)

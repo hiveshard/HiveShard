@@ -17,11 +17,6 @@ public class TestShard: IHiveShard
 
     public int ReceivedIncrements { get; private set; } = 0;
 
-    public void Process()
-    {
-        while (_testRepository.TryGet(out int increment)) ReceivedIncrements += increment;
-    }
-
     public void Initialize()
     {
         _scopedShardTunnel.Register<InitialDataEvent>(x =>

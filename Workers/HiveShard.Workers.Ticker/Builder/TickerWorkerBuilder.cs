@@ -11,7 +11,7 @@ public class TickerWorkerBuilder
 {
     private readonly List<TickerIsolatedEnvironment> _tickers = [];
     private readonly List<GlobalTickerIsolatedEnvironment> _globalTickers = [];
-    private string _tickerIdentifier;
+    private Guid _tickerIdentifier;
 
     internal IsolatedEnvironment Build()
     {
@@ -37,7 +37,7 @@ public class TickerWorkerBuilder
         return this;
     }
 
-    public TickerWorkerBuilder Identify(string tickerIdentifier)
+    public TickerWorkerBuilder Identify(Guid tickerIdentifier)
     {
         _tickerIdentifier = tickerIdentifier;
         return this;

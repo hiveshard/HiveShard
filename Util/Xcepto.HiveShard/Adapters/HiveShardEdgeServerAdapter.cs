@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using HiveShard.Data;
 using HiveShard.Edge;
 using HiveShard.Provider;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,18 +13,18 @@ namespace Xcepto.HiveShard.Adapters;
 public class HiveShardEdgeServerAdapter<T>: XceptoAdapter
     where T: BaseEdge
 {
-    private readonly string _compartmentIdentifier;
+    private readonly CompartmentIdentifier _compartmentIdentifier;
 
-    public HiveShardEdgeServerAdapter(string edgeWorkerName)
+    public HiveShardEdgeServerAdapter(Guid edgeWorkerName)
     {
-        _compartmentIdentifier = $"edgeWorker-{edgeWorkerName}";
+        _compartmentIdentifier = new CompartmentIdentifier(edgeWorkerName, CompartmentType.EdgeWorker);
     }
     protected override Task Initialize(IServiceProvider serviceProvider) => Task.CompletedTask;
 
     protected override Task Cleanup(IServiceProvider serviceProvider)
     {
         var compartmentRepository = serviceProvider.GetRequiredService<CompartmentRepository>();
-        var compartment = compartmentRepository.GetCompartment(_compartmentIdentifier);
+        var compartment = compartmentRepository.GetCompartment(_compartmentIdentifier.ToString());
         var cancellationProvider = compartment.Services.GetRequiredService<CancellationProvider>();
         cancellationProvider.RequestCancellation();
         return Task.CompletedTask;

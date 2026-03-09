@@ -1,7 +1,8 @@
-﻿namespace HiveShard.Interface;
+﻿using HiveShard.Data;
+
+namespace HiveShard.Interface;
 
 public interface IHiveShard
 {
-    public void Process();
     public void Initialize();
 }

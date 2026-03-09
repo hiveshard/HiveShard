@@ -1,19 +1,20 @@
 using HiveShard.Client.Data;
+using HiveShard.Data;
 
 namespace HiveShard.Client.Builder;
 
 public class ClientBuilder
 {
-    private string _username;
+    private HiveShardClient _client;
 
     internal IsolatedEnvironment Build()
     {
-        return new ClientIsolatedEnvironment(_username);
+        return new ClientIsolatedEnvironment(_client);
     }
 
-    public ClientBuilder Identify(string username)
+    public ClientBuilder Identify(HiveShardClient username)
     {
-        _username = username;
+        _client = username;
         return this;
     }
 }

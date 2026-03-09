@@ -1,3 +1,4 @@
+using System;
 using HiveShard.Edge;
 using HiveShard.Workers.Edge.Data;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +9,7 @@ public class EdgeWorkerBuilder()
 {
     private readonly ServiceCollection _serviceCollection = new();
     private bool _dynamicEdgeAssignment = false;
-    private string _identifier;
+    private Guid _identifier;
 
     public EdgeWorkerBuilder AddEdge<T>()
         where T : BaseEdge
@@ -17,7 +18,7 @@ public class EdgeWorkerBuilder()
         return this;
     }
 
-    public EdgeWorkerBuilder Identify(string identifier)
+    public EdgeWorkerBuilder Identify(Guid identifier)
     {
         _identifier = identifier;
         return this;

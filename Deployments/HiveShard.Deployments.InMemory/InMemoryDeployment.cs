@@ -39,24 +39,24 @@ namespace HiveShard.Deployments.InMemory;
 public class InMemoryDeployment: IDeployment
 {
     private readonly List<CompartmentEnvironment> _isolatedEnvironments = [];
-    private readonly List<(string, Type, string)> _entryPointLocations = [];
+    private readonly List<(Type, CompartmentIdentifier)> _entryPointLocations = [];
 
-    private void AddEntryPoint<T>(string compartment, string compartmentType)
+    private void AddEntryPoint<T>(CompartmentIdentifier compartmentIdentifier)
     where T: class
     {
-        _entryPointLocations.Add((compartment, typeof(T), compartmentType));
+        _entryPointLocations.Add((typeof(T), compartmentIdentifier));
     }
     
-    public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, 
+    public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk,
         IEnumerable<IsolatedEnvironment> workers,
-        IEventRepository eventRepository)
+        IEventRepository eventRepository, string environmentName)
     {
         TelemetryConfig telemetryConfig = new TelemetryConfig(
             new Uri(HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENDPOINT")),
             HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_TOKEN"),
             HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ORGANIZATION"),
             HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_PROJECT"),
-            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE")
+            $"{HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE")}_{environmentName}"
         );
         
         var globalChunkConfig = new GlobalChunkConfig(minChunk, maxChunk);
@@ -115,7 +115,7 @@ public class InMemoryDeployment: IDeployment
         foreach (var initializer in initializationIsolatedEnvironment.Initializers) initializerAdditionRepository.AddInitializer(initializer);
 
         var compartmentEnvironment = new CompartmentEnvironment(
-            "initializer", 
+            new CompartmentIdentifier(Guid.NewGuid(), CompartmentType.Initializer), 
             serviceCollection, 
             new DependencyBuilder()
                 .Add<ISimpleFabric>()
@@ -137,7 +137,7 @@ public class InMemoryDeployment: IDeployment
         foreach (var hiveShardIdentity in shardWorkerIsolatedEnvironment.HiveShards) repository.Add(new ShardAdditionRequest(hiveShardIdentity));
 
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"shardWorker-{shardWorkerIsolatedEnvironment.Identifier}", 
+            new CompartmentIdentifier(shardWorkerIsolatedEnvironment.Identifier, CompartmentType.ShardWorker), 
             serviceCollection, 
             new DependencyBuilder()
                 .Add<ISimpleFabric>()
@@ -159,7 +159,7 @@ public class InMemoryDeployment: IDeployment
         serviceCollection.AddSingleton<EdgeWorker>();
         serviceCollection.AddSingleton<IEdgeTunnel, EdgeTunnel>();
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"edgeWorker-{edgeWorkerIsolatedEnvironment.Identifier}", 
+            new CompartmentIdentifier(edgeWorkerIsolatedEnvironment.Identifier, CompartmentType.EdgeWorker), 
             serviceCollection, 
             new DependencyBuilder()
                 .Add<CancellationProvider>()
@@ -179,9 +179,9 @@ public class InMemoryDeployment: IDeployment
 
         serviceCollection.AddSingleton<ClientTunnel>();
         serviceCollection.AddSingleton<IClientTunnel, ClientTunnel>(x => x.GetRequiredService<ClientTunnel>());
-        serviceCollection.AddSingleton<HiveShardClient>(new HiveShardClient(clientIsolatedEnvironment.Username));
+        serviceCollection.AddSingleton<HiveShardClient>(clientIsolatedEnvironment.User);
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"client-{clientIsolatedEnvironment.Username}", 
+            new CompartmentIdentifier(clientIsolatedEnvironment.User.UserId, CompartmentType.Client), 
             serviceCollection, 
             new DependencyBuilder()
                 .Add<IEdgeTunnelClientEndpoint>()
@@ -200,12 +200,16 @@ public class InMemoryDeployment: IDeployment
         serviceCollection.AddSingleton<TickerRepository>();
         var tickerAdditionRepository = new TickerAdditionRepository();
         serviceCollection.AddSingleton<TickerAdditionRepository>(tickerAdditionRepository);
-        foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers) tickerAdditionRepository.RequestEventTickerAddition(tickerIsolatedEnvironment.Identity);
-        foreach (var globalTickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.GlobalTickers) tickerAdditionRepository.RequestGlobalTickerAddition(globalTickerIsolatedEnvironment.GlobalTickerIdentity);
-        AddEntryPoint<TickerWorker>(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, "tickerWorker");
+        foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers) 
+            tickerAdditionRepository.RequestEventTickerAddition(tickerIsolatedEnvironment.Identity);
+        foreach (var globalTickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.GlobalTickers) 
+            tickerAdditionRepository.RequestGlobalTickerAddition(globalTickerIsolatedEnvironment.GlobalTickerIdentity);
+
+        var compartmentIdentifier = new CompartmentIdentifier(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, CompartmentType.TickerWorker);
+        AddEntryPoint<TickerWorker>(compartmentIdentifier);
 
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"tickerWorker-{tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier}",
+            compartmentIdentifier,
             serviceCollection,
             new DependencyBuilder()
                 .Add<ICancellationProvider>()

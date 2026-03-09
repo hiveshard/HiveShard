@@ -6,5 +6,6 @@ namespace HiveShard.Interface;
 
 public interface IDeployment
 {
-    ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, IEnumerable<IsolatedEnvironment> asEnumerable, IEventRepository eventRepository);
+    ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, IEnumerable<IsolatedEnvironment> asEnumerable,
+        IEventRepository eventRepository, string environmentName);
 }

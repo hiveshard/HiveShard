@@ -9,10 +9,10 @@ namespace Xcepto.HiveShard.Adapters;
 public class HiveShardShardAdapter: XceptoAdapter
 {
     private readonly HiveShardIdentity _hiveShardIdentity;
-    private readonly string _compartmentIdentifier;
-    public HiveShardShardAdapter(string worker, HiveShardIdentity hiveShardIdentity)
+    private readonly CompartmentIdentifier _compartmentIdentifier;
+    public HiveShardShardAdapter(Guid id, HiveShardIdentity hiveShardIdentity)
     {
-        _compartmentIdentifier = $"shardWorker-{worker}";
+        _compartmentIdentifier = new CompartmentIdentifier(id, CompartmentType.ShardWorker);
         _hiveShardIdentity = hiveShardIdentity;
     }
     

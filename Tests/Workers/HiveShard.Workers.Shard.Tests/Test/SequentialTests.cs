@@ -18,13 +18,13 @@ public class SequentialTests<T>
 where T: IDeployment, new()
 {
     private HiveShardIdentity _hiveShardIdentity;
-    private string _hiveShardWorker;
+    private Guid _hiveShardWorker;
     private HiveShardScenario _hiveShardScenario;
 
     [OneTimeSetUp]
     public void SetUp()
     {
-        _hiveShardWorker = "SW1";
+        _hiveShardWorker = Guid.NewGuid();
         var onlyChunk = new Chunk(0, 0);
         _hiveShardIdentity = new HiveShardIdentity(onlyChunk, ShardType.From<EchoHiveShard>(), Guid.NewGuid());
         ServiceEnvironment environment = HiveShardFactory.Create<T>(builder => builder
