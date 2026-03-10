@@ -6,16 +6,16 @@ using HiveShard.Workers.Initializer.Data;namespace HiveShard.Workers.Initializer
 
 public class InitializationBuilder
 {
-    private readonly List<Type> _initializers = new();
+    private readonly List<InitializerAdditionRequest> _initializers = new();
     public InitializerIsolatedEnvironment Build()
     {
         return new InitializerIsolatedEnvironment(_initializers.AsEnumerable());
     }
 
-    public InitializationBuilder AddInitializer<TInitializer>()
+    public InitializationBuilder AddInitializer<TInitializer>(InitializerEmitterIdentity identity)
         where TInitializer: IInitializer
     {
-        _initializers.Add(typeof(TInitializer));
+        _initializers.Add(new InitializerAdditionRequest(identity, typeof(TInitializer)));
         return this;
     }
 }

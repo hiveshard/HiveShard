@@ -24,6 +24,8 @@ public class TickerWorkerBuilder
         Ticker(new DistributedTickerIdentity(id, typeof(T)));
         return this;
     }
+
+    public TickerWorkerBuilder Ticker<T>() where T : class, IEvent => Ticker<T>(Guid.NewGuid());
     
     public TickerWorkerBuilder Ticker(DistributedTickerIdentity identity)
     {
@@ -36,6 +38,8 @@ public class TickerWorkerBuilder
         _globalTickers.Add(new GlobalTickerIsolatedEnvironment(globalTickerIdentity));
         return this;
     }
+
+    public TickerWorkerBuilder GlobalTicker() => GlobalTicker(new GlobalTickerIdentity(Guid.NewGuid()));
 
     public TickerWorkerBuilder Identify(Guid tickerIdentifier)
     {

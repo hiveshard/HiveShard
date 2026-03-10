@@ -5,9 +5,9 @@ namespace HiveShard.Workers.Initializer.Data;
 
 public class InitializerIsolatedEnvironment: IsolatedEnvironment
 {
-    public IEnumerable<Type> Initializers { get; }
+    public IEnumerable<InitializerAdditionRequest> Initializers { get; }
 
-    public InitializerIsolatedEnvironment(IEnumerable<Type> initializers)
+    public InitializerIsolatedEnvironment(IEnumerable<InitializerAdditionRequest> initializers)
     {
         Initializers = initializers;
     }

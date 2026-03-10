@@ -9,6 +9,7 @@ using HiveShard.Ticker.Tests.Shards;
 using HiveShard.Workers.Shard.Extensions;
 using HiveShard.Workers.Ticker.Extensions;
 using HiveShard.Ticker.Tests.Extensions;
+using HiveShard.Workers.Initializer.Data;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
 
@@ -25,7 +26,7 @@ public class EventTickerTests<T>
         Guid tickerIdentifier = Guid.NewGuid();
         var onlyChunk = new Chunk(0, 0);
         var hiveShardIdentity = new HiveShardIdentity(onlyChunk, ShardType.From<NavigationShard>(), Guid.NewGuid());
-        var initializerType = new InitializerType(new EmitterIdentity("test initializer"));
+        var initializerType = new InitializerEmitterIdentity(new EmitterIdentity("test initializer"));
         var initTickerIdentity = new DistributedTickerIdentity(Guid.NewGuid(), typeof(InitializationEvent));
         var testEventIdentity = new DistributedTickerIdentity(Guid.NewGuid(), typeof(TestEvent));
         var globalTickerIdentity = new GlobalTickerIdentity(Guid.NewGuid());

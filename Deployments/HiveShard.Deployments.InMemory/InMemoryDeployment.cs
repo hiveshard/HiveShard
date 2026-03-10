@@ -112,7 +112,8 @@ public class InMemoryDeployment: IDeployment
         InitializerAdditionRepository initializerAdditionRepository = new InitializerAdditionRepository();
         serviceCollection.AddSingleton(initializerAdditionRepository);
         
-        foreach (var initializer in initializationIsolatedEnvironment.Initializers) initializerAdditionRepository.AddInitializer(initializer);
+        foreach (var initializer in initializationIsolatedEnvironment.Initializers) 
+            initializerAdditionRepository.AddInitializer(initializer);
 
         var compartmentEnvironment = new CompartmentEnvironment(
             new CompartmentIdentifier(Guid.NewGuid(), CompartmentType.Initializer), 
@@ -136,7 +137,8 @@ public class InMemoryDeployment: IDeployment
         ShardAdditionRepository repository = new ShardAdditionRepository();
         serviceCollection.AddSingleton<ShardAdditionRepository>(repository);
         
-        foreach (var hiveShardIdentity in shardWorkerIsolatedEnvironment.HiveShards) repository.Add(new ShardAdditionRequest(hiveShardIdentity));
+        foreach (var hiveShardIdentity in shardWorkerIsolatedEnvironment.HiveShards) 
+            repository.Add(new ShardAdditionRequest(hiveShardIdentity));
 
         var compartmentEnvironment = new CompartmentEnvironment(
             new CompartmentIdentifier(shardWorkerIsolatedEnvironment.Identifier, CompartmentType.ShardWorker), 

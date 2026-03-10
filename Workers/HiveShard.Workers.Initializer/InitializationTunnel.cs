@@ -7,6 +7,7 @@ using HiveShard.Event;
 using HiveShard.Initializer.Interfaces;
 using HiveShard.Interface;
 using HiveShard.Interface.Repository;
+using HiveShard.Workers.Initializer.Data;
 
 namespace HiveShard.Workers.Initializer;
 
@@ -15,7 +16,7 @@ public class InitializationTunnel: IInitializationTunnel
     private readonly ISimpleFabric _simpleFabric;
     private readonly IEventRepository _eventRepository;
     private readonly Dictionary<(Type, Chunk), long> _offsets = new();
-    private InitializerType _emitterIdentity;
+    private InitializerEmitterIdentity _emitterIdentity;
     private IInitializer _initializerInstance;
 
     public InitializationTunnel(ISimpleFabric simpleFabric, IEventRepository eventRepository)
@@ -34,11 +35,10 @@ public class InitializationTunnel: IInitializationTunnel
         _simpleFabric.Send(index.Item1.FullName!, chunk, new Envelope<TEvent>(e, Guid.NewGuid()));
     }
 
-    public void Initialize(IInitializer initializerInstance)
+    public void Initialize(IInitializer initializerInstance, InitializerEmitterIdentity identity)
     {
         _initializerInstance = initializerInstance;
-        var newGuid = Guid.NewGuid();
-        _emitterIdentity = new InitializerType(new EmitterIdentity($"initializer-{newGuid}"));
+        _emitterIdentity = identity;
         _simpleFabric.Register<Tick>("ticks", HandleTick);
     }
 
