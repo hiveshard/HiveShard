@@ -16,14 +16,9 @@ public class InitializationTests<T>
 where T: class, IDeployment, new()
 {
     [Test]
-    [Ignore("system not stable enough for this yet")]
     public async Task TestInitializerCausedServiceToWriteToRepository()
     {
         Guid shardWorker = Guid.NewGuid();
-        List<int> increments = new List<int>()
-        {
-            2, 5, 6, 12, 25
-        };
         var shard = new HiveShardIdentity(new Chunk(0, 0), ShardType.From<TestShard>(), Guid.NewGuid());
         var environment = HiveShardFactory.Create<T>(builder => builder
             .ShardWorker(workerBuilder => workerBuilder
@@ -39,7 +34,8 @@ where T: class, IDeployment, new()
         {
             var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(shardWorker, shard));
 
-            shardAdapter.Except<TestShard>(x=> x.ReceivedIncrements == increments.Sum());
+            shardAdapter.Except<TestShard>(x=> 
+                x.ReceivedIncrements == TestShardInitializer.Increments.Sum());
         });
     }
 

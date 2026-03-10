@@ -119,6 +119,8 @@ public class InMemoryDeployment: IDeployment
             serviceCollection, 
             new DependencyBuilder()
                 .Add<ISimpleFabric>()
+                .Add<GlobalChunkConfig>()
+                .Add<IEventRepository>()
                 .Build(),
             typeof(Initialization)
         );
