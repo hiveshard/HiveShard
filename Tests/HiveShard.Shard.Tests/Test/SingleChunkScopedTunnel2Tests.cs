@@ -9,6 +9,7 @@ using HiveShard.Shard.Tests.Data;
 using HiveShard.Shard.Tests.Events;
 using HiveShard.Shard.Tests.Shards;
 using HiveShard.Telemetry.Console;
+using HiveShard.Shard.Tests.Extensions;
 
 namespace HiveShard.Shard.Tests.Test;
 
@@ -20,7 +21,8 @@ public class SingleChunkScopedTunnel2Tests
         chunk = new Chunk(0,0);
         GlobalChunkConfig chunkConfig = new GlobalChunkConfig(chunk, chunk);
         fabric = CreateTunnel(chunkConfig);
-        ScopedShardTunnel tunnel = new ScopedShardTunnel(fabric, chunkConfig);
+        IHiveShardTelemetry telemetry = new SimpleConsoleTelemetry();
+        ScopedShardTunnel tunnel = new ScopedShardTunnel(fabric, chunkConfig, telemetry);
         shard = new TestShard(tunnel);
         var identity = new HiveShardIdentity(chunk, ShardType.From<TestShard>(), Guid.NewGuid());
         tunnel.Initialize(shard, identity);

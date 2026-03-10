@@ -28,26 +28,33 @@ public class GlobalTicker
     {
         var tickEventName = typeof(Tick).FullName!;
         // this tick should be ignored if receivers already know of something > 0
-        _simpleFabric.Send("ticks", new Partition(0), new Tick(0, [], DateTime.Now, tickEventName, _globalTickerIdentity.ToEmitterType()));
+        _simpleFabric.Send("ticks", new Partition(0),
+            new Envelope<Tick>(
+                new Tick(0, [], DateTime.Now, tickEventName, _globalTickerIdentity.ToEmitterType()),
+                Guid.NewGuid()
+            )
+        );
         _currentTick = 0;
         
         
-        foreach (var eventOrder in _eventRepository.GetTotalOrder()) _simpleFabric.Register<CompletedTick>("completed-ticks", new Partition(eventOrder.Value), HandleEventCompletedTick);
+        foreach (var eventOrder in _eventRepository.GetTotalOrder()) 
+            _simpleFabric.Register<CompletedTick>("completed-ticks", new Partition(eventOrder.Value), HandleEventCompletedTick);
 
         return Task.CompletedTask;
     }
 
 
     private readonly Dictionary<long, ISet<string>> _completedTicks = new();
-    private void HandleEventCompletedTick(Consumption<CompletedTick> consumption)
+    private void HandleEventCompletedTick(Consumption<IEnvelope<CompletedTick>> consumption)
     {
-        var messageTick = consumption.Message.Tick;
+        var completedTick = consumption.Message.Payload;
+        var messageTick = completedTick.Tick;
         if (messageTick < _currentTick) 
             return;
         
         if (!_completedTicks.ContainsKey(messageTick))
             _completedTicks[messageTick] = new HashSet<string>();
-        _completedTicks[messageTick].Add(consumption.Message.EventType);
+        _completedTicks[messageTick].Add(completedTick.EventType);
 
         foreach (var eventTypeString in _eventRepository.GetTotalOrder()
                      .Select(x => x.Key))
@@ -62,6 +69,11 @@ public class GlobalTicker
         }
 
         _currentTick += 1;
-        _simpleFabric.Send("ticks", new Partition(0), new Tick(_currentTick, [], DateTime.Now, typeof(Tick).FullName!, _globalTickerIdentity.ToEmitterType()));
+        _simpleFabric.Send("ticks", new Partition(0),
+            new Envelope<Tick>(
+                new Tick(_currentTick, [], DateTime.Now, typeof(Tick).FullName!, _globalTickerIdentity.ToEmitterType()),
+                Guid.NewGuid()
+            )
+        );
     }
 }

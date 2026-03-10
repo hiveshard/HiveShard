@@ -56,25 +56,25 @@ namespace HiveShard.Fabrics.Kafka
             };
         }
         
-        public void Register<T>(string topic, Action<Consumption<T>> action) where T: IEvent
+        public void Register<T>(string topic, Action<Consumption<IEnvelope<T>>> action) where T: IEvent
             => Register(topic, new Chunk(0, 0), action);
 
-        public void Register<T>(string topic, Chunk chunk, Action<Consumption<T>> action) where T: IEvent
+        public void Register<T>(string topic, Chunk chunk, Action<Consumption<IEnvelope<T>>> action) where T: IEvent
         {
             _ensureTopics.Add(new TopicPartition(topic, chunk), _ctsToken);
             _kafkaRegistrations.Enqueue(new KafkaRegistration(new TopicPartition(topic, chunk), (json, offset) =>
             {
-                var message = _serializer.Deserialize<T>(json);
-                action(new Consumption<T>(message, offset));
+                var message = _serializer.Deserialize<IEnvelope<T>>(json);
+                action(new Consumption<IEnvelope<T>>(message, offset));
             }));
         }
 
-        public void Register<T>(string topic, Data.Partition partition, Action<Consumption<T>> action)
+        public void Register<T>(string topic, Data.Partition partition, Action<Consumption<IEnvelope<T>>> action)
             where T: IEvent => Register(topic, partition.ToChunk(_globalChunkConfig), action);
 
-        public async Task Send<T>(string topic, T message) where T: IEvent
-            => await Send(topic, new Chunk(0,0), message);
-        public Task Send<T>(string topic, Chunk chunk, T message) where T: IEvent
+        public void Send<T>(string topic, IEnvelope<T> message) where T: IEvent
+            => Send(topic, new Chunk(0,0), message);
+        public void Send<T>(string topic, Chunk chunk, IEnvelope<T> message) where T: IEvent
         {
             TopicPartition topicPartition = new TopicPartition(topic, chunk);
             _messagesToBeProduced.AddOrUpdate(topicPartition,
@@ -86,13 +86,13 @@ namespace HiveShard.Fabrics.Kafka
                 },
                 (key, oldValue) => oldValue is null ? new BlockingCollection<string>() : oldValue);
             _messagesToBeProduced[topicPartition].Add(_serializer.Serialize(message));
-            return Task.CompletedTask;
+            throw new NotImplementedException("no immediate access to offset");
         }
 
-        public Task Send<T>(string topic, Data.Partition partition, T message) where T: IEvent =>
+        public void Send<T>(string topic, Data.Partition partition, IEnvelope<T> message) where T: IEvent =>
             Send(topic, partition.ToChunk(_globalChunkConfig), message);
 
-        public IEnumerable<Message<object>> FetchTopic(TopicPartition topicPartition, long fromOffset, long toOffsetExclusive)
+        public IEnumerable<Consumption<IEnvelope<object>>> FetchTopic(TopicPartition topicPartition, long fromOffset, long toOffsetExclusive)
         {
             throw new NotImplementedException();
         }

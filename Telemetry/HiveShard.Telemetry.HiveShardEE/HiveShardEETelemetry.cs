@@ -123,6 +123,7 @@ namespace HiveShard.Telemetry.HiveShardEE
                         new SystemLogIngestRequest(logs));
                     if (postAsJsonAsync.StatusCode != HttpStatusCode.OK)
                         throw new Exception($"Failed to flush logs to HiveShardEE: {postAsJsonAsync.StatusCode}");
+                    break;
                 }
                 catch (Exception e)
                 {
@@ -139,13 +140,29 @@ namespace HiveShard.Telemetry.HiveShardEE
         
         private async Task<int> CreateEnvironment()
         {
-            var response = await _client.PostAsJsonAsync(new Uri(_config.ApiEndpoint, $"api/{_config.Organization}/{_config.Project}/env/create"),
-                new CreateEnvironmentRequest(_config.EnvironmentType));
+            var content = "";
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    var response = await _client.PostAsJsonAsync(new Uri(_config.ApiEndpoint, $"api/{_config.Organization}/{_config.Project}/env/create"),
+                        new CreateEnvironmentRequest(_config.EnvironmentType));
 
-            if (response.StatusCode is not HttpStatusCode.OK)
-                throw new Exception($"Failed to create a HiveShardEE environment: {response.StatusCode}");
+                    if (response.StatusCode is not HttpStatusCode.OK)
+                        throw new Exception($"Failed to create a HiveShardEE environment: {response.StatusCode}");
 
-            var content = await response.Content.ReadAsStringAsync();
+                    content = await response.Content.ReadAsStringAsync();
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                await Task.Delay(200);
+            }
+            
+            
+            
             var createEnvironmentResponse = _serializer.Deserialize<CreateEnvironmentResponse>(content);
 
             return createEnvironmentResponse.EnvInstance;
@@ -182,6 +199,7 @@ namespace HiveShard.Telemetry.HiveShardEE
                         new EdgeIngestRequest(causes));
                     if (postAsJsonAsync.StatusCode != HttpStatusCode.OK)
                         throw new Exception($"Failed to flush causes to HiveShardEE: {postAsJsonAsync.StatusCode}");
+                    break;
                 }
                 catch (Exception e)
                 {

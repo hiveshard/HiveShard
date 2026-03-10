@@ -22,7 +22,7 @@ public class InitializationTunnel: IInitializationTunnel
         var index = (typeof(TEvent), chunk);
 
         _offsets[index]++;
-        _simpleFabric.Send(index.Item1.FullName!, chunk, e);
+        _simpleFabric.Send(index.Item1.FullName!, chunk, new Envelope<TEvent>(e, Guid.NewGuid()));
     }
 
     public async Task FinalizeInitialization()
@@ -35,8 +35,12 @@ public class InitializationTunnel: IInitializationTunnel
         {
             List<TopicPartitionOffset> offsets = new();
             foreach (var (chunk, offset) in offsetsPerTopic) offsets.Add(new TopicPartitionOffset(offsetsPerTopic.Key.FullName!, chunk, offset));
-            await _simpleFabric.Send("completed-ticks",
-                CompletedTick.From(offsetsPerTopic.Key, emitterIdentity, 0, offsets.AsEnumerable()));
+            _simpleFabric.Send("completed-ticks",
+                new Envelope<CompletedTick>(
+                    CompletedTick.From(offsetsPerTopic.Key, emitterIdentity, 0, offsets.AsEnumerable()),
+                    Guid.NewGuid()
+                )
+            );
         }
     }
 

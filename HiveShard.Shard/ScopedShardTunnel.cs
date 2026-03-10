@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
 using HiveShard.Interface;
+using HiveShard.Interface.Logging;
 using HiveShard.Shard.Data;
 using HiveShard.Shard.Interfaces;
 
@@ -14,15 +15,17 @@ public class ScopedShardTunnel: IScopedShardTunnel
 {
     private Dictionary<string, Tick> _advancedTicks = new();
     private Dictionary<TopicPartition, long> _consumedOffsets = new();
-    private Dictionary<string, Action<Message<object>>> _registrations = new();
+    private Dictionary<string, Action<ShardRegistrationContext>> _registrations = new();
     private HiveShardIdentity _identity;
     private GlobalChunkConfig _globalChunkConfig;
     private ISimpleFabric _fabric;
+    private IHiveShardTelemetry _telemetry;
 
-    public ScopedShardTunnel(ISimpleFabric fabric, GlobalChunkConfig globalChunkConfig)
+    public ScopedShardTunnel(ISimpleFabric fabric, GlobalChunkConfig globalChunkConfig, IHiveShardTelemetry telemetry)
     {
         _fabric = fabric;
         _globalChunkConfig = globalChunkConfig;
+        _telemetry = telemetry;
     }
 
     private void AdvanceTick(Tick tick)
@@ -58,33 +61,50 @@ public class ScopedShardTunnel: IScopedShardTunnel
                     .Select(x => x.Offset)
                     .FirstOrDefault(); // default = 0 is fine
 
-                foreach (var message in _fabric.FetchTopic(topicPartition, _consumedOffsets[topicPartition], toOffset))
+                foreach (var consumption in _fabric.FetchTopic(topicPartition, _consumedOffsets[topicPartition], toOffset))
                 {
-                    registration(message);
+                    registration(new ShardRegistrationContext(consumption, tick.TickNumber, topicPartition));
                 }
 
                 _consumedOffsets[topicPartition] = toOffset;
             }
         }
     }
-    
+
+    private ShardRegistrationContext? _currentContext;
     public void Register<TEvent>(Action<Message<TEvent>> handler) where TEvent : IEvent
     {
-        _registrations.Add(typeof(TEvent).FullName!, consumption =>
+        _registrations.Add(typeof(TEvent).FullName!, context =>
         {
-            handler(new Message<TEvent>((TEvent)consumption.Payload, consumption.Chunk));
+            _currentContext = context;
+            handler(new Message<TEvent>((TEvent)context.Consumption.Message.Payload, context.TopicPartition.Chunk));
         });
     }
 
     public void Send<TEvent>(TEvent message) where TEvent : IEvent
     {
-        _fabric.Send(typeof(TEvent).FullName!, _identity.Chunk, message);
+        if (_currentContext is null)
+            throw new Exception("Send without context is impossible");
+        IEnvelope<TEvent> envelope = new Envelope<TEvent>(message, Guid.NewGuid());
+        _fabric.Send(typeof(TEvent).FullName!, _identity.Chunk, envelope);
+        _telemetry.Cause(new TransitionCause(
+            tick: _currentContext.Tick,
+            shardType: _identity.ShardType.TypeName,
+            converge: 0,
+            shardX: _identity.Chunk.XCoord,
+            shardY: _identity.Chunk.YCoord,
+            shardReplica: 1,
+            inboundEvent: _currentContext.Consumption.Message.MessageId,
+            inboundEventType: _currentContext.TopicPartition.Topic,
+            outboundEvent: envelope.MessageId,
+            outboundEventType: typeof(TEvent).FullName!
+        ));
     }
 
     public void Initialize(IHiveShard shard, HiveShardIdentity identity)
     {
         _identity = identity;
         shard.Initialize(_identity.Chunk);
-        _fabric.Register<Tick>("ticks", x => AdvanceTick(x.Message));
+        _fabric.Register<Tick>("ticks", x => AdvanceTick(x.Message.Payload));
     }
 }

@@ -19,11 +19,11 @@ public class InMemorySimpleFabricTests
         var chunk = new Chunk(1, 1);
         ConcurrentQueue<TestEvent> receivedMessages = new();
 
-        await inMemorySimpleFabric.Send(topic, chunk, new TestEvent(id));
+        inMemorySimpleFabric.Send(topic, chunk, new Envelope<TestEvent>(new TestEvent(id), Guid.NewGuid()));
         
         inMemorySimpleFabric.Register<TestEvent>(topic, chunk, e =>
         {
-            receivedMessages.Enqueue(e.Message);
+            receivedMessages.Enqueue(e.Message.Payload);
         });
 
         bool condition = false;

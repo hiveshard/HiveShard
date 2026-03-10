@@ -14,7 +14,7 @@ public class SimpleFabricExpectationState<T>: XceptoState
     private readonly Predicate<T> _predicate;
     private readonly string _topic;
 
-    private readonly ConcurrentQueue<T> _messages = new();
+    private readonly ConcurrentQueue<IEnvelope<T>> _messages = new();
     private readonly Partition _partition;
 
     public SimpleFabricExpectationState(string name, Predicate<T> predicate, string topic, Partition partition) : base(name)
@@ -29,7 +29,7 @@ public class SimpleFabricExpectationState<T>: XceptoState
         var fabric = serviceProvider.GetRequiredService<ISimpleFabric>();
         fabric.Register<T>(_topic, _partition, x =>
         {
-            _messages.Enqueue(((Consumption<T>)x).Message);
+            _messages.Enqueue(x.Message);
         });
         return Task.CompletedTask;
     }
@@ -41,7 +41,7 @@ public class SimpleFabricExpectationState<T>: XceptoState
             if (!_messages.TryDequeue(out var t))
                 break;
 
-            if (_predicate(t)) return Task.FromResult(true);
+            if (_predicate(t.Payload)) return Task.FromResult(true);
         }
 
         return Task.FromResult(false);

@@ -8,6 +8,7 @@ using HiveShard.Ticker.Tests.Events;
 using HiveShard.Ticker.Tests.Shards;
 using HiveShard.Workers.Shard.Extensions;
 using HiveShard.Workers.Ticker.Extensions;
+using HiveShard.Ticker.Tests.Extensions;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
 

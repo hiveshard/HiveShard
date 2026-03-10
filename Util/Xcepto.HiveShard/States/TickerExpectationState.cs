@@ -22,7 +22,7 @@ where TTickEvent : ITickEvent
     private readonly Partition _partition;
     private readonly Predicate<TTickEvent> _predicate;
 
-    private readonly ConcurrentQueue<TTickEvent> _messages = new();
+    private readonly ConcurrentQueue<IEnvelope<TTickEvent>> _messages = new();
     private readonly string _topic;
 
     public override Task Initialize(IServiceProvider serviceProvider)
@@ -30,7 +30,7 @@ where TTickEvent : ITickEvent
         var fabric = serviceProvider.GetRequiredService<ISimpleFabric>();
         fabric.Register<TTickEvent>(_topic, _partition, x =>
         {
-            _messages.Enqueue(((Consumption<TTickEvent>)x).Message);
+            _messages.Enqueue(((Consumption<IEnvelope<TTickEvent>>)x).Message);
         });
         return Task.CompletedTask;
     }
@@ -42,7 +42,7 @@ where TTickEvent : ITickEvent
             if (!_messages.TryDequeue(out var t))
                 break;
 
-            if (_predicate(t)) return Task.FromResult(true);
+            if (_predicate(t.Payload)) return Task.FromResult(true);
         }
 
         return Task.FromResult(false);
