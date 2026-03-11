@@ -21,13 +21,12 @@ public class DistributedTicker
         _eventRepository = eventRepository;
     }
 
-    public Task Start()
+    public void Initialize()
     {
         var eventOrder = new Partition(_eventRepository.GetEventOrder(_config.EventType));
         _simpleFabric.Register<Tick>("ticks", new Partition(0), HandleGlobalTicks);
         _simpleFabric.Register<CompletedTick>("completed-ticks", eventOrder,
             HandleEventSpecificCompletedTick);
-        return Task.CompletedTask;
     }
 
     private readonly ConcurrentDictionary<long, ConcurrentHashSet<EmitterIdentity>> _completedEventTicks = new();

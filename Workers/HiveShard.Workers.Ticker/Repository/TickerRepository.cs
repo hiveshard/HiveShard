@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using HiveShard.Ticker;
 using HiveShard.Ticker.Data;
 using HiveShard.Workers.Ticker.Data;
 
@@ -7,25 +8,25 @@ namespace HiveShard.Workers.Ticker.Repository;
 
 public class TickerRepository
 {
-    private readonly Dictionary<Type, EventTickerInstance> _eventTickerMap = new();
-    private readonly Dictionary<GlobalTickerIdentity, GlobalTickerInstance> _globalTickerMap = new();
+    private readonly Dictionary<Type, DistributedTicker> _eventTickerMap = new();
+    private readonly Dictionary<GlobalTickerIdentity, GlobalTicker> _globalTickerMap = new();
 
-    public void AddTicker(Type eventType, EventTickerInstance eventTicker)
+    public void AddTicker(Type eventType, DistributedTicker eventTicker)
     {
         _eventTickerMap.Add(eventType, eventTicker);
     }
     
-    public void AddGlobalTicker(GlobalTickerIdentity globalTickerIdentity, GlobalTickerInstance globalTicker)
+    public void AddGlobalTicker(GlobalTickerIdentity globalTickerIdentity, GlobalTicker globalTicker)
     {
         _globalTickerMap.Add(globalTickerIdentity, globalTicker);
     }
 
-    public EventTickerInstance GetTicker(Type eventType)
+    public DistributedTicker GetTicker(Type eventType)
     {
         return _eventTickerMap[eventType];
     }
 
-    public IEnumerable<EventTickerInstance> GetAll() => _eventTickerMap.Values;
+    public IEnumerable<DistributedTicker> GetAll() => _eventTickerMap.Values;
 
-    public IEnumerable<GlobalTickerInstance> GetGlobalTickers() => _globalTickerMap.Values;
+    public IEnumerable<GlobalTicker> GetGlobalTickers() => _globalTickerMap.Values;
 }

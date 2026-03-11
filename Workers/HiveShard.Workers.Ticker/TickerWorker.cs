@@ -34,44 +34,7 @@ public class TickerWorker: IIsolatedEntryPoint
     private readonly TaskCompletionSource<bool> _completion = new();
     private int _activeTasks;
 
-    public Task Start()
-    {
-        StartTracked(Task.Run(ManageAdditions));
-
-        foreach (var t in _tickerRepository.GetAll())
-            StartTracked(t.Task);
-
-        foreach (var t in _tickerRepository.GetGlobalTickers())
-            StartTracked(t.Task);
-
-        return _completion.Task;
-    }
-
-    private void StartTracked(Task task)
-    {
-        Interlocked.Increment(ref _activeTasks);
-
-        task.ContinueWith(t =>
-        {
-            if (t.IsFaulted)
-            {
-                var ex =
-                    t.Exception!.InnerExceptions.Count == 1
-                        ? t.Exception.InnerExceptions[0]
-                        : t.Exception.GetBaseException();
-
-                _completion.TrySetException(ex);
-                return;
-            }
-
-            if (Interlocked.Decrement(ref _activeTasks) == 0)
-                _completion.TrySetResult(true);
-
-        }, TaskContinuationOptions.ExecuteSynchronously);
-    }
-
-
-    private async Task ManageAdditions()
+    public async Task Start()
     {
         while (!_cancellationProvider.GetToken().IsCancellationRequested)
         {
@@ -83,20 +46,16 @@ public class TickerWorker: IIsolatedEntryPoint
                     _simpleFabric,
                     _eventRepository);
 
-                var task = Task.Run(eventTicker.Start);
-                _tickerRepository.AddTicker(identity.EventType, new EventTickerInstance(eventTicker, task));
-
-                StartTracked(task);
+                eventTicker.Initialize();
+                _tickerRepository.AddTicker(identity.EventType, eventTicker);
             }
 
             while (_tickerAdditionRepository.TryConsumeGlobalTickerRequest(out GlobalTickerIdentity id))
             {
                 var globalTicker = new GlobalTicker(id, _simpleFabric, _eventRepository);
 
-                var task = Task.Run(globalTicker.Start);
-                _tickerRepository.AddGlobalTicker(id, new GlobalTickerInstance(globalTicker, task));
-
-                StartTracked(task);
+                globalTicker.Initialize();
+                _tickerRepository.AddGlobalTicker(id, globalTicker);
             }
 
             await Task.Delay(100);

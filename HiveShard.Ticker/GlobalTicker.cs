@@ -24,7 +24,7 @@ public class GlobalTicker
     }
 
     private long _currentTick;
-    public Task Start()
+    public void Initialize()
     {
         var tickEventName = typeof(Tick).FullName!;
         // this tick should be ignored if receivers already know of something > 0
@@ -39,8 +39,6 @@ public class GlobalTicker
         
         foreach (var eventOrder in _eventRepository.GetTotalOrder()) 
             _simpleFabric.Register<CompletedTick>("completed-ticks", new Partition(eventOrder.Value), HandleEventCompletedTick);
-
-        return Task.CompletedTask;
     }
 
 
