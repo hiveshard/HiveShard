@@ -37,8 +37,7 @@ public class GlobalTicker
         _currentTick = 0;
         
         
-        foreach (var eventOrder in _eventRepository.GetTotalOrder()) 
-            _simpleFabric.Register<CompletedTick>("completed-ticks", new Partition(eventOrder.Value), HandleEventCompletedTick);
+        _simpleFabric.Register<CompletedTick>("completed-ticks", new Partition(0), HandleEventCompletedTick);
     }
 
 

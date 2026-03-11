@@ -85,6 +85,7 @@ public class SingleChunkDistributedTickerTests
         
         Assert.That(globalTick, Is.Not.Null);
         Assert.That(globalTick.Tick, Is.EqualTo(0));
+        Assert.That(globalTick.EventType, Is.EqualTo(typeof(TestEvent).FullName!));
         Assert.That(globalTick.EmitterIdentity, Is.EqualTo(distributedTickerEmitter.Identity));
     }
 }

@@ -16,9 +16,6 @@ public class InMemorySimpleFabricBuilder
 {
     public InMemorySimpleFabric Build(IHiveShardTelemetry telemetryProvider)
     {
-        ITickRepository tickRepository = new TickRepository();
-        IIdentityConfig identityConfig = new IdentityConfig(Guid.NewGuid(), "test");
-        ICancellationProvider cancellationProvider = new CancellationProvider();
         ISerializer serializer = new NewtonsoftSerializer();
         return new InMemorySimpleFabric(telemetryProvider, new GlobalChunkConfig(new Chunk(0,0), new Chunk(0,0)), serializer);
     }
