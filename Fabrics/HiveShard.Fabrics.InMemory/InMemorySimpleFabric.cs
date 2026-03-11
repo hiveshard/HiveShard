@@ -76,7 +76,7 @@ public class InMemorySimpleFabric: ISimpleFabric
         var consumption = new Consumption<IEnvelope<object>>(new Envelope<object>(message.Payload, message.MessageId), currentOffset);
         _topics[index].TryAdd(currentOffset, consumption);
             
-        _scopedFabricLoggingProvider.LogDebug($"Send({topic}[{partition.Value}/{partition.ToChunk(_globalChunkConfig)}]) with {_serializer.Serialize(message)}");
+        _scopedFabricLoggingProvider.LogDebug($"Send({topic}[partition: {partition.Value}, offset: {currentOffset}]) with {_serializer.Serialize(message)}");
 
         var newOffset = currentOffset + 1;
         var fetchedConsumers = _consumers[index].ToArray();

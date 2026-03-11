@@ -25,4 +25,6 @@ public class EmitterIdentity
     {
         return EmitterIdentityString.GetHashCode();
     }
+
+    public override string ToString() => EmitterIdentityString;
 }

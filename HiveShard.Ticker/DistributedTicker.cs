@@ -71,23 +71,24 @@ public class DistributedTicker
             _ => new ConcurrentHashSet<EmitterIdentity>());
         
         // skip duplicates
-        if (!hashSet.Contains(completedTick.EmitterIdentity))
+        if (hashSet.Contains(completedTick.EmitterIdentity))
             return;
         
         hashSet.Add(completedTick.EmitterIdentity);
 
         foreach (var eventEmitterType in _eventRepository.GetEmitters(_config.EventType.FullName!))
+        {
             // not done yet
-            if(!hashSet.Contains(eventEmitterType.Identity))
+            if (!hashSet.Contains(eventEmitterType.Identity))
                 return;
+        }
 
         FinalizeTick();
     }
 
     private void FinalizeTick()
     {
-        var thisTickersPartition = new Partition(_eventRepository.GetEventOrder(_config.EventType));
-        _simpleFabric.Send("completed-ticks", thisTickersPartition,
+        _simpleFabric.Send("completed-ticks", new Partition(0),
             new Envelope<CompletedTick>(
                 new CompletedTick(_config.EmitterType.Identity, _currentTick, _config.EventType.FullName!, []),
                 Guid.NewGuid()
