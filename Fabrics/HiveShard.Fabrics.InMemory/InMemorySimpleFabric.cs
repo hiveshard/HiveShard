@@ -89,9 +89,14 @@ public class InMemorySimpleFabric: ISimpleFabric
         _topicMaxOffsets[index] = newOffset;
     }
 
+    public IEnumerable<Consumption<IEnvelope<object>>> FetchTopic(TopicChunk topicChunk, long fromOffset,
+        long toOffsetExclusive) =>
+        FetchTopic(new TopicPartition(topicChunk.Topic, topicChunk.Chunk.ToPartition(_globalChunkConfig)), fromOffset,
+            toOffsetExclusive);
+
     public IEnumerable<Consumption<IEnvelope<object>>> FetchTopic(TopicPartition topicPartition, long fromOffset, long toOffsetExclusive)
     {
-        var index = (new EventType(topicPartition.Topic), topicPartition.Chunk.ToPartition(_globalChunkConfig));
+        var index = (new EventType(topicPartition.Topic), topicPartition.Partition);
         if (!_topics.TryGetValue(index, out var concurrentDictionary))
             throw new Exception($"{index} did not exist in topics");
 

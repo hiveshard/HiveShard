@@ -10,13 +10,13 @@ using HiveShard.Ticker.Data;
 
 namespace HiveShard.Ticker;
 
-public class GlobalTicker
+public class TickBarrier
 {
     private readonly GlobalTickerIdentity _globalTickerIdentity;
     private readonly ISimpleFabric _simpleFabric;
     private readonly IEventRepository _eventRepository;
 
-    public GlobalTicker(GlobalTickerIdentity globalTickerIdentity, ISimpleFabric simpleFabric, IEventRepository eventRepository)
+    public TickBarrier(GlobalTickerIdentity globalTickerIdentity, ISimpleFabric simpleFabric, IEventRepository eventRepository)
     {
         _globalTickerIdentity = globalTickerIdentity;
         _simpleFabric = simpleFabric;
@@ -56,8 +56,8 @@ public class GlobalTicker
         foreach (var eventTypeString in _eventRepository.GetTotalOrder()
                      .Select(x => x.Key))
         {
-            // Ignore initialization ticks outside of tick 1
-            if(messageTick != 1 && _eventRepository.GetInitializationOnlyEvents().Contains(eventTypeString))
+            // Ignore initialization ticks after tick 1
+            if(messageTick > 1 && _eventRepository.GetInitializationOnlyEvents().Contains(eventTypeString))
                 continue;
             
             // require all remaining ticks

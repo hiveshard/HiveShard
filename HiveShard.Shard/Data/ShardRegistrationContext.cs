@@ -7,14 +7,14 @@ namespace HiveShard.Shard.Data;
 public class ShardRegistrationContext
 {
 
-    public ShardRegistrationContext(Consumption<IEnvelope<object>> consumption, long tick, TopicPartition topicPartition)
+    public ShardRegistrationContext(Consumption<IEnvelope<object>> consumption, long tick, TopicChunk topicChunk)
     {
-        TopicPartition = topicPartition;
+        TopicChunk = topicChunk;
         Consumption = consumption;
         Tick = tick;
     }
 
     public Consumption<IEnvelope<object>> Consumption { get; }
     public long Tick { get; }
-    public TopicPartition TopicPartition { get; }
+    public TopicChunk TopicChunk { get; }
 }

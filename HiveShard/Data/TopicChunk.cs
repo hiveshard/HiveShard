@@ -2,16 +2,16 @@ using HiveShard.Interface.Config;
 
 namespace HiveShard.Data;
 
-public class TopicPartition
+public class TopicChunk
 {
-    public TopicPartition(string topic, Partition partition)
+    public TopicChunk(string topic, Chunk chunk)
     {
         Topic = topic;
-        Partition = partition;
+        Chunk = chunk;
     }
 
     public string Topic { get; }
-    public Partition Partition { get; }
+    public Chunk Chunk { get; }
         
     public string Prefixed(IEnvironmentConfig environmentConfig)
     {
@@ -20,7 +20,7 @@ public class TopicPartition
 
     private bool Equals(TopicChunk other)
     {
-        return Topic == other.Topic && Equals(Partition, other.Chunk);
+        return Topic == other.Topic && Equals(Chunk, other.Chunk);
     }
 
     public override bool Equals(object? obj)
@@ -34,7 +34,7 @@ public class TopicPartition
     {
         unchecked
         {
-            return (Topic.GetHashCode() * 397) ^ Partition.GetHashCode();
+            return (Topic.GetHashCode() * 397) ^ Chunk.GetHashCode();
         }
     }
 }

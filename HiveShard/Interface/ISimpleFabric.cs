@@ -13,5 +13,6 @@ public interface ISimpleFabric: IFabric
     void Send<T>(string topic, IEnvelope<T> message) where T: IEvent;
     void Send<T>(string topic, Chunk chunk, IEnvelope<T> message) where T: IEvent;
     void Send<T>(string topic, Partition partition, IEnvelope<T> message) where T: IEvent;
+    IEnumerable<Consumption<IEnvelope<object>>> FetchTopic(TopicChunk topicChunk, long fromOffset, long toOffsetExclusive);
     IEnumerable<Consumption<IEnvelope<object>>> FetchTopic(TopicPartition topicPartition, long fromOffset, long toOffsetExclusive);
 }

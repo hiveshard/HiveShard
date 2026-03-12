@@ -26,10 +26,10 @@ namespace HiveShard.Fabrics.Kafka
         private readonly ISerializer _serializer;
         private readonly IHiveShardTelemetry _scopedLogger;
         private readonly IEnvironmentConfig _environmentConfig;
-        private readonly BlockingCollection<TopicPartition> _ensureTopics = new();
+        private readonly BlockingCollection<TopicChunk> _ensureTopics = new();
         private readonly ConcurrentQueue<KafkaRegistration> _kafkaRegistrations = new();
-        private readonly ConcurrentQueue<TopicPartition> _newProducers = new();
-        private readonly ConcurrentDictionary<TopicPartition, BlockingCollection<string>> _messagesToBeProduced = new();
+        private readonly ConcurrentQueue<TopicChunk> _newProducers = new();
+        private readonly ConcurrentDictionary<TopicChunk, BlockingCollection<string>> _messagesToBeProduced = new();
         private readonly GlobalChunkConfig _globalChunkConfig;
         public SimpleKafkaFabric(IIdentityConfig identityConfig, ICancellationProvider cancellationProvider, ISerializer serializer, IHiveShardTelemetry fabricLoggingProvider, IEnvironmentConfig environmentConfig, GlobalChunkConfig globalChunkConfig)
         {
@@ -61,8 +61,8 @@ namespace HiveShard.Fabrics.Kafka
 
         public void Register<T>(string topic, Chunk chunk, Action<Consumption<IEnvelope<T>>> action) where T: IEvent
         {
-            _ensureTopics.Add(new TopicPartition(topic, chunk), _ctsToken);
-            _kafkaRegistrations.Enqueue(new KafkaRegistration(new TopicPartition(topic, chunk), (json, offset) =>
+            _ensureTopics.Add(new TopicChunk(topic, chunk), _ctsToken);
+            _kafkaRegistrations.Enqueue(new KafkaRegistration(new TopicChunk(topic, chunk), (json, offset) =>
             {
                 var message = _serializer.Deserialize<IEnvelope<T>>(json);
                 action(new Consumption<IEnvelope<T>>(message, offset));
@@ -76,21 +76,26 @@ namespace HiveShard.Fabrics.Kafka
             => Send(topic, new Chunk(0,0), message);
         public void Send<T>(string topic, Chunk chunk, IEnvelope<T> message) where T: IEvent
         {
-            TopicPartition topicPartition = new TopicPartition(topic, chunk);
-            _messagesToBeProduced.AddOrUpdate(topicPartition,
+            TopicChunk topicChunk = new TopicChunk(topic, chunk);
+            _messagesToBeProduced.AddOrUpdate(topicChunk,
                 key =>
                 {
-                    _newProducers.Enqueue(topicPartition);
-                    _ensureTopics.Add(topicPartition, _ctsToken);
+                    _newProducers.Enqueue(topicChunk);
+                    _ensureTopics.Add(topicChunk, _ctsToken);
                     return new BlockingCollection<string>();
                 },
                 (key, oldValue) => oldValue is null ? new BlockingCollection<string>() : oldValue);
-            _messagesToBeProduced[topicPartition].Add(_serializer.Serialize(message));
+            _messagesToBeProduced[topicChunk].Add(_serializer.Serialize(message));
             throw new NotImplementedException("no immediate access to offset");
         }
 
         public void Send<T>(string topic, Data.Partition partition, IEnvelope<T> message) where T: IEvent =>
             Send(topic, partition.ToChunk(_globalChunkConfig), message);
+
+        public IEnumerable<Consumption<IEnvelope<object>>> FetchTopic(TopicChunk topicChunk, long fromOffset, long toOffsetExclusive)
+        {
+            throw new NotImplementedException();
+        }
 
         public IEnumerable<Consumption<IEnvelope<object>>> FetchTopic(TopicPartition topicPartition, long fromOffset, long toOffsetExclusive)
         {
@@ -150,7 +155,7 @@ namespace HiveShard.Fabrics.Kafka
             }, cancellationToken);
         }
 
-        private Task CreateProducer(TopicPartition topicPartition, CancellationToken cancellationToken)
+        private Task CreateProducer(TopicChunk topicChunk, CancellationToken cancellationToken)
         {
             return Task.Run(async () =>
             {
@@ -167,17 +172,17 @@ namespace HiveShard.Fabrics.Kafka
                                     _scopedLogger.LogDebug($"{logMessage.Name}: {logMessage.Message}");
                             })
                             .Build();
-                }, $"Publish {topicPartition.Topic}", _ctsToken, _scopedLogger);
+                }, $"Publish {topicChunk.Topic}", _ctsToken, _scopedLogger);
                 
                 
-                var blockingCollection = _messagesToBeProduced[topicPartition];
+                var blockingCollection = _messagesToBeProduced[topicChunk];
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var message = blockingCollection.Take();
-                    var delivery = await producer.ProduceAsync(new Confluent.Kafka.TopicPartition($"{_environmentConfig.Prefix}-{topicPartition.Topic}", new Partition(topicPartition.Chunk.ToPartition(_globalChunkConfig).Value)), 
+                    var delivery = await producer.ProduceAsync(new Confluent.Kafka.TopicPartition($"{_environmentConfig.Prefix}-{topicChunk.Topic}", new Partition(topicChunk.Chunk.ToPartition(_globalChunkConfig).Value)), 
                         new Message<Null, string> { Value = message, Headers = new Headers()
                         {
-                            new Header("message-type", Encoding.UTF8.GetBytes(topicPartition.Topic))
+                            new Header("message-type", Encoding.UTF8.GetBytes(topicChunk.Topic))
                         }}, cancellationToken);
                     _scopedLogger.LogDebug($"Delivered to: {delivery.TopicPartitionOffset}");
                 }
@@ -202,8 +207,8 @@ namespace HiveShard.Fabrics.Kafka
                         .Build();
                     if (consumer is null)
                         throw new Exception();
-                    var partition = new Partition(kafkaRegistration.TopicPartition.Chunk.ToPartition(_globalChunkConfig).Value);
-                    var kafkaTopicPartition = new Confluent.Kafka.TopicPartition(kafkaRegistration.TopicPartition.Prefixed(_environmentConfig), partition);
+                    var partition = new Partition(kafkaRegistration.TopicChunk.Chunk.ToPartition(_globalChunkConfig).Value);
+                    var kafkaTopicPartition = new Confluent.Kafka.TopicPartition(kafkaRegistration.TopicChunk.Prefixed(_environmentConfig), partition);
                     consumer.Assign(kafkaTopicPartition);
                     return Task.CompletedTask;
                     
@@ -235,13 +240,13 @@ namespace HiveShard.Fabrics.Kafka
 
     public class KafkaRegistration
     {
-        public TopicPartition TopicPartition { get; }
+        public TopicChunk TopicChunk { get; }
         public Action<string, Offset> Action { get; }
 
-        public KafkaRegistration(TopicPartition topicPartition, Action<string, Offset> action)
+        public KafkaRegistration(TopicChunk topicChunk, Action<string, Offset> action)
         {
             this.Action = action;
-            this.TopicPartition = topicPartition;
+            this.TopicChunk = topicChunk;
         }
     }
 }

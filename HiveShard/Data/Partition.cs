@@ -38,4 +38,6 @@ public class Partition
     {
         return Value;
     }
+
+    public override string ToString() => Value.ToString();
 }

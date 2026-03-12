@@ -35,4 +35,7 @@ public class EventType
     {
         return EventTypeFullname.GetHashCode();
     }
+
+
+    public override string ToString() => EventTypeFullname;
 }

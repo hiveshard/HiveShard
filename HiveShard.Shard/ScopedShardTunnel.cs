@@ -14,7 +14,7 @@ namespace HiveShard.Shard;
 public class ScopedShardTunnel: IScopedShardTunnel
 {
     private Dictionary<string, Tick> _advancedTicks = new();
-    private Dictionary<TopicPartition, long> _consumedOffsets = new();
+    private Dictionary<TopicChunk, long> _consumedOffsets = new();
     private Dictionary<string, Action<ShardRegistrationContext>> _registrations = new();
     private HiveShardIdentity _identity;
     private GlobalChunkConfig _globalChunkConfig;
@@ -51,7 +51,7 @@ public class ScopedShardTunnel: IScopedShardTunnel
         {
             foreach (var chunk in _identity.Chunk.GetNeighboursAndSelf(_globalChunkConfig))
             {
-                var topicPartition = new TopicPartition(tick.TickEventType, chunk);
+                var topicPartition = new TopicChunk(tick.TickEventType, chunk);
                 if (!_consumedOffsets.ContainsKey(topicPartition))
                     _consumedOffsets[topicPartition] = 0;
 
@@ -77,7 +77,7 @@ public class ScopedShardTunnel: IScopedShardTunnel
         _registrations.Add(typeof(TEvent).FullName!, context =>
         {
             _currentContext = context;
-            handler(new Message<TEvent>((TEvent)context.Consumption.Message.Payload, context.TopicPartition.Chunk));
+            handler(new Message<TEvent>((TEvent)context.Consumption.Message.Payload, context.TopicChunk.Chunk));
         });
     }
 
@@ -95,7 +95,7 @@ public class ScopedShardTunnel: IScopedShardTunnel
             shardY: _identity.Chunk.YCoord,
             shardReplica: 1,
             inboundEvent: _currentContext.Consumption.Message.MessageId,
-            inboundEventType: _currentContext.TopicPartition.Topic,
+            inboundEventType: _currentContext.TopicChunk.Topic,
             outboundEvent: envelope.MessageId,
             outboundEventType: typeof(TEvent).FullName!
         ));
