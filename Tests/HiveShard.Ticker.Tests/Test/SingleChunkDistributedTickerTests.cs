@@ -32,13 +32,13 @@ public class SingleChunkDistributedTickerTests
         
         ticker.Initialize();
         
-        fabric.Send("ticks", new Partition(0), new Envelope<Tick>(
+        fabric.Send(typeof(Tick).FullName!, new Partition(0), new Envelope<Tick>(
             new Tick(0, [], DateTime.UtcNow, typeof(Tick).FullName!, thisEmitter.Identity),
             Guid.NewGuid()
         ));
 
         Tick? testEventTick = null;
-        fabric.Register<Tick>("ticks", new Partition(repository.GetEventOrder<TestEvent>()), x =>
+        fabric.Register<Tick>(typeof(Tick).FullName!, new Partition(repository.GetEventOrder<TestEvent>()), x =>
         {
             testEventTick = x.Message.Payload;
         });
@@ -65,12 +65,12 @@ public class SingleChunkDistributedTickerTests
         
         ticker.Initialize();
         
-        fabric.Send("ticks", new Partition(0), new Envelope<Tick>(
+        fabric.Send(typeof(Tick).FullName!, new Partition(0), new Envelope<Tick>(
             new Tick(0, [], DateTime.UtcNow, typeof(Tick).FullName!, thisEmitter.Identity),
             Guid.NewGuid()
         ));
 
-        fabric.Send("completed-ticks", new Partition(repository.GetEventOrder<TestEvent>()),
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(repository.GetEventOrder<TestEvent>()),
             new Envelope<CompletedTick>(
                 new CompletedTick(thisEmitter.Identity, 0, typeof(TestEvent).FullName!, []),
                 Guid.NewGuid()
@@ -78,7 +78,7 @@ public class SingleChunkDistributedTickerTests
         );
         
         CompletedTick? globalTick = null;
-        fabric.Register<CompletedTick>("completed-ticks", new Partition(0), x =>
+        fabric.Register<CompletedTick>(typeof(CompletedTick).FullName!, new Partition(0), x =>
         {
             globalTick = x.Message.Payload;
         });

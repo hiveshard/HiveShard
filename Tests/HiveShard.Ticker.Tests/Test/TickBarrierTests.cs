@@ -23,11 +23,11 @@ public class TickBarrierTests
             .Build(telemetry);
         var eventRepository = new EventRepository();
         
-        TickBarrier tickBarrier = new TickBarrier(globalTickerIdentity, fabric, eventRepository);
-        tickBarrier.Initialize();
+        GlobalTicker globalTicker = new GlobalTicker(globalTickerIdentity, fabric, eventRepository);
+        globalTicker.Initialize();
 
         Tick? tick = null;
-        fabric.Register<Tick>("ticks", new Partition(0), consumption =>
+        fabric.Register<Tick>(typeof(Tick).FullName!, new Partition(0), consumption =>
         {
             tick = consumption.Message.Payload;
         });
@@ -47,16 +47,16 @@ public class TickBarrierTests
         var eventRepository = new EventRepository();
         eventRepository.RegisterEvent<TestEvent>(thisEmitter);
         
-        TickBarrier tickBarrier = new TickBarrier(globalTickerIdentity, fabric, eventRepository);
-        tickBarrier.Initialize();
+        GlobalTicker globalTicker = new GlobalTicker(globalTickerIdentity, fabric, eventRepository);
+        globalTicker.Initialize();
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisEmitter.Identity, 0, typeof(TestEvent).FullName!, []),
             Guid.NewGuid()
         ));
         
         Tick? lastTick = null;
-        fabric.Register<Tick>("ticks", new Partition(0), consumption =>
+        fabric.Register<Tick>(typeof(Tick).FullName!, new Partition(0), consumption =>
         {
             lastTick = consumption.Message.Payload;
         });
@@ -79,10 +79,10 @@ public class TickBarrierTests
         eventRepository.RegisterEvent<InitializationEvent>(thisInitializerEmitter);
         eventRepository.RegisterEvent<TestEvent>(thisTestEmitter);
         
-        TickBarrier tickBarrier = new TickBarrier(globalTickerIdentity, fabric, eventRepository);
-        tickBarrier.Initialize();
+        GlobalTicker globalTicker = new GlobalTicker(globalTickerIdentity, fabric, eventRepository);
+        globalTicker.Initialize();
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisTestEmitter.Identity, 0, typeof(TestEvent).FullName!, []),
             Guid.NewGuid()
         ));
@@ -106,10 +106,10 @@ public class TickBarrierTests
         eventRepository.RegisterEvent<InitializationEvent>(thisInitializerEmitter);
         eventRepository.RegisterEvent<TestEvent>(thisTestEmitter);
         
-        TickBarrier tickBarrier = new TickBarrier(globalTickerIdentity, fabric, eventRepository);
-        tickBarrier.Initialize();
+        GlobalTicker globalTicker = new GlobalTicker(globalTickerIdentity, fabric, eventRepository);
+        globalTicker.Initialize();
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisTestEmitter.Identity, 0, typeof(TestEvent).FullName!, []),
             Guid.NewGuid()
         ));
@@ -119,7 +119,7 @@ public class TickBarrierTests
             fabric.FetchTopicOffset<Tick>(new Partition(0), 1);
         }, Throws.Exception);
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisInitializerEmitter.Identity, 0, typeof(InitializationEvent).FullName!, []),
             Guid.NewGuid()
         ));
@@ -142,14 +142,14 @@ public class TickBarrierTests
         eventRepository.RegisterEvent<InitializationEvent>(thisInitializerEmitter);
         eventRepository.RegisterEvent<TestEvent>(thisTestEmitter);
         
-        TickBarrier tickBarrier = new TickBarrier(globalTickerIdentity, fabric, eventRepository);
-        tickBarrier.Initialize();
+        GlobalTicker globalTicker = new GlobalTicker(globalTickerIdentity, fabric, eventRepository);
+        globalTicker.Initialize();
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisTestEmitter.Identity, 0, typeof(TestEvent).FullName!, []),
             Guid.NewGuid()
         ));
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisInitializerEmitter.Identity, 0, typeof(InitializationEvent).FullName!, []),
             Guid.NewGuid()
         ));
@@ -157,7 +157,7 @@ public class TickBarrierTests
         var tick1 = fabric.FetchTopicOffset<Tick>(new Partition(0), 1);
         Assert.That(tick1.TickNumber, Is.EqualTo(1));
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisTestEmitter.Identity, 1, typeof(TestEvent).FullName!, []),
             Guid.NewGuid()
         ));
@@ -167,7 +167,7 @@ public class TickBarrierTests
             fabric.FetchTopicOffset<Tick>(new Partition(0), 2);
         }, Throws.Exception);
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisInitializerEmitter.Identity, 1, typeof(InitializationEvent).FullName!, []),
             Guid.NewGuid()
         ));
@@ -190,14 +190,14 @@ public class TickBarrierTests
         eventRepository.RegisterEvent<InitializationEvent>(thisInitializerEmitter);
         eventRepository.RegisterEvent<TestEvent>(thisTestEmitter);
         
-        TickBarrier tickBarrier = new TickBarrier(globalTickerIdentity, fabric, eventRepository);
-        tickBarrier.Initialize();
+        GlobalTicker globalTicker = new GlobalTicker(globalTickerIdentity, fabric, eventRepository);
+        globalTicker.Initialize();
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisTestEmitter.Identity, 0, typeof(TestEvent).FullName!, []),
             Guid.NewGuid()
         ));
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisInitializerEmitter.Identity, 0, typeof(InitializationEvent).FullName!, []),
             Guid.NewGuid()
         ));
@@ -205,11 +205,11 @@ public class TickBarrierTests
         var tick1 = fabric.FetchTopicOffset<Tick>(new Partition(0), 1);
         Assert.That(tick1.TickNumber, Is.EqualTo(1));
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisTestEmitter.Identity, 1, typeof(TestEvent).FullName!, []),
             Guid.NewGuid()
         ));
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisInitializerEmitter.Identity, 1, typeof(InitializationEvent).FullName!, []),
             Guid.NewGuid()
         ));
@@ -217,7 +217,7 @@ public class TickBarrierTests
         var tick2 = fabric.FetchTopicOffset<Tick>(new Partition(0), 2);
         Assert.That(tick2.TickNumber, Is.EqualTo(2));
         
-        fabric.Send("completed-ticks", new Partition(0), new Envelope<CompletedTick>(
+        fabric.Send(typeof(CompletedTick).FullName!, new Partition(0), new Envelope<CompletedTick>(
             new CompletedTick(thisTestEmitter.Identity, 2, typeof(TestEvent).FullName!, []),
             Guid.NewGuid()
         ));

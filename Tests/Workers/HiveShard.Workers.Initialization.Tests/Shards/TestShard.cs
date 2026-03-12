@@ -23,6 +23,7 @@ public class TestShard: IHiveShard
         _scopedShardTunnel.Register<InitialDataEvent>(x =>
         {
             _testRepository.AddInt(x.Payload.Value);
+            _scopedShardTunnel.Send(new InitialDataResponse());
         });
     }
 }

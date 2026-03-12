@@ -16,7 +16,7 @@ public class HiveShardGlobalTickerAdapter: XceptoAdapter
     {
         AddStep(new TickerExpectationState<Tick>(
             $"Expect tick {tickNumber} on partition {0} from {_emitterIdentity.EmitterIdentityString}", 
-            "ticks", new Partition(0),
+            typeof(Tick).FullName!, new Partition(0),
             tick => tick.TickNumber.Equals(tickNumber) && tick.Emitter.Equals(_emitterIdentity)
                 && tick.TickEventType.Equals(typeof(Tick).FullName!)));
     }

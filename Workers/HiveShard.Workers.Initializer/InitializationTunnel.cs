@@ -45,7 +45,7 @@ public class InitializationTunnel: IInitializationTunnel
         _emitterIdentity = identity;
         foreach (var topic in _eventRepository.GetTopicsOfEmitter(identity.Identity))
         {
-            _simpleFabric.Register<Tick>("ticks", new Partition(_eventRepository.GetEventOrder(topic)), HandleTick);
+            _simpleFabric.Register<Tick>(typeof(Tick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)), HandleTick);
         }
     }
 
@@ -57,7 +57,7 @@ public class InitializationTunnel: IInitializationTunnel
                 return;
             foreach (var topic in _eventRepository.GetTopicsOfEmitter(_emitterIdentity.Identity))
             {
-                _simpleFabric.Send("completed-ticks", new Partition(_eventRepository.GetEventOrder(topic)),
+                _simpleFabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)),
                     new Envelope<CompletedTick>(
                         CompletedTick.From(topic, _emitterIdentity, 0, []),
                         Guid.NewGuid()
@@ -81,7 +81,7 @@ public class InitializationTunnel: IInitializationTunnel
                             throw new Exception(
                                 $"Initializer {_initializerInstance.GetType().FullName!} did not initialize {topic}[chunk: {chunk}]");
                         
-                        _simpleFabric.Send("completed-ticks", new Partition(_eventRepository.GetEventOrder(topic)),
+                        _simpleFabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)),
                             new Envelope<CompletedTick>(
                                 CompletedTick.From(topic, _emitterIdentity, 0, 
                                 [

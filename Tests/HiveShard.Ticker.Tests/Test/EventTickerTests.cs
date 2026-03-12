@@ -69,7 +69,7 @@ public class EventTickerTests<T>
 
             // initializer hello
             testFabricAccess.FabricAction(simpleFabric => simpleFabric.Send<CompletedTick>(
-                "completed-ticks", initializationEventPartition, 
+                typeof(CompletedTick).FullName!, initializationEventPartition, 
                 new CompletedTick(initializerType.Identity, 0, initializationEventName, 
                     [new TopicPartitionOffset(initializationEventName, onlyChunk, 0)])));
 
@@ -86,7 +86,7 @@ public class EventTickerTests<T>
             testFabricAccess.FabricAction(simpleFabric => simpleFabric.Send<InitializationEvent>(
                 typeof(InitializationEvent).FullName!, onlyChunk, initializationEvent));
             testFabricAccess.FabricAction(simpleFabric => simpleFabric.Send<CompletedTick>(
-                "completed-ticks", initializationEventPartition, 
+                typeof(CompletedTick).FullName!, initializationEventPartition, 
                 new CompletedTick(initializerType.Identity, 1, initializationEventName, 
                     [new TopicPartitionOffset(initializationEventName, onlyChunk, 1)])));
             

@@ -18,16 +18,16 @@ public class TopicPartition
         return $"{environmentConfig.Prefix}-{Topic}";
     }
 
-    private bool Equals(TopicChunk other)
+    private bool Equals(TopicPartition other)
     {
-        return Topic == other.Topic && Equals(Partition, other.Chunk);
+        return Topic == other.Topic && Equals(Partition, other.Partition);
     }
 
     public override bool Equals(object? obj)
     {
         if (obj is null) return false;
         if (ReferenceEquals(this, obj)) return true;
-        return obj.GetType() == GetType() && Equals((TopicChunk)obj);
+        return obj.GetType() == GetType() && Equals((TopicPartition)obj);
     }
 
     public override int GetHashCode()

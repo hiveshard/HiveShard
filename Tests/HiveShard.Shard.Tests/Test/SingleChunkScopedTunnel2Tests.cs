@@ -3,6 +3,7 @@ using HiveShard.Event;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
+using HiveShard.Repository;
 using HiveShard.Serializer;
 using HiveShard.Shard.Interfaces;
 using HiveShard.Shard.Tests.Data;
@@ -21,10 +22,13 @@ public class SingleChunkScopedTunnel2Tests
         chunk = new Chunk(0,0);
         GlobalChunkConfig chunkConfig = new GlobalChunkConfig(chunk, chunk);
         fabric = CreateTunnel(chunkConfig);
+        EventRepository eventRepository = new EventRepository();
         IHiveShardTelemetry telemetry = new SimpleConsoleTelemetry();
-        ScopedShardTunnel tunnel = new ScopedShardTunnel(fabric, chunkConfig, telemetry);
+        ScopedShardTunnel tunnel = new ScopedShardTunnel(fabric, chunkConfig, telemetry, eventRepository);
         shard = new TestShard(tunnel);
-        var identity = new HiveShardIdentity(chunk, ShardType.From<TestShard>(), Guid.NewGuid());
+        HiveShardIdentity identity = new HiveShardIdentity(chunk, ShardType.From<TestShard>(), Guid.NewGuid());
+        eventRepository.RegisterEvent<TestEvent1>(identity);
+        eventRepository.RegisterEvent<TestEvent2>(identity);
         tunnel.Initialize(shard, identity);
     }
     
@@ -32,11 +36,11 @@ public class SingleChunkScopedTunnel2Tests
     public void TunnelDelivers_AfterAllTicksReceived()
     {
         Setup(out var fabric, out var shard, out var chunk);
-
+        
         fabric.Send(typeof(TestEvent1).FullName!, chunk, new TestEvent1(6));
         fabric.Send(typeof(TestEvent2).FullName!, chunk, new TestEvent2(4));
-        fabric.Send("ticks",CreateTick<TestEvent1>(0, 1));
-        fabric.Send("ticks",CreateTick<TestEvent2>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent1>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent2>(0, 1));
         
         Assert.That(shard.Sum, Is.EqualTo(10));
     }
@@ -48,7 +52,7 @@ public class SingleChunkScopedTunnel2Tests
 
         fabric.Send(typeof(TestEvent1).FullName!, chunk, new TestEvent1(6));
         fabric.Send(typeof(TestEvent2).FullName!, chunk, new TestEvent2(4));
-        fabric.Send("ticks",CreateTick<TestEvent1>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent1>(0, 1));
         
         Assert.That(shard.Sum, Is.EqualTo(0));
     }
@@ -60,8 +64,8 @@ public class SingleChunkScopedTunnel2Tests
 
         fabric.Send(typeof(TestEvent1).FullName!, chunk, new TestEvent1(6));
         fabric.Send(typeof(TestEvent2).FullName!, chunk, new TestEvent2(4));
-        fabric.Send("ticks",CreateTick<TestEvent1>(0, 1));
-        fabric.Send("ticks",CreateTick<TestEvent2>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent1>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent2>(0, 1));
         fabric.Send(typeof(TestEvent2).FullName!, chunk, new TestEvent2(3));
         
         Assert.That(shard.Sum, Is.EqualTo(10));
@@ -75,14 +79,14 @@ public class SingleChunkScopedTunnel2Tests
 
         fabric.Send(typeof(TestEvent1).FullName!, chunk, new TestEvent1(6));
         fabric.Send(typeof(TestEvent2).FullName!, chunk, new TestEvent2(4));
-        fabric.Send("ticks",CreateTick<TestEvent1>(0, 1));
-        fabric.Send("ticks",CreateTick<TestEvent2>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent1>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent2>(0, 1));
         
         Assert.That(shard.Sum, Is.EqualTo(10));
 
         fabric.Send(typeof(TestEvent2).FullName!, chunk, new TestEvent2(3));
-        fabric.Send("ticks",CreateTick<TestEvent1>(1, 1));
-        fabric.Send("ticks",CreateTick<TestEvent2>(1, 2));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent1>(1, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent2>(1, 2));
         
         Assert.That(shard.Sum, Is.EqualTo(13));
     }
@@ -95,10 +99,30 @@ public class SingleChunkScopedTunnel2Tests
 
         fabric.Send(typeof(TestEvent2).FullName!, chunk, new TestEvent2(4, Operation.Multiplication));
         fabric.Send(typeof(TestEvent1).FullName!, chunk, new TestEvent1(6, Operation.Addition));
-        fabric.Send("ticks",CreateTick<TestEvent1>(0, 1));
-        fabric.Send("ticks",CreateTick<TestEvent2>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent1>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent2>(0, 1));
         
         Assert.That(shard.Sum, Is.EqualTo(24));
+    }
+    
+    [Test]
+    public void TunnelRespondsWithCompleted()
+    {
+        Setup(out var fabric, out var shard, out var chunk);
+
+        fabric.Send(typeof(TestEvent1).FullName!, chunk, new TestEvent1(6));
+        fabric.Send(typeof(TestEvent2).FullName!, chunk, new TestEvent2(6));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent1>(0, 1));
+        fabric.Send(typeof(Tick).FullName!,CreateTick<TestEvent2>(0, 1));
+
+        var completedTick = fabric.FetchTopic(new TopicPartition(typeof(CompletedTick).FullName!, new Partition(1)), 0, 1)
+            .Select(x => x.Message.Payload)
+            .Cast<CompletedTick>()
+            .FirstOrDefault();
+        
+        Assert.That(completedTick, Is.Not.Null);
+        Assert.That(completedTick.EventType, Is.EqualTo(typeof(TestEvent1).FullName!));
+        Assert.That(completedTick.Tick, Is.EqualTo(0));
     }
 
 

@@ -52,7 +52,7 @@ public class TickerWorker: IIsolatedEntryPoint
 
             while (_tickerAdditionRepository.TryConsumeGlobalTickerRequest(out GlobalTickerIdentity id))
             {
-                var globalTicker = new TickBarrier(id, _simpleFabric, _eventRepository);
+                var globalTicker = new GlobalTicker(id, _simpleFabric, _eventRepository);
 
                 globalTicker.Initialize();
                 _tickerRepository.AddGlobalTicker(id, globalTicker);

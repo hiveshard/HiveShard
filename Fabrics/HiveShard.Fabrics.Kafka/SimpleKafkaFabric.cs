@@ -92,6 +92,11 @@ namespace HiveShard.Fabrics.Kafka
         public void Send<T>(string topic, Data.Partition partition, IEnvelope<T> message) where T: IEvent =>
             Send(topic, partition.ToChunk(_globalChunkConfig), message);
 
+        public void Send<T>(string topic, Data.Partition partition, Func<BatchedOffsetResults, IEnvelope<T>> messageBuilder) where T : IEvent
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<Consumption<IEnvelope<object>>> FetchTopic(TopicChunk topicChunk, long fromOffset, long toOffsetExclusive)
         {
             throw new NotImplementedException();

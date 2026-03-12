@@ -6,6 +6,7 @@ using HiveShard.Data;
 using HiveShard.Event;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
+using HiveShard.Interface.Repository;
 using HiveShard.Shard.Data;
 using HiveShard.Shard.Interfaces;
 
@@ -20,12 +21,14 @@ public class ScopedShardTunnel: IScopedShardTunnel
     private GlobalChunkConfig _globalChunkConfig;
     private ISimpleFabric _fabric;
     private IHiveShardTelemetry _telemetry;
+    private IEventRepository _eventRepository;
 
-    public ScopedShardTunnel(ISimpleFabric fabric, GlobalChunkConfig globalChunkConfig, IHiveShardTelemetry telemetry)
+    public ScopedShardTunnel(ISimpleFabric fabric, GlobalChunkConfig globalChunkConfig, IHiveShardTelemetry telemetry, IEventRepository eventRepository)
     {
         _fabric = fabric;
         _globalChunkConfig = globalChunkConfig;
         _telemetry = telemetry;
+        _eventRepository = eventRepository;
     }
 
     private void AdvanceTick(Tick tick)
@@ -68,6 +71,25 @@ public class ScopedShardTunnel: IScopedShardTunnel
 
                 _consumedOffsets[topicPartition] = toOffset;
             }
+            _fabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(tick.TickEventType)),
+                results =>
+                {
+                    List<TopicPartitionOffset> offsets = [];
+                    var topicsOfEmitter = _eventRepository.GetTopicsOfEmitter(_identity.Identity);
+                    foreach (var topic in topicsOfEmitter)
+                    {
+                        var topicPartition = new TopicPartition(topic, _identity.Chunk.ToPartition(_globalChunkConfig));
+                        if (results.Offsets.TryGetValue(topicPartition, out var offset))
+                        {
+                            offsets.Add(new TopicPartitionOffset(topic, _identity.Chunk, offset));   
+                        }
+                    }
+                    return new Envelope<CompletedTick>(
+                        new CompletedTick(_identity.Identity, tick.TickNumber, tick.TickEventType, offsets),
+                        Guid.NewGuid()
+                    );
+                }
+            );
         }
     }
 
@@ -105,6 +127,6 @@ public class ScopedShardTunnel: IScopedShardTunnel
     {
         _identity = identity;
         shard.Initialize(_identity.Chunk);
-        _fabric.Register<Tick>("ticks", x => AdvanceTick(x.Message.Payload));
+        _fabric.Register<Tick>(typeof(Tick).FullName!, x => AdvanceTick(x.Message.Payload));
     }
 }

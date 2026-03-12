@@ -28,6 +28,7 @@ where T: class, IDeployment, new()
         var environment = HiveShardFactory.Create<T>(builder => builder
             .Events(eventBuilder => eventBuilder
                 .RegisterEvent<InitialDataEvent>(initializer)
+                .RegisterEvent<InitialDataResponse>(shard)
             )
             .ShardWorker(workerBuilder => workerBuilder
                 .Identify(shardWorker)
@@ -39,6 +40,7 @@ where T: class, IDeployment, new()
             .TickerWorker(tickerWorker => tickerWorker
                 .GlobalTicker()
                 .Ticker<InitialDataEvent>()
+                .Ticker<InitialDataResponse>()
             )
         );
 

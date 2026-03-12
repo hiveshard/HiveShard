@@ -24,8 +24,8 @@ public class DistributedTicker
     public void Initialize()
     {
         var eventOrder = new Partition(_eventRepository.GetEventOrder(_config.EventType));
-        _simpleFabric.Register<Tick>("ticks", new Partition(0), HandleGlobalTicks);
-        _simpleFabric.Register<CompletedTick>("completed-ticks", eventOrder,
+        _simpleFabric.Register<Tick>(typeof(Tick).FullName!, new Partition(0), HandleGlobalTicks);
+        _simpleFabric.Register<CompletedTick>(typeof(CompletedTick).FullName!, eventOrder,
             HandleEventSpecificCompletedTick);
     }
 
@@ -52,7 +52,7 @@ public class DistributedTicker
         {
             _currentTick += 1;
             var eventPartition = new Partition(_eventRepository.GetEventOrder(_config.EventType));
-            _simpleFabric.Send("ticks", eventPartition,
+            _simpleFabric.Send(typeof(Tick).FullName!, eventPartition,
                 new Envelope<Tick>(
                     new Tick(_currentTick, [], DateTime.Now, _config.EventType.FullName!, _config.EmitterType.Identity),
                     Guid.NewGuid())
@@ -88,7 +88,7 @@ public class DistributedTicker
 
     private void FinalizeTick()
     {
-        _simpleFabric.Send("completed-ticks", new Partition(0),
+        _simpleFabric.Send(typeof(CompletedTick).FullName!, new Partition(0),
             new Envelope<CompletedTick>(
                 new CompletedTick(_config.EmitterType.Identity, _currentTick, _config.EventType.FullName!, []),
                 Guid.NewGuid()

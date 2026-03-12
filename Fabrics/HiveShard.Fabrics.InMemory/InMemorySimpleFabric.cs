@@ -65,18 +65,26 @@ public class InMemorySimpleFabric: ISimpleFabric
         Send<T>(topic, chunk.ToPartition(_globalChunkConfig), message);
 
 
-    public void Send<T>(string topic, Partition partition, IEnvelope<T> message) where T : IEvent
+    public void Send<T>(string topic, Partition partition, IEnvelope<T> message) where T : IEvent =>
+        Send<T>(topic, partition, _ => message);
+
+    public void Send<T>(string topic, Partition partition, Func<BatchedOffsetResults, IEnvelope<T>> messageBuilder) where T : IEvent
     {
         var index = (EventType.From<T>(), partition);
 
         InitTopic(index);
-            
+
+        var offsets = _topicMaxOffsets
+            .ToDictionary(x =>
+                    new TopicPartition(x.Key.Item1.EventTypeFullname, x.Key.Item2),
+                x => x.Value);
+        IEnvelope<T> actualMessage = messageBuilder(new BatchedOffsetResults(offsets));
             
         var currentOffset = _topicMaxOffsets[index];
-        var consumption = new Consumption<IEnvelope<object>>(new Envelope<object>(message.Payload, message.MessageId), currentOffset);
+        var consumption = new Consumption<IEnvelope<object>>(new Envelope<object>(actualMessage.Payload, actualMessage.MessageId), currentOffset);
         _topics[index].TryAdd(currentOffset, consumption);
             
-        _scopedFabricLoggingProvider.LogDebug($"Send({topic}[partition: {partition.Value}, offset: {currentOffset}]) with {_serializer.Serialize(message)}");
+        _scopedFabricLoggingProvider.LogDebug($"Send({topic}[partition: {partition.Value}, offset: {currentOffset}]) with {_serializer.Serialize(actualMessage)}");
 
         var newOffset = currentOffset + 1;
         var fetchedConsumers = _consumers[index].ToArray();

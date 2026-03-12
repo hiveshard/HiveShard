@@ -10,13 +10,13 @@ using HiveShard.Ticker.Data;
 
 namespace HiveShard.Ticker;
 
-public class TickBarrier
+public class GlobalTicker
 {
     private readonly GlobalTickerIdentity _globalTickerIdentity;
     private readonly ISimpleFabric _simpleFabric;
     private readonly IEventRepository _eventRepository;
 
-    public TickBarrier(GlobalTickerIdentity globalTickerIdentity, ISimpleFabric simpleFabric, IEventRepository eventRepository)
+    public GlobalTicker(GlobalTickerIdentity globalTickerIdentity, ISimpleFabric simpleFabric, IEventRepository eventRepository)
     {
         _globalTickerIdentity = globalTickerIdentity;
         _simpleFabric = simpleFabric;
@@ -28,7 +28,7 @@ public class TickBarrier
     {
         var tickEventName = typeof(Tick).FullName!;
         // this tick should be ignored if receivers already know of something > 0
-        _simpleFabric.Send("ticks", new Partition(0),
+        _simpleFabric.Send(typeof(Tick).FullName!, new Partition(0),
             new Envelope<Tick>(
                 new Tick(0, [], DateTime.Now, tickEventName, _globalTickerIdentity.ToEmitterType()),
                 Guid.NewGuid()
@@ -37,7 +37,7 @@ public class TickBarrier
         _currentTick = 0;
         
         
-        _simpleFabric.Register<CompletedTick>("completed-ticks", new Partition(0), HandleEventCompletedTick);
+        _simpleFabric.Register<CompletedTick>(typeof(CompletedTick).FullName!, new Partition(0), HandleEventCompletedTick);
     }
 
 
@@ -66,7 +66,7 @@ public class TickBarrier
         }
 
         _currentTick += 1;
-        _simpleFabric.Send("ticks", new Partition(0),
+        _simpleFabric.Send(typeof(Tick).FullName!, new Partition(0),
             new Envelope<Tick>(
                 new Tick(_currentTick, [], DateTime.Now, typeof(Tick).FullName!, _globalTickerIdentity.ToEmitterType()),
                 Guid.NewGuid()
