@@ -12,5 +12,5 @@ public interface IEventRepository
     public IEnumerable<string> GetInitializationOnlyEvents();
     public KeyValuePair<string, int>[] GetTotalOrder();
     public IEventEmitterType[] GetEmitters(string eventType);
-    public string[] GetTopicsOfEmitter(HiveShardIdentity hiveShardIdentity);
+    public string[] GetTopicsOfEmitter(EmitterIdentity identity);
 }

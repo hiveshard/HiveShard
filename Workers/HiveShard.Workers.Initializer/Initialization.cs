@@ -28,7 +28,7 @@ public class Initialization : IIsolatedEntryPoint
     {
         while (_initializers.TryGetInitializer(out InitializerAdditionRequest request))
         {
-            InitializationTunnel initializationTunnel = new InitializationTunnel(_fabric, _eventRepository);
+            InitializationTunnel initializationTunnel = new InitializationTunnel(_fabric, _eventRepository, _globalChunkConfig);
             
             ServiceCollection initializerCollection = new ServiceCollection();
             initializerCollection.AddSingleton(typeof(IInitializer),request.Type);

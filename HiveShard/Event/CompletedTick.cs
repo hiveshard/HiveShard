@@ -29,7 +29,7 @@ public class CompletedTick: ITickEvent
     public static CompletedTick From(string eventType, IEventEmitterType emitter, long tick,
         IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
     {
-        if (emitter.InitializationTickOnly && tick != 2)
+        if (emitter.InitializationTickOnly && tick > 1)
             throw new InvalidOperationException();
 
         return new CompletedTick(emitter.Identity, tick, eventType, topicPartitionOffsets);

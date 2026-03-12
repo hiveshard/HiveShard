@@ -13,7 +13,7 @@ public class TestShardInitializer: IInitializer
         _config = config;
     }
 
-    public Task Initialize(IInitializationTunnel tunnel)
+    public void Initialize(IInitializationTunnel tunnel)
     {
         for (int x = _config.MinChunk.XCoord; x <= _config.MaxChunk.XCoord; x++)
         {
@@ -25,8 +25,6 @@ public class TestShardInitializer: IInitializer
                 }
             }
         }
-
-        return Task.CompletedTask;
     }
     
     public static List<int> Increments = new List<int>()

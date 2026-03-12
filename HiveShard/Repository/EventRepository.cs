@@ -49,6 +49,6 @@ public class EventRepository: IEventRepository
         return shard.ToArray();
     }
 
-    public string[] GetTopicsOfEmitter(HiveShardIdentity hiveShardIdentity) =>
-        _topicsByEmitter[hiveShardIdentity.Identity].ToArray();
+    public string[] GetTopicsOfEmitter(EmitterIdentity identity) =>
+        _topicsByEmitter[identity].ToArray();
 }
