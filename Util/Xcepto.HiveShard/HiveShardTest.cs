@@ -9,7 +9,7 @@ namespace Xcepto.HiveShard;
 
 public class HiveShardTest
 {
-    private static TimeoutConfig DefaultTimeout => TimeoutConfig.FromSeconds(30);
+    private static TimeoutConfig DefaultTimeout => TimeoutConfig.FromSeconds(5);
     public static async Task Given(ServiceEnvironment environment, Action<TransitionBuilder> xceptoBuilder)
     {
         await XceptoTest.Given(new HiveShardScenario(environment), DefaultTimeout, xceptoBuilder);

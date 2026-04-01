@@ -44,7 +44,7 @@ where T: class, IDeployment, new()
             )
         );
 
-        await HiveShardTest.Given(environment, builder =>
+            await HiveShardTest.Given(environment, builder =>
         {
             var shardAdapter = builder.RegisterAdapter(new HiveShardShardAdapter(shardWorker, shard));
 

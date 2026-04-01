@@ -104,6 +104,8 @@ public class InMemorySimpleFabric: ISimpleFabric
 
     public IEnumerable<Consumption<IEnvelope<object>>> FetchTopic(TopicPartition topicPartition, long fromOffset, long toOffsetExclusive)
     {
+        if(toOffsetExclusive - fromOffset <= 0)
+            return [];
         var index = (new EventType(topicPartition.Topic), topicPartition.Partition);
         if (!_topics.TryGetValue(index, out var concurrentDictionary))
             throw new Exception($"{index} did not exist in topics");

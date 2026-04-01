@@ -9,7 +9,7 @@ public static class FabricExtensions
     where T: IEvent =>
         fabric.Send(topic, chunk, new Envelope<T>(message, Guid.NewGuid()));
     
-    public static void Send<T>(this ISimpleFabric fabric, string topic, T message)
+    public static void Send<T>(this ISimpleFabric fabric, string topic, Partition partition, T message)
         where T: IEvent =>
-        fabric.Send(topic, new Partition(0), new Envelope<T>(message, Guid.NewGuid()));
+        fabric.Send(topic, partition, new Envelope<T>(message, Guid.NewGuid()));
 }

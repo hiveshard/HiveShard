@@ -93,14 +93,17 @@ public class ScopedShardTunnel: IScopedShardTunnel
         }
     }
 
+    private List<string> _requiredEvents = new();
     private ShardRegistrationContext? _currentContext;
     public void Register<TEvent>(Action<Message<TEvent>> handler) where TEvent : IEvent
     {
-        _registrations.Add(typeof(TEvent).FullName!, context =>
+        var eventType = typeof(TEvent).FullName!;
+        _registrations.Add(eventType, context =>
         {
             _currentContext = context;
             handler(new Message<TEvent>((TEvent)context.Consumption.Message.Payload, context.TopicChunk.Chunk));
         });
+        _requiredEvents.Add(eventType);
     }
 
     public void Send<TEvent>(TEvent message) where TEvent : IEvent
@@ -127,6 +130,10 @@ public class ScopedShardTunnel: IScopedShardTunnel
     {
         _identity = identity;
         shard.Initialize(_identity.Chunk);
-        _fabric.Register<Tick>(typeof(Tick).FullName!, x => AdvanceTick(x.Message.Payload));
+        foreach (var requiredEvent in _requiredEvents)
+        {
+            var partition = _eventRepository.GetEventOrder(requiredEvent);
+            _fabric.Register<Tick>(typeof(Tick).FullName!, new Partition(partition), x => AdvanceTick(x.Message.Payload));
+        }
     }
 }
