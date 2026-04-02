@@ -1,11 +1,10 @@
-﻿using System.Linq.Expressions;
-using HiveShard.Data;
+﻿using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Shard.Interfaces;
-using HiveShard.Shard.Tests.Data;
-using HiveShard.Shard.Tests.Events;
+using HiveShard.Worker.Tests.Data;
+using HiveShard.Worker.Tests.Events;
 
-namespace HiveShard.Shard.Tests.Shards;
+namespace HiveShard.Worker.Tests.Shards;
 
 public class TestShard: IHiveShard
 {

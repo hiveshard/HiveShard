@@ -1,4 +1,4 @@
-namespace HiveShard.Shard.Tests.Data;
+namespace HiveShard.Worker.Tests.Data;
 
 public enum Operation
 {

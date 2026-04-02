@@ -1,7 +1,7 @@
 ﻿using HiveShard.Interface;
-using HiveShard.Shard.Tests.Data;
+using HiveShard.Worker.Tests.Data;
 
-namespace HiveShard.Shard.Tests.Events;
+namespace HiveShard.Worker.Tests.Events;
 
 public class TestEvent2: IEvent
 {

@@ -108,7 +108,7 @@ public class InMemorySimpleFabric: ISimpleFabric
             return [];
         var index = (new EventType(topicPartition.Topic), topicPartition.Partition);
         if (!_topics.TryGetValue(index, out var concurrentDictionary))
-            throw new Exception($"{index} did not exist in topics");
+            return [];
 
         List<Consumption<IEnvelope<object>>> consumptions = new();
         for (long i = fromOffset; i < toOffsetExclusive; i++)

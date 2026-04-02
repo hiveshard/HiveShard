@@ -49,6 +49,10 @@ public class EventRepository: IEventRepository
         return shard.ToArray();
     }
 
-    public string[] GetTopicsOfEmitter(EmitterIdentity identity) =>
-        _topicsByEmitter[identity].ToArray();
+    public string[] GetTopicsOfEmitter(EmitterIdentity identity)
+    {
+        if (!_topicsByEmitter.ContainsKey(identity))
+            return [];
+        return _topicsByEmitter[identity].ToArray();
+    }
 }

@@ -71,25 +71,26 @@ public class ScopedShardTunnel: IScopedShardTunnel
 
                 _consumedOffsets[topicPartition] = toOffset;
             }
-            _fabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(tick.TickEventType)),
-                results =>
-                {
-                    List<TopicPartitionOffset> offsets = [];
-                    var topicsOfEmitter = _eventRepository.GetTopicsOfEmitter(_identity.Identity);
-                    foreach (var topic in topicsOfEmitter)
+
+            foreach (var topic in _eventRepository.GetTopicsOfEmitter(_identity.Identity))
+            {
+                _fabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(tick.TickEventType)),
+                    results =>
                     {
-                        var topicPartition = new TopicPartition(topic, _identity.Chunk.ToPartition(_globalChunkConfig));
-                        if (results.Offsets.TryGetValue(topicPartition, out var offset))
-                        {
-                            offsets.Add(new TopicPartitionOffset(topic, _identity.Chunk, offset));   
-                        }
+                        List<TopicPartitionOffset> offsets = results.Offsets
+                            .Select(x => new TopicPartitionOffset(
+                                x.Key.Topic, 
+                                x.Key.Partition.ToChunk(_globalChunkConfig), 
+                                x.Value
+                            )
+                        ).ToList();
+                        return new Envelope<CompletedTick>(
+                            new CompletedTick(_identity.Identity, tick.TickNumber, topic, offsets),
+                            Guid.NewGuid()
+                        );
                     }
-                    return new Envelope<CompletedTick>(
-                        new CompletedTick(_identity.Identity, tick.TickNumber, tick.TickEventType, offsets),
-                        Guid.NewGuid()
-                    );
-                }
-            );
+                );   
+            }
         }
     }
 
