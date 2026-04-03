@@ -38,6 +38,6 @@ public class DistributedTickerIdentity
 
     public EmitterIdentity ToEmitterIdentity()
     {
-        return new EmitterIdentity($"{EventType.FullName!}[{Id}]");
+        return new EmitterIdentity($"DistributedTicker({EventType.FullName!})[{Id}]");
     }
 }
