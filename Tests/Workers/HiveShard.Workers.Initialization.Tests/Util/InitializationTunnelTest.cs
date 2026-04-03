@@ -22,6 +22,7 @@ namespace HiveShard.Workers.Initialization.Tests.Util
         private readonly EventRepository _eventRepository;
         private readonly ISimpleFabric _fabric;
         private readonly TInitializer _initializer;
+        private GlobalChunkConfig _globalChunkConfig;
 
         private static readonly Chunk Chunk = new(0, 0);
 
@@ -33,13 +34,13 @@ namespace HiveShard.Workers.Initialization.Tests.Util
         {
             _eventRepository = eventRepository;
 
-            var chunkConfig = new GlobalChunkConfig(Chunk, Chunk);
-            _fabric = CreateFabric(chunkConfig);
+            _globalChunkConfig = new GlobalChunkConfig(Chunk, Chunk);
+            _fabric = CreateFabric(_globalChunkConfig);
 
-            var tunnel = new InitializationTunnel(_fabric, _eventRepository, chunkConfig);
+            var tunnel = new InitializationTunnel(_fabric, _eventRepository, _globalChunkConfig);
 
             var serviceCollection = new ServiceCollection();
-            serviceCollection.AddSingleton<GlobalChunkConfig>(chunkConfig);
+            serviceCollection.AddSingleton<GlobalChunkConfig>(_globalChunkConfig);
             serviceCollection.AddSingleton<TInitializer>();
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -88,6 +89,17 @@ namespace HiveShard.Workers.Initialization.Tests.Util
 
             return _fabric.FetchTopic(
                 new TopicPartition(typeof(CompletedTick).FullName!, partition),
+                from,
+                toExclusive
+            );
+        }
+        
+        public IEnumerable<Consumption<IEnvelope<object>>> FetchTopic<T>(int from, int toExclusive)
+        where T : IEvent
+        {
+            var topicPartition = new TopicPartition(typeof(T).FullName!, Chunk.ToPartition(_globalChunkConfig));
+            return _fabric.FetchTopic(
+                topicPartition,
                 from,
                 toExclusive
             );

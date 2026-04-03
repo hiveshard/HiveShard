@@ -61,4 +61,47 @@ public class InitializationTunnelTests
             .FirstOrDefault();
         Assert.That(completedTick, Is.Null);
     }
+    
+    [Test]
+    public void InitializerDoesNotRespondWithInitializationEventsOnTick0()
+    {
+        InitializationTunnelTest<TestShardInitializer> test = InitializationTunnelTest<TestShardInitializer>.CreateTestInitializer();
+
+        test.SendTick<InitialDataEvent>(0);
+
+        var initialDataEvent = test.FetchTopic<InitialDataEvent>(0, 1)
+            .Select(x => x.Message.Payload)
+            .Cast<InitialDataEvent>()
+            .FirstOrDefault();
+        Assert.That(initialDataEvent, Is.Null);
+    }
+    
+    [Test]
+    public void InitializerDoesRespondWithInitializationEventsOnTick1()
+    {
+        InitializationTunnelTest<TestShardInitializer> test = InitializationTunnelTest<TestShardInitializer>.CreateTestInitializer();
+
+        test.SendTick<InitialDataEvent>(1);
+
+        var initialDataEvent = test.FetchTopic<InitialDataEvent>(0, 1)
+            .Select(x => x.Message.Payload)
+            .Cast<InitialDataEvent>()
+            .FirstOrDefault();
+        Assert.That(initialDataEvent, Is.Not.Null);
+        Assert.That(initialDataEvent.Value, Is.GreaterThan(0));
+    }
+    
+    [Test]
+    public void InitializerDoesNotRespondWithInitializationEventsOnTick2()
+    {
+        InitializationTunnelTest<TestShardInitializer> test = InitializationTunnelTest<TestShardInitializer>.CreateTestInitializer();
+
+        test.SendTick<InitialDataEvent>(2);
+
+        var initialDataEvent = test.FetchTopic<InitialDataEvent>(0, 1)
+            .Select(x => x.Message.Payload)
+            .Cast<InitialDataEvent>()
+            .FirstOrDefault();
+        Assert.That(initialDataEvent, Is.Null);
+    }
 }
