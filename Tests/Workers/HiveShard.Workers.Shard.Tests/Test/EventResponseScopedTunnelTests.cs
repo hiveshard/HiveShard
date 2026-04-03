@@ -16,7 +16,9 @@ public class EventResponseScopedTunnelTests
         ScopedTunnelTest<EchoHiveShard> test = ScopedTunnelTest<EchoHiveShard>.FromEchoShard();
         
         test.Send(new TestEvent(7));
+        // wait for both input- and output-event-type ticks
         test.SendTick<TestEvent>(0, 1);
+        test.SendTick<TestEventResponse>(0, 1);
 
         var completedTick = test.FetchCompletedTopic(new Partition(1), 0, 1)
             .Select(x => x.Message.Payload)

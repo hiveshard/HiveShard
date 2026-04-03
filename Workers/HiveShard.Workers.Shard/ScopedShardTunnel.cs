@@ -43,9 +43,11 @@ public class ScopedShardTunnel: IScopedShardTunnel
         
         _advancedTicks[tick.TickEventType] = tick;
 
-        if (_registrations.Keys.All(type => _advancedTicks.TryGetValue(type, out var t) 
-                                            && t.TickNumber == tick.TickNumber))
-            AdvanceShard(_advancedTicks.Values.OrderBy(x=> x.TickEventType));
+        if (_requiredEvents.All(type => _advancedTicks.TryGetValue(type, out var t) 
+                                        && t.TickNumber == tick.TickNumber))
+            AdvanceShard(_advancedTicks.Values
+                .Where(x => _registrations.ContainsKey(x.TickEventType)) // only READ event type ticks are relevant
+                .OrderBy(x=> x.TickEventType));
     }
 
     private void AdvanceShard(IEnumerable<Tick> ticks)
@@ -131,6 +133,10 @@ public class ScopedShardTunnel: IScopedShardTunnel
     {
         _identity = identity;
         shard.Initialize(_identity.Chunk);
+        
+        // wait for both input-event and output-event based tick events 
+        _requiredEvents.AddRange(_eventRepository.GetTopicsOfEmitter(_identity.Identity));
+        
         foreach (var requiredEvent in _requiredEvents)
         {
             var partition = _eventRepository.GetEventOrder(requiredEvent);
