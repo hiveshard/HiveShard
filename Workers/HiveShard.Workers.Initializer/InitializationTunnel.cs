@@ -83,7 +83,7 @@ public class InitializationTunnel: IInitializationTunnel
                         
                         _simpleFabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)),
                             new Envelope<CompletedTick>(
-                                CompletedTick.From(topic, _emitterIdentity, 0, 
+                                CompletedTick.From(topic, _emitterIdentity, 1, 
                                 [
                                     new TopicPartitionOffset(topic, chunk, offset)
                                 ]),
