@@ -28,6 +28,7 @@
       <ProjectReference Include="..\..\..\Fabrics\HiveShard.Fabrics.Kafka\HiveShard.Fabrics.Kafka.csproj" />
       <ProjectReference Include="..\..\..\HiveShard\HiveShard.csproj" />
       <ProjectReference Include="..\..\..\Util\Xcepto.HiveShard\Xcepto.HiveShard.csproj" />
+      <ProjectReference Include="..\..\HiveShard.Tests.Utils\HiveShard.Tests.Utils.csproj" />
     </ItemGroup>
 
 </Project>

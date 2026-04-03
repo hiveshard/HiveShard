@@ -106,7 +106,10 @@ public class InitializationTunnel: IInitializationTunnel
 
         foreach (var topic in _eventRepository.GetTopicsOfEmitter(_emitterIdentity.Identity))
         {
-            if (_tickAdvances[topic] < tick.TickNumber)
+            if (!_tickAdvances.TryGetValue(topic, out var advance))
+                return false;
+            
+            if (advance < tick.TickNumber)
                 return false;
         }
 

@@ -1,7 +1,7 @@
 using HiveShard.Data;
 using HiveShard.Interface;
 
-namespace HiveShard.Worker.Tests;
+namespace HiveShard.Tests.Utils;
 
 public static class FabricExtensions
 {

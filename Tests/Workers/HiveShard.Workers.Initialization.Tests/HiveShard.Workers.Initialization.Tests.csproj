@@ -25,6 +25,7 @@
       <ProjectReference Include="..\..\..\Deployments\HiveShard.Deployments.InMemory\HiveShard.Deployments.InMemory.csproj" />
       <ProjectReference Include="..\..\..\Util\Xcepto.HiveShard\Xcepto.HiveShard.csproj" />
       <ProjectReference Include="..\..\..\Workers\HiveShard.Workers.Initializer\HiveShard.Workers.Initializer.csproj" />
+      <ProjectReference Include="..\..\HiveShard.Tests.Utils\HiveShard.Tests.Utils.csproj" />
     </ItemGroup>
 
 </Project>

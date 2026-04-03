@@ -2,7 +2,6 @@
 using HiveShard.Deployments.InMemory;
 using HiveShard.Factory;
 using HiveShard.Interface;
-using HiveShard.Ticker.Data;
 using HiveShard.Workers.Initialization.Tests.Events;
 using HiveShard.Workers.Initialization.Tests.Initializer;
 using HiveShard.Workers.Initialization.Tests.Shards;
@@ -13,10 +12,10 @@ using HiveShard.Workers.Ticker.Extensions;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Adapters;
 
-namespace HiveShard.Workers.Initialization.Tests;
+namespace HiveShard.Workers.Initialization.Tests.Integration;
 
 [TestFixture(typeof(InMemoryDeployment))]
-public class InitializationTests<T>
+public class InitializationSequenceTests<T>
 where T: class, IDeployment, new()
 {
     [Test]

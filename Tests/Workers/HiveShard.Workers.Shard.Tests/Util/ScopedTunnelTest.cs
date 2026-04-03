@@ -11,6 +11,7 @@ using HiveShard.Telemetry.Console;
 using HiveShard.Worker.Tests.Data;
 using HiveShard.Worker.Tests.Events;
 using HiveShard.Worker.Tests.Shards;
+using HiveShard.Tests.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HiveShard.Worker.Tests.Util;
