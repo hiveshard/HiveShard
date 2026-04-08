@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Event;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
 using HiveShard.Interface.Repository;
-using HiveShard.Shard.Data;
 using HiveShard.Shard.Interfaces;
+using HiveShard.Workers.Shard.Data;
 
-namespace HiveShard.Shard;
+namespace HiveShard.Workers.Shard;
 
 public class ScopedShardTunnel: IScopedShardTunnel
 {

@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Edge;
+using HiveShard.Edge.Interfaces;
 using HiveShard.Provider;
+using HiveShard.Workers.Edge;
 using Microsoft.Extensions.DependencyInjection;
 using Xcepto.Adapters;
 using Xcepto.HiveShard.States;

@@ -1,5 +1,3 @@
-using HiveShard.Ticker.Data;
-
 namespace HiveShard.Workers.Ticker.Data;
 
 public class GlobalTickerIsolatedEnvironment: IsolatedEnvironment

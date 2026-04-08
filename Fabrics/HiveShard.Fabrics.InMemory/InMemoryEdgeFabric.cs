@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HiveShard.Client.Interfaces;
 using HiveShard.Data;
-using HiveShard.Edge.Events;
 using HiveShard.Edge.Interfaces;
 using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
+using HiveShard.Workers.Edge.Events;
 
 namespace HiveShard.Fabrics.InMemory;
 

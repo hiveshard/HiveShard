@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using HiveShard.Ticker.Data;
 
 namespace HiveShard.Workers.Ticker.Data;
 

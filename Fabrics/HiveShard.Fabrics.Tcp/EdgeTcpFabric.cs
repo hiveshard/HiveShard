@@ -8,12 +8,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Edge;
-using HiveShard.Edge.Events;
 using HiveShard.Edge.Interfaces;
 using HiveShard.Fabrics.Tcp.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Providers;
+using HiveShard.Workers.Edge;
+using HiveShard.Workers.Edge.Events;
 
 namespace HiveShard.Fabrics.Tcp
 {

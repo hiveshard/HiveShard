@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using HiveShard.Interface;
 using HiveShard.Interface.Providers;
 using HiveShard.Interface.Repository;
-using HiveShard.Ticker;
-using HiveShard.Ticker.Data;
 using HiveShard.Workers.Ticker.Data;
 using HiveShard.Workers.Ticker.Repository;
 

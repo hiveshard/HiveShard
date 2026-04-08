@@ -7,13 +7,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Client.Interfaces;
 using HiveShard.Data;
-using HiveShard.Edge.Events;
 using HiveShard.Fabrics.Tcp.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
 using HiveShard.Interface.Providers;
 using HiveShard.Util;
+using HiveShard.Workers.Edge.Events;
 
 namespace HiveShard.Fabrics.Tcp
 {

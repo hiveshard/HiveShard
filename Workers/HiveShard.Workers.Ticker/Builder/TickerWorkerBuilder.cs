@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HiveShard.Interface;
-using HiveShard.Ticker.Data;
 using HiveShard.Workers.Ticker.Data;
 
 namespace HiveShard.Workers.Ticker.Builder;

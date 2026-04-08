@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using HiveShard.Ticker.Data;
+using HiveShard.Workers.Ticker.Data;
 
 namespace HiveShard.Workers.Ticker.Repository;
 

@@ -1,7 +1,7 @@
 using HiveShard.Data;
 using HiveShard.Event;
 using HiveShard.Interface.Repository;
-using HiveShard.Ticker.Data;
+using HiveShard.Workers.Ticker.Data;
 using Xcepto.Adapters;
 using Xcepto.HiveShard.States;
 
