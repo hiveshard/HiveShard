@@ -3,12 +3,12 @@ using HiveShard.Interface;
 
 namespace HiveShard.Workers.Ticker.Tests.Data;
 
-public class DistributedTickerType: IEventEmitterType
+public class TestEmitterType: IEventEmitterType
 {
     private readonly int _number = 0;
-    public DistributedTickerType() { }
+    public TestEmitterType() { }
 
-    public DistributedTickerType(int number)
+    public TestEmitterType(int number)
     {
         _number = number;
     }

@@ -40,7 +40,7 @@ public class GlobalTicker
     }
 
 
-    private readonly Dictionary<long, ISet<string>> _completedTicks = new();
+    private readonly Dictionary<long, ISet<EmitterIdentity>> _completedTicks = new();
     private void HandleEventCompletedTick(Consumption<IEnvelope<CompletedTick>> consumption)
     {
         var completedTick = consumption.Message.Payload;
@@ -49,19 +49,22 @@ public class GlobalTicker
             return;
         
         if (!_completedTicks.ContainsKey(messageTick))
-            _completedTicks[messageTick] = new HashSet<string>();
-        _completedTicks[messageTick].Add(completedTick.EventType);
+            _completedTicks[messageTick] = new HashSet<EmitterIdentity>();
+        
+        _completedTicks[messageTick].Add(completedTick.EmitterIdentity);
 
-        foreach (var eventTypeString in _eventRepository.GetTotalOrder()
-                     .Select(x => x.Key))
+        foreach (var registeredElement in _eventRepository.GetTotalOrder())
         {
             // Ignore initialization ticks after tick 1
-            if(messageTick > 1 && _eventRepository.GetInitializationOnlyEvents().Contains(eventTypeString))
+            if(messageTick > 1 && _eventRepository.GetInitializationOnlyEvents().Contains(registeredElement.Key))
                 continue;
             
-            // require all remaining ticks
-            if(!_completedTicks[messageTick].Contains(eventTypeString))
-                return;
+            foreach (var emitter in _eventRepository.GetEmitters(registeredElement.Key))
+            {
+                // require all remaining ticks
+                if(!_completedTicks[messageTick].Contains(emitter.Identity))
+                    return;   
+            }
         }
 
         _currentTick += 1;

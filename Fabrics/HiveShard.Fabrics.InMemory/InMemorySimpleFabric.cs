@@ -113,8 +113,9 @@ public class InMemorySimpleFabric: ISimpleFabric
         List<Consumption<IEnvelope<object>>> consumptions = new();
         for (long i = fromOffset; i < toOffsetExclusive; i++)
         {
-            var consumption = concurrentDictionary[i];
-            consumptions.Add(consumption);
+            if (!concurrentDictionary.TryGetValue(i, out var value))
+                break;
+            consumptions.Add(value);
         }
 
         return consumptions;
