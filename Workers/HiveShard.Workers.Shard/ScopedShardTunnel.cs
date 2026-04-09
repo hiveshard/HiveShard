@@ -75,7 +75,7 @@ public class ScopedShardTunnel: IScopedShardTunnel
 
             foreach (var topic in _eventRepository.GetTopicsOfEmitter(_identity.Identity))
             {
-                _fabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(tick.TickEventType)),
+                _fabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)),
                     results =>
                     {
                         List<TopicPartitionOffset> offsets = results.Offsets
