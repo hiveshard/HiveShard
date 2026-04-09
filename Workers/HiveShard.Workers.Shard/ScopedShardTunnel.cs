@@ -30,6 +30,8 @@ public class ScopedShardTunnel: IScopedShardTunnel
         _eventRepository = eventRepository;
     }
 
+    private long _lastAdvancedTick = -1;
+    
     private void AdvanceTick(Tick tick)
     {
         if (_identity == null)
@@ -44,9 +46,16 @@ public class ScopedShardTunnel: IScopedShardTunnel
 
         if (_requiredEvents.All(type => _advancedTicks.TryGetValue(type, out var t) 
                                         && t.TickNumber == tick.TickNumber))
+        {
+            if (_lastAdvancedTick >= tick.TickNumber)
+                return;
+
+            _lastAdvancedTick = tick.TickNumber;
+            
             AdvanceShard(_advancedTicks.Values
                 .Where(x => _registrations.ContainsKey(x.TickEventType)) // only READ event type ticks are relevant
-                .OrderBy(x=> x.TickEventType));
+                .OrderBy(x => x.TickEventType));
+        }
     }
 
     private void AdvanceShard(IEnumerable<Tick> ticks)
