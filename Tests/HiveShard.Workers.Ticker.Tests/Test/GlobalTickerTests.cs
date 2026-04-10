@@ -32,10 +32,14 @@ public class GlobalTickerTests
         var emitter1 = new DistributedTickerType(1);
         var emitter2 = new DistributedTickerType(2);
 
-        var test = GlobalTickerTest.WithEvent<CompletedTick>(emitter1, emitter2);
-
+        var eventRepository = new EventRepository();
+        eventRepository.RegisterEvent<TestEvent>(emitter1);
+        eventRepository.RegisterEvent<InitializationEvent>(emitter2);
+        var test = GlobalTickerTest.FromRepository(eventRepository);
+        
+        
         test.SendRootCompleted<TestEvent>(emitter1, 0);
-        test.SendRootCompleted<TestEvent>(emitter2, 0);
+        test.SendRootCompleted<InitializationEvent>(emitter2, 0);
         test.DeliverAll();
 
         var tick = test.FetchTick(1, 2);
@@ -51,7 +55,10 @@ public class GlobalTickerTests
         var emitter1 = new DistributedTickerType(1);
         var emitter2 = new DistributedTickerType(2);
 
-        var test = GlobalTickerTest.WithEvent<CompletedTick>(emitter1, emitter2);
+        var eventRepository = new EventRepository();
+        eventRepository.RegisterEvent<TestEvent>(emitter1);
+        eventRepository.RegisterEvent<InitializationEvent>(emitter2);
+        var test = GlobalTickerTest.FromRepository(eventRepository);
 
         test.SendRootCompleted<TestEvent>(emitter1, 0);
         test.DeliverAll();
