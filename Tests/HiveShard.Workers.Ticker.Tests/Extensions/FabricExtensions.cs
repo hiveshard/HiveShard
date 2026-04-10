@@ -5,17 +5,17 @@ namespace HiveShard.Workers.Ticker.Tests.Extensions;
 
 public static class FabricExtensions
 {
-    public static void Send<T>(this ISimpleFabric fabric, string topic, Chunk chunk, T message)
+    public static void Send<T>(this ISimpleFabric fabric, string topic, Chunk chunk, EmitterIdentity emitterIdentity, T message)
     where T: IEvent =>
-        fabric.Send(topic, chunk, new Envelope<T>(message, Guid.NewGuid()));
+        fabric.Send(topic, chunk, new Envelope<T>(message, Guid.NewGuid(), emitterIdentity));
     
-    public static void Send<T>(this ISimpleFabric fabric, string topic, Partition partition, T message)
+    public static void Send<T>(this ISimpleFabric fabric, string topic, Partition partition, EmitterIdentity emitterIdentity, T message)
         where T: IEvent =>
-        fabric.Send(topic, partition, new Envelope<T>(message, Guid.NewGuid()));
+        fabric.Send(topic, partition, new Envelope<T>(message, Guid.NewGuid(), emitterIdentity));
     
-    public static void Send<T>(this ISimpleFabric fabric, string topic, T message)
+    public static void Send<T>(this ISimpleFabric fabric, string topic, EmitterIdentity emitterIdentity, T message)
         where T: IEvent =>
-        fabric.Send(topic, new Partition(0), new Envelope<T>(message, Guid.NewGuid()));
+        fabric.Send(topic, new Partition(0), new Envelope<T>(message, Guid.NewGuid(), emitterIdentity));
 
     public static T FetchTopicOffset<T>(this ISimpleFabric fabric, Partition partition, long offset)
     where T: IEvent

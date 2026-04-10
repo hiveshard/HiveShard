@@ -10,21 +10,24 @@ namespace HiveShard.Fabrics.InMemory.Tests.Test;
 public class InMemorySimpleFabricTests
 {
     [Test]
-    public async Task RegistrationAfterPublishWorks()
+    public void RegistrationAfterPublishWorks()
     {
         SimpleConsoleTelemetry simpleConsoleTelemetry = new SimpleConsoleTelemetry();
         var inMemorySimpleFabric = new InMemorySimpleFabricBuilder().Build(simpleConsoleTelemetry);
         var id = Guid.NewGuid();
         var topic = "test";
+        var testEmitter = new TestEmitter();
         var chunk = new Chunk(1, 1);
         ConcurrentQueue<TestEvent> receivedMessages = new();
 
-        inMemorySimpleFabric.Send(topic, chunk, new Envelope<TestEvent>(new TestEvent(id), Guid.NewGuid()));
+        inMemorySimpleFabric.Send(topic, chunk, new Envelope<TestEvent>(new TestEvent(id), Guid.NewGuid(), testEmitter.Identity));
         
-        inMemorySimpleFabric.Register<TestEvent>(topic, chunk, e =>
+        inMemorySimpleFabric.Register<TestEvent>(topic, chunk, testEmitter.Identity, e =>
         {
             receivedMessages.Enqueue(e.Message.Payload);
         });
+
+        inMemorySimpleFabric.CompleteDeliveries(1);
 
         bool condition = false;
         while (receivedMessages.TryDequeue(out TestEvent? testEvent))

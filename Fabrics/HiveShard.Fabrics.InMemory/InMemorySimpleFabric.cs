@@ -2,8 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using HiveShard.Data;
+using HiveShard.Fabrics.InMemory.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Logging;
 
@@ -14,9 +16,10 @@ public class InMemorySimpleFabric: ISimpleFabric
     private readonly GlobalChunkConfig _globalChunkConfig;
         
     private readonly ConcurrentDictionary<(EventType, Partition), ConcurrentDictionary<long, Consumption<IEnvelope<object>>>> _topics = new();
-    private readonly ConcurrentDictionary<(EventType, Partition), List<Action<Consumption<IEnvelope<object>>>>> _consumers = new();
+    private readonly ConcurrentDictionary<(EventType, Partition), List<ConsumerRegistration>> _consumers = new();
     private readonly ConcurrentDictionary<(EventType, Partition), long> _topicMaxOffsets = new();
     private readonly ConcurrentDictionary<Action<Consumption<IEnvelope<object>>>, long> _consumerOffsets = new();
+    private readonly ConcurrentQueue<DelayedConsumption> _actionQueue = new ();
     private readonly IHiveShardTelemetry _scopedFabricLoggingProvider;
     private readonly ISerializer _serializer;
 
@@ -28,33 +31,67 @@ public class InMemorySimpleFabric: ISimpleFabric
         _scopedFabricLoggingProvider = loggingProvider;
     }
 
-    public void Register<T>(string topic, Action<Consumption<IEnvelope<T>>> action) where T : IEvent =>
-        Register(topic, new Partition(0), action);
+    
+    public void Start(CancellationToken ct)
+    {
+        Task.Run(async () =>
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                var thisCycleActions = _actionQueue.ToArray();
+                foreach (var delayedConsumption in thisCycleActions)
+                {
+                    CompleteDelivery(delayedConsumption);
+                }
+                await Task.Delay(50, ct);
+            }
+        }, ct);
+    }
 
-    public void Register<T>(string topic, Chunk chunk, Action<Consumption<IEnvelope<T>>> action) where T : IEvent =>
-        Register(topic, chunk.ToPartition(_globalChunkConfig), action);
+    private void CompleteDelivery(DelayedConsumption delayedConsumption)
+    {
+        delayedConsumption.Action(delayedConsumption.Value);
+        _consumerOffsets[delayedConsumption.Action] = delayedConsumption.NewOffset;
+        _scopedFabricLoggingProvider.LogDebug($"Consumed({delayedConsumption.Topic}[partition: {delayedConsumption.Partition}, offset: {delayedConsumption.ConsumedOffset}]) by {delayedConsumption.Consumer.EmitterIdentityString}");
+    }
 
-    public void Register<T>(string topic, Partition partition, Action<Consumption<IEnvelope<T>>> action) where T : IEvent
+    public void CompleteDeliveries(int deliveries)
+    {
+        for (int i = 0; i < deliveries; i++)
+        {
+            if (!_actionQueue.TryDequeue(out var delivery))
+                throw new Exception($"There was no {i + 1}th delivery.");
+            CompleteDelivery(delivery);
+        }
+    }
+
+    public void Register<T>(string topic, EmitterIdentity consumer, Action<Consumption<IEnvelope<T>>> action) where T : IEvent =>
+        Register(topic, new Partition(0), consumer, action);
+
+    public void Register<T>(string topic, Chunk chunk, EmitterIdentity consumer, Action<Consumption<IEnvelope<T>>> action) where T : IEvent =>
+        Register(topic, chunk.ToPartition(_globalChunkConfig), consumer, action);
+
+    public void Register<T>(string topic, Partition partition, EmitterIdentity consumer, Action<Consumption<IEnvelope<T>>> action) where T : IEvent
     {
         var index = (EventType.From<T>(), partition);
         InitTopic(index);
 
-        Action<Consumption<IEnvelope<object>>> newConsumer = o => action(
-            new Consumption<IEnvelope<T>>(new Envelope<T>((T)o.Message.Payload, o.Message.MessageId), o.Offset)
+        Action<Consumption<IEnvelope<object>>> castedAction = o => action(
+            new Consumption<IEnvelope<T>>(new Envelope<T>((T)o.Message.Payload, o.Message.MessageId, o.Message.Emitter), o.Offset)
         );
-        _consumers[index].Add(newConsumer);
-        _consumerOffsets[newConsumer] = 0;
+        _consumers[index].Add(new ConsumerRegistration(castedAction, consumer));
+        _consumerOffsets[castedAction] = 0;
 
         var messages = _topics[index];
-        long currentOffset = _consumerOffsets[newConsumer];
+        long currentOffset = _consumerOffsets[castedAction];
         while (currentOffset < _topicMaxOffsets[index])
         {
             if (!messages.TryGetValue(currentOffset, out var value))
                 throw new Exception("offset not existent in topic");
 
-            newConsumer(value);
-            _consumerOffsets[newConsumer] = currentOffset;
-            currentOffset += 1;
+            long newOffset = currentOffset + 1;
+            _actionQueue.Enqueue(new DelayedConsumption(castedAction, value, currentOffset, newOffset, topic, partition, consumer));
+            currentOffset = newOffset;
         }
     }
 
@@ -81,17 +118,16 @@ public class InMemorySimpleFabric: ISimpleFabric
         IEnvelope<T> actualMessage = messageBuilder(new BatchedOffsetResults(offsets));
             
         var currentOffset = _topicMaxOffsets[index];
-        var consumption = new Consumption<IEnvelope<object>>(new Envelope<object>(actualMessage.Payload, actualMessage.MessageId), currentOffset);
+        var consumption = new Consumption<IEnvelope<object>>(new Envelope<object>(actualMessage.Payload, actualMessage.MessageId, actualMessage.Emitter), currentOffset);
         _topics[index].TryAdd(currentOffset, consumption);
             
-        _scopedFabricLoggingProvider.LogDebug($"Send({topic}[partition: {partition.Value}, offset: {currentOffset}]) with {_serializer.Serialize(actualMessage)}");
+        _scopedFabricLoggingProvider.LogDebug($"Produced({topic}[partition: {partition.Value}, offset: {currentOffset}]) with {_serializer.Serialize(actualMessage)}");
 
         var newOffset = currentOffset + 1;
         var fetchedConsumers = _consumers[index].ToArray();
-        foreach (var action in fetchedConsumers)
+        foreach (var registration in fetchedConsumers)
         {
-            action(consumption);
-            _consumerOffsets[action] = newOffset;
+            _actionQueue.Enqueue(new DelayedConsumption(registration.Action, consumption, currentOffset, newOffset, topic, partition, registration.ConsumerIdentity));
         }
 
         _topicMaxOffsets[index] = newOffset;
@@ -125,6 +161,6 @@ public class InMemorySimpleFabric: ISimpleFabric
     {
         _topicMaxOffsets.GetOrAdd(index, _ => 0);
         _topics.GetOrAdd(index, _ => new ConcurrentDictionary<long, Consumption<IEnvelope<object>>>());
-        _consumers.GetOrAdd(index, _ => new List<Action<Consumption<IEnvelope<object>>>>());
+        _consumers.GetOrAdd(index, _ => new List<ConsumerRegistration>());
     }
 }

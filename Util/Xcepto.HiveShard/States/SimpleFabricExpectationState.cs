@@ -16,9 +16,11 @@ public class SimpleFabricExpectationState<T>: XceptoState
 
     private readonly ConcurrentQueue<IEnvelope<T>> _messages = new();
     private readonly Partition _partition;
+    private EmitterIdentity _emitterIdentity;
 
-    public SimpleFabricExpectationState(string name, Predicate<T> predicate, string topic, Partition partition) : base(name)
+    public SimpleFabricExpectationState(string name, Predicate<T> predicate, string topic, Partition partition, EmitterIdentity emitterIdentity) : base(name)
     {
+        _emitterIdentity = emitterIdentity;
         _partition = partition;
         _topic = topic;
         _predicate = predicate;
@@ -27,7 +29,7 @@ public class SimpleFabricExpectationState<T>: XceptoState
     public override Task Initialize(IServiceProvider serviceProvider)
     {
         var fabric = serviceProvider.GetRequiredService<ISimpleFabric>();
-        fabric.Register<T>(_topic, _partition, x =>
+        fabric.Register<T>(_topic, _partition, _emitterIdentity, x =>
         {
             _messages.Enqueue(x.Message);
         });

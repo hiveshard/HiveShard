@@ -25,10 +25,12 @@ public class ScopedTunnelTest<TShard>
     private static readonly TestEmitter TestEmitter = new();
     private ISimpleFabric _fabric;
     private TShard _shard;
+    private HiveShardIdentity _identity;
     public TShard Shard => _shard;
 
     private ScopedTunnelTest(EventRepository eventRepository, HiveShardIdentity identity)
     {
+        _identity = identity;
         _eventRepository = eventRepository;
         
         GlobalChunkConfig chunkConfig = new GlobalChunkConfig(Chunk, Chunk);
@@ -70,11 +72,11 @@ public class ScopedTunnelTest<TShard>
         where T: IEvent
     {
         var partition = new Partition(_eventRepository.GetEventOrder<T>());
-        _fabric.Send(typeof(Tick).FullName!, partition, CreateTick<T>(tick, offset));
+        _fabric.Send(typeof(Tick).FullName!, partition, _identity.Identity, CreateTick<T>(tick, offset));
     }
 
     public void Send<T>(T message)
-        where T: IEvent => _fabric.Send(typeof(T).FullName!, Chunk, message);
+        where T: IEvent => _fabric.Send(typeof(T).FullName!, Chunk, _identity.Identity, message);
 
     public IEnumerable<Consumption<IEnvelope<object>>> FetchCompletedTopic(Partition partition, int from, int toExclusive)
     {
@@ -97,5 +99,33 @@ public class ScopedTunnelTest<TShard>
         eventRepository.RegisterEvent<TestEvent>(TestEmitter);
         eventRepository.RegisterEvent<TestEventResponse>(identity);
         return new ScopedTunnelTest<EchoHiveShard>(eventRepository, identity);
+    }
+
+    public void Deliver(int amount)
+    {
+        _fabric.CompleteDeliveries(amount);
+    }
+
+    public void DeliverAll()
+    {
+        bool passes = true;
+        while (passes)
+        {
+            try
+            {
+                Deliver(1);
+            }
+            catch (Exception)
+            {
+                passes = false;
+            }
+        }
+    }
+
+    public Partition GetPartition<T>()
+    where T: IEvent
+    {
+        var eventOrder = _eventRepository.GetEventOrder<T>();
+        return new Partition(eventOrder);
     }
 }

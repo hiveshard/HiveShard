@@ -19,8 +19,10 @@ public class EventResponseScopedTunnelTests
         // wait for both input- and output-event-type ticks
         test.SendTick<TestEvent>(0, 1);
         test.SendTick<TestEventResponse>(0, 1);
+        test.DeliverAll();
 
-        var completedTick = test.FetchCompletedTopic(new Partition(1), 0, 1)
+        var responsePartition = test.GetPartition<TestEventResponse>(); // since its the second 
+        var completedTick = test.FetchCompletedTopic(responsePartition, 0, 1)
             .Select(x => x.Message.Payload)
             .Cast<CompletedTick>()
             .FirstOrDefault();

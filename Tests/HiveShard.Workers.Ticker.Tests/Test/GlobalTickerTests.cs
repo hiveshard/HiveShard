@@ -18,6 +18,7 @@ public class GlobalTickerTests
     public void GlobalTicker_StartsWithTick0()
     {
         var test = GlobalTickerTest.Empty();
+        test.DeliverAll();
 
         var tick = test.FetchTick(0, 1);
 
@@ -35,6 +36,7 @@ public class GlobalTickerTests
 
         test.SendRootCompleted<TestEvent>(emitter1, 0);
         test.SendRootCompleted<TestEvent>(emitter2, 0);
+        test.DeliverAll();
 
         var tick = test.FetchTick(1, 2);
 
@@ -52,6 +54,7 @@ public class GlobalTickerTests
         var test = GlobalTickerTest.WithEvent<CompletedTick>(emitter1, emitter2);
 
         test.SendRootCompleted<TestEvent>(emitter1, 0);
+        test.DeliverAll();
 
         var tick = test.FetchTick(1, 2);
 

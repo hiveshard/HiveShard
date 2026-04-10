@@ -21,6 +21,7 @@ public class InitializationTunnelTests
         InitializationTunnelTest<TestShardInitializer> test = InitializationTunnelTest<TestShardInitializer>.CreateTestInitializer();
 
         test.SendTick<InitialDataEvent>(0);
+        test.DeliverAll();
 
         var completedTick = test.FetchCompletedTopic<InitialDataEvent>(0, 1)
             .Select(x => x.Message.Payload)
@@ -38,6 +39,7 @@ public class InitializationTunnelTests
         InitializationTunnelTest<TestShardInitializer> test = InitializationTunnelTest<TestShardInitializer>.CreateTestInitializer();
 
         test.SendTick<InitialDataEvent>(1);
+        test.DeliverAll();
 
         var completedTick = test.FetchCompletedTopic<InitialDataEvent>(0, 1)
             .Select(x => x.Message.Payload)
@@ -54,6 +56,7 @@ public class InitializationTunnelTests
         InitializationTunnelTest<TestShardInitializer> test = InitializationTunnelTest<TestShardInitializer>.CreateTestInitializer();
 
         test.SendTick<InitialDataEvent>(2);
+        test.Deliver(1);
 
         var completedTick = test.FetchCompletedTopic<InitialDataEvent>(0, 1)
             .Select(x => x.Message.Payload)
@@ -68,6 +71,7 @@ public class InitializationTunnelTests
         InitializationTunnelTest<TestShardInitializer> test = InitializationTunnelTest<TestShardInitializer>.CreateTestInitializer();
 
         test.SendTick<InitialDataEvent>(0);
+        test.Deliver(1);
 
         var initialDataEvent = test.FetchTopic<InitialDataEvent>(0, 1)
             .Select(x => x.Message.Payload)
@@ -82,6 +86,7 @@ public class InitializationTunnelTests
         InitializationTunnelTest<TestShardInitializer> test = InitializationTunnelTest<TestShardInitializer>.CreateTestInitializer();
 
         test.SendTick<InitialDataEvent>(1);
+        test.DeliverAll();
 
         var initialDataEvent = test.FetchTopic<InitialDataEvent>(0, 1)
             .Select(x => x.Message.Payload)

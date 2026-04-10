@@ -16,6 +16,7 @@ public class GlobalTickerTest
     private readonly EventRepository _eventRepository;
     private readonly GlobalChunkConfig _chunkConfig;
     private readonly GlobalTicker _ticker;
+    private GlobalTickerIdentity _identity;
 
     public GlobalTicker Ticker => _ticker;
 
@@ -27,8 +28,8 @@ public class GlobalTickerTest
         _fabric = new InMemorySimpleFabricBuilder().Build(new SimpleConsoleTelemetry());
         _eventRepository = eventRepository;
 
-        var identity = new GlobalTickerIdentity(Guid.NewGuid());
-        _ticker = new GlobalTicker(identity, _fabric, _eventRepository);
+        _identity = new GlobalTickerIdentity(Guid.NewGuid());
+        _ticker = new GlobalTicker(_identity, _fabric, _eventRepository);
 
         _ticker.Initialize();
     }
@@ -46,14 +47,35 @@ public class GlobalTickerTest
                     typeof(T).FullName!,
                     []
                 ),
-                Guid.NewGuid()
+                Guid.NewGuid(),
+                _identity.ToEmitterType()
             )
         );
     }
 
+    public void Deliver(int amount)
+    {
+        _fabric.CompleteDeliveries(amount);
+    }
+    
+    public void DeliverAll()
+    {
+        bool passes = true;
+        while (passes)
+        {
+            try
+            {
+                Deliver(1);
+            }
+            catch (Exception)
+            {
+                passes = false;
+            }
+        }
+    }
     public Tick? FetchTick(int from, int toExclusive)
     {
-        return _fabric.FetchTopic(
+        var ticks = _fabric.FetchTopic(
                 new TopicChunk(
                     typeof(Tick).FullName!,
                     new Partition(0).ToChunk(_chunkConfig)
@@ -62,8 +84,17 @@ public class GlobalTickerTest
                 toExclusive
             )
             .Select(x => x.Message.Payload)
-            .Cast<Tick>()
-            .FirstOrDefault();
+            .Cast<Tick>();
+
+        return ticks.FirstOrDefault();
+    }
+    
+    public Tick FetchTickOrThrow(int offset)
+    {
+        var tick = FetchTick(offset, offset + 1);
+        if (tick == null)
+            throw new Exception("No tick available");
+        return tick;
     }
     
     public static GlobalTickerTest Empty()
@@ -81,6 +112,11 @@ public class GlobalTickerTest
         foreach (var emitter in emitters)
             repo.RegisterEvent<T>(emitter);
 
+        return new GlobalTickerTest(repo);
+    }
+    
+    public static GlobalTickerTest FromRepository(EventRepository repo)
+    {
         return new GlobalTickerTest(repo);
     }
 }

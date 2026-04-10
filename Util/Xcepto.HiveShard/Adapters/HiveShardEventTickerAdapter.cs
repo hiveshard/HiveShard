@@ -25,7 +25,7 @@ public class HiveShardEventTickerAdapter: XceptoAdapter
     {
         AddStep(new TickerExpectationState<Tick>(
             $"Expect tick {tickNumber} on partition {_partition.Value} from {_emitterIdentity.EmitterIdentityString}", 
-            typeof(Tick).FullName!, _partition,
+            typeof(Tick).FullName!, _partition, _emitterIdentity,
             tick => tick.TickNumber.Equals(tickNumber) 
                     && tick.Emitter.Equals(_emitterIdentity)
                     && tick.TickEventType.Equals(_tickerIdentity.EventType.FullName!)));
@@ -34,7 +34,7 @@ public class HiveShardEventTickerAdapter: XceptoAdapter
     {
         AddStep(new TickerExpectationState<CompletedTick>(
             $"Expect tick {tickNumber} on partition {_partition.Value} from {_emitterIdentity.EmitterIdentityString}", 
-            typeof(CompletedTick).FullName!, _partition,
+            typeof(CompletedTick).FullName!, _partition, _emitterIdentity,
             tick => tick.Tick.Equals(tickNumber) 
                     && tick.EmitterIdentity.Equals(_emitterIdentity)
                     && tick.EventType.Equals(_tickerIdentity.EventType.FullName!)));

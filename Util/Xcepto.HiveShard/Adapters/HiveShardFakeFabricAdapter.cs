@@ -8,6 +8,12 @@ namespace Xcepto.HiveShard.Adapters;
 
 public class HiveShardFakeFabricAdapter: XceptoAdapter
 {
+    private EmitterIdentity _identity;
+
+    public HiveShardFakeFabricAdapter(EmitterIdentity identity)
+    {
+        _identity = identity;
+    }
     public void FabricAction(Action<ISimpleFabric> action)
     {
         AddStep(new SimpleFabricActionState("Simple Fabric action", action));
@@ -16,6 +22,6 @@ public class HiveShardFakeFabricAdapter: XceptoAdapter
     public void FabricExpectation<T>(Predicate<T> predicate, string topic, Partition partition)
         where T: IEvent 
     {
-        AddStep(new SimpleFabricExpectationState<T>("Simple fabric expectation state", predicate, topic, partition));
+        AddStep(new SimpleFabricExpectationState<T>("Simple fabric expectation state", predicate, topic, partition, _identity));
     }
 }

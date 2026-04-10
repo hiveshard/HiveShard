@@ -7,6 +7,7 @@ using HiveShard.Workers.Initializer.Data;
 using HiveShard.Workers.Shard.Extensions;
 using HiveShard.Workers.Ticker.Data;
 using HiveShard.Workers.Ticker.Extensions;
+using HiveShard.Workers.Ticker.Tests.Data;
 using HiveShard.Workers.Ticker.Tests.Events;
 using HiveShard.Workers.Ticker.Tests.Extensions;
 using HiveShard.Workers.Ticker.Tests.Shards;
@@ -25,6 +26,7 @@ public class EventTickerTests<T>
     {
         Guid tickerIdentifier = Guid.NewGuid();
         var onlyChunk = new Chunk(0, 0);
+        var thisEmitter = new TestEmitterType();
         var hiveShardIdentity = new HiveShardIdentity(onlyChunk, ShardType.From<NavigationShard>(), Guid.NewGuid());
         var initializerType = new InitializerEmitterIdentity(new EmitterIdentity("test initializer"));
         var initTickerIdentity = new DistributedTickerIdentity(Guid.NewGuid(), typeof(InitializationEvent));
@@ -57,7 +59,7 @@ public class EventTickerTests<T>
 
         await HiveShardTest.Given(environment, builder =>
         {
-            var testFabricAccess = builder.RegisterAdapter(new HiveShardFakeFabricAdapter());
+            var testFabricAccess = builder.RegisterAdapter(new HiveShardFakeFabricAdapter(thisEmitter.Identity));
             var globalTicker = builder.RegisterAdapter(new HiveShardGlobalTickerAdapter(globalTickerIdentity.ToEmitterType()));
             var testEventTicker = builder.RegisterAdapter(new HiveShardEventTickerAdapter(testEventIdentity, eventConfig));
             var initEventTicker = builder.RegisterAdapter(new HiveShardEventTickerAdapter(initTickerIdentity, eventConfig));
@@ -69,9 +71,10 @@ public class EventTickerTests<T>
 
             // initializer hello
             testFabricAccess.FabricAction(simpleFabric => simpleFabric.Send<CompletedTick>(
-                typeof(CompletedTick).FullName!, initializationEventPartition, 
+                typeof(CompletedTick).FullName!, initializationEventPartition, initializerType.Identity,
                 new CompletedTick(initializerType.Identity, 0, initializationEventName, 
-                    [new TopicPartitionOffset(initializationEventName, onlyChunk, 0)])));
+                    [new TopicPartitionOffset(initializationEventName, onlyChunk, 0)]))
+            );
 
 
             // Completed 0
@@ -84,9 +87,9 @@ public class EventTickerTests<T>
             initEventTicker.ExpectTick(1);
 
             testFabricAccess.FabricAction(simpleFabric => simpleFabric.Send<InitializationEvent>(
-                typeof(InitializationEvent).FullName!, onlyChunk, initializationEvent));
+                typeof(InitializationEvent).FullName!, onlyChunk, initializerType.Identity, initializationEvent));
             testFabricAccess.FabricAction(simpleFabric => simpleFabric.Send<CompletedTick>(
-                typeof(CompletedTick).FullName!, initializationEventPartition, 
+                typeof(CompletedTick).FullName!, initializationEventPartition, initializerType.Identity, 
                 new CompletedTick(initializerType.Identity, 1, initializationEventName, 
                     [new TopicPartitionOffset(initializationEventName, onlyChunk, 1)])));
             

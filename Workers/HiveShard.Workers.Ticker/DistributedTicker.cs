@@ -20,11 +20,13 @@ public class DistributedTicker
         _eventRepository = eventRepository;
     }
 
+    public EmitterIdentity Identity => _config.EmitterType.Identity;
+
     public void Initialize()
     {
         var eventOrder = new Partition(_eventRepository.GetEventOrder(_config.EventType));
-        _simpleFabric.Register<Tick>(typeof(Tick).FullName!, new Partition(0), HandleGlobalTicks);
-        _simpleFabric.Register<CompletedTick>(typeof(CompletedTick).FullName!, eventOrder,
+        _simpleFabric.Register<Tick>(typeof(Tick).FullName!, new Partition(0), _config.EmitterType.Identity, HandleGlobalTicks);
+        _simpleFabric.Register<CompletedTick>(typeof(CompletedTick).FullName!, eventOrder, _config.EmitterType.Identity,
             HandleEventSpecificCompletedTick);
     }
 
@@ -54,8 +56,10 @@ public class DistributedTicker
             _simpleFabric.Send(typeof(Tick).FullName!, eventPartition,
                 new Envelope<Tick>(
                     new Tick(_currentTick, [], DateTime.Now, _config.EventType.FullName!, _config.EmitterType.Identity),
-                    Guid.NewGuid())
-                );
+                    Guid.NewGuid(),
+                    _config.EmitterType.Identity
+                )
+            );
         }
             
     }
@@ -90,7 +94,8 @@ public class DistributedTicker
         _simpleFabric.Send(typeof(CompletedTick).FullName!, new Partition(0),
             new Envelope<CompletedTick>(
                 new CompletedTick(_config.EmitterType.Identity, _currentTick, _config.EventType.FullName!, []),
-                Guid.NewGuid()
+                Guid.NewGuid(),
+                _config.EmitterType.Identity
             )
         );
     }

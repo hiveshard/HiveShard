@@ -23,6 +23,7 @@ namespace HiveShard.Workers.Initialization.Tests.Util
         private readonly ISimpleFabric _fabric;
         private readonly TInitializer _initializer;
         private GlobalChunkConfig _globalChunkConfig;
+        private InitializerEmitterIdentity _initializerEmitterIdentity;
 
         private static readonly Chunk Chunk = new(0, 0);
 
@@ -32,6 +33,7 @@ namespace HiveShard.Workers.Initialization.Tests.Util
             EventRepository eventRepository,
             InitializerEmitterIdentity identity)
         {
+            _initializerEmitterIdentity = identity;
             _eventRepository = eventRepository;
 
             _globalChunkConfig = new GlobalChunkConfig(Chunk, Chunk);
@@ -46,7 +48,7 @@ namespace HiveShard.Workers.Initialization.Tests.Util
 
             _initializer = serviceProvider.GetRequiredService<TInitializer>();
 
-            tunnel.Initialize(_initializer, identity);
+            tunnel.Initialize(_initializer, _initializerEmitterIdentity);
         }
 
         private ISimpleFabric CreateFabric(GlobalChunkConfig chunkConfig)
@@ -76,6 +78,7 @@ namespace HiveShard.Workers.Initialization.Tests.Util
             _fabric.Send(
                 typeof(Tick).FullName!,
                 partition,
+                _initializerEmitterIdentity.Identity,
                 CreateTick<T>(tick)
             );
         }
@@ -114,6 +117,27 @@ namespace HiveShard.Workers.Initialization.Tests.Util
             eventRepository.RegisterEvent<InitialDataEvent>(identity);
 
             return new InitializationTunnelTest<TInitializer>(eventRepository, identity);
+        }
+
+        public void Deliver(int amount)
+        {
+            _fabric.CompleteDeliveries(amount);
+        }
+
+        public void DeliverAll()
+        {
+            bool passes = true;
+            while (passes)
+            {
+                try
+                {
+                    Deliver(1);
+                }
+                catch (Exception)
+                {
+                    passes = false;
+                }
+            }
         }
     }
 }

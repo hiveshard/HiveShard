@@ -11,13 +11,13 @@ namespace HiveShard.Workers.Ticker;
 
 public class GlobalTicker
 {
-    private readonly GlobalTickerIdentity _globalTickerIdentity;
+    public GlobalTickerIdentity TickerIdentity { get; }
     private readonly ISimpleFabric _simpleFabric;
     private readonly IEventRepository _eventRepository;
 
     public GlobalTicker(GlobalTickerIdentity globalTickerIdentity, ISimpleFabric simpleFabric, IEventRepository eventRepository)
     {
-        _globalTickerIdentity = globalTickerIdentity;
+        this.TickerIdentity = globalTickerIdentity;
         _simpleFabric = simpleFabric;
         _eventRepository = eventRepository;
     }
@@ -29,14 +29,15 @@ public class GlobalTicker
         // this tick should be ignored if receivers already know of something > 0
         _simpleFabric.Send(typeof(Tick).FullName!, new Partition(0),
             new Envelope<Tick>(
-                new Tick(0, [], DateTime.Now, tickEventName, _globalTickerIdentity.ToEmitterType()),
-                Guid.NewGuid()
+                new Tick(0, [], DateTime.Now, tickEventName, TickerIdentity.ToEmitterType()),
+                Guid.NewGuid(),
+                TickerIdentity.ToEmitterType()
             )
         );
         _currentTick = 0;
         
         
-        _simpleFabric.Register<CompletedTick>(typeof(CompletedTick).FullName!, new Partition(0), HandleEventCompletedTick);
+        _simpleFabric.Register<CompletedTick>(typeof(CompletedTick).FullName!, new Partition(0), TickerIdentity.ToEmitterType(), HandleEventCompletedTick);
     }
 
 
@@ -67,8 +68,9 @@ public class GlobalTicker
         _currentTick += 1;
         _simpleFabric.Send(typeof(Tick).FullName!, new Partition(0),
             new Envelope<Tick>(
-                new Tick(_currentTick, [], DateTime.Now, typeof(Tick).FullName!, _globalTickerIdentity.ToEmitterType()),
-                Guid.NewGuid()
+                new Tick(_currentTick, [], DateTime.Now, typeof(Tick).FullName!, TickerIdentity.ToEmitterType()),
+                Guid.NewGuid(),
+                TickerIdentity.ToEmitterType()
             )
         );
     }

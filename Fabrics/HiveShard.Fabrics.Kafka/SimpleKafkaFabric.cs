@@ -55,11 +55,13 @@ namespace HiveShard.Fabrics.Kafka
                 BootstrapServers = _broker,
             };
         }
-        
-        public void Register<T>(string topic, Action<Consumption<IEnvelope<T>>> action) where T: IEvent
-            => Register(topic, new Chunk(0, 0), action);
 
-        public void Register<T>(string topic, Chunk chunk, Action<Consumption<IEnvelope<T>>> action) where T: IEvent
+        public void CompleteDeliveries(int deliveries) => throw new NotImplementedException();
+
+        public void Register<T>(string topic, EmitterIdentity consumer, Action<Consumption<IEnvelope<T>>> action) where T: IEvent
+            => Register(topic, new Chunk(0, 0), consumer, action);
+
+        public void Register<T>(string topic, Chunk chunk, EmitterIdentity consumer, Action<Consumption<IEnvelope<T>>> action) where T: IEvent
         {
             _ensureTopics.Add(new TopicChunk(topic, chunk), _ctsToken);
             _kafkaRegistrations.Enqueue(new KafkaRegistration(new TopicChunk(topic, chunk), (json, offset) =>
@@ -69,8 +71,8 @@ namespace HiveShard.Fabrics.Kafka
             }));
         }
 
-        public void Register<T>(string topic, Data.Partition partition, Action<Consumption<IEnvelope<T>>> action)
-            where T: IEvent => Register(topic, partition.ToChunk(_globalChunkConfig), action);
+        public void Register<T>(string topic, Data.Partition partition, EmitterIdentity consumer, Action<Consumption<IEnvelope<T>>> action)
+            where T: IEvent => Register(topic, partition.ToChunk(_globalChunkConfig), consumer, action);
 
         public void Send<T>(string topic, IEnvelope<T> message) where T: IEvent
             => Send(topic, new Chunk(0,0), message);
@@ -107,9 +109,9 @@ namespace HiveShard.Fabrics.Kafka
             throw new NotImplementedException();
         }
 
-        public Task Start(CancellationToken cancellationToken)
+        public void Start(CancellationToken cancellationToken)
         {
-            return Task.Run(async () =>
+            Task.Run(async () =>
             {
                 List<Task> tasks = new List<Task>();
                 tasks.Add(CreateAdminClient(cancellationToken));

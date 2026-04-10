@@ -19,6 +19,7 @@ public class ShardStateScopedTunnelTests
         test.Send(new TestEvent2(4));
         test.SendTick<TestEvent1>(0, 1);
         test.SendTick<TestEvent2>(0, 1);
+        test.DeliverAll();
         
         Assert.That(test.Shard.Sum, Is.EqualTo(10));
     }
@@ -45,6 +46,7 @@ public class ShardStateScopedTunnelTests
         test.SendTick<TestEvent1>(0, 1);
         test.SendTick<TestEvent2>(0, 1);
         test.Send(new TestEvent2(3));
+        test.DeliverAll();
         
         Assert.That(test.Shard.Sum, Is.EqualTo(10));
     }
@@ -59,12 +61,14 @@ public class ShardStateScopedTunnelTests
         test.Send(new TestEvent2(4));
         test.SendTick<TestEvent1>(0, 1);
         test.SendTick<TestEvent2>(0, 1);
+        test.DeliverAll();
         
         Assert.That(test.Shard.Sum, Is.EqualTo(10));
 
         test.Send(new TestEvent2(3));
         test.SendTick<TestEvent1>(1, 1);
         test.SendTick<TestEvent2>(1, 2);
+        test.DeliverAll();
         
         Assert.That(test.Shard.Sum, Is.EqualTo(13));
     }
@@ -79,6 +83,7 @@ public class ShardStateScopedTunnelTests
         test.Send(new TestEvent1(6, Operation.Addition));
         test.SendTick<TestEvent1>(0, 1);
         test.SendTick<TestEvent2>(0, 1);
+        test.DeliverAll();
         
         Assert.That(test.Shard.Sum, Is.EqualTo(24));
     }
@@ -92,6 +97,7 @@ public class ShardStateScopedTunnelTests
         test.Send(new TestEvent2(6));
         test.SendTick<TestEvent1>(0, 1);
         test.SendTick<TestEvent2>(0, 1);
+        test.DeliverAll();
 
         var completedTick = test.FetchCompletedTopic(new Partition(1), 0, 1)
             .Select(x => x.Message.Payload)

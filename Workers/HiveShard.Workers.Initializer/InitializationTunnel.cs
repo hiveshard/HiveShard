@@ -36,7 +36,7 @@ public class InitializationTunnel: IInitializationTunnel
         if (!_offsets.ContainsKey(index))
             _offsets[index] = 0;
         _offsets[index]++;
-        _simpleFabric.Send(index.Item1, chunk, new Envelope<TEvent>(e, Guid.NewGuid()));
+        _simpleFabric.Send(index.Item1, chunk, new Envelope<TEvent>(e, Guid.NewGuid(), _emitterIdentity.Identity));
     }
 
     public void Initialize(IInitializer initializerInstance, InitializerEmitterIdentity identity)
@@ -45,7 +45,7 @@ public class InitializationTunnel: IInitializationTunnel
         _emitterIdentity = identity;
         foreach (var topic in _eventRepository.GetTopicsOfEmitter(identity.Identity))
         {
-            _simpleFabric.Register<Tick>(typeof(Tick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)), HandleTick);
+            _simpleFabric.Register<Tick>(typeof(Tick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)), identity.Identity, HandleTick);
         }
     }
 
@@ -60,7 +60,8 @@ public class InitializationTunnel: IInitializationTunnel
                 _simpleFabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)),
                     new Envelope<CompletedTick>(
                         CompletedTick.From(topic, _emitterIdentity, 0, []),
-                        Guid.NewGuid()
+                        Guid.NewGuid(),
+                        _emitterIdentity.Identity
                     )
                 );
             }
@@ -87,7 +88,8 @@ public class InitializationTunnel: IInitializationTunnel
                                 [
                                     new TopicPartitionOffset(topic, chunk, offset)
                                 ]),
-                                Guid.NewGuid()
+                                Guid.NewGuid(),
+                                _emitterIdentity.Identity
                             )
                         );
                     }

@@ -96,7 +96,8 @@ public class ScopedShardTunnel: IScopedShardTunnel
                         ).ToList();
                         return new Envelope<CompletedTick>(
                             new CompletedTick(_identity.Identity, tick.TickNumber, topic, offsets),
-                            Guid.NewGuid()
+                            Guid.NewGuid(),
+                            _identity.Identity
                         );
                     }
                 );   
@@ -121,7 +122,7 @@ public class ScopedShardTunnel: IScopedShardTunnel
     {
         if (_currentContext is null)
             throw new Exception("Send without context is impossible");
-        IEnvelope<TEvent> envelope = new Envelope<TEvent>(message, Guid.NewGuid());
+        IEnvelope<TEvent> envelope = new Envelope<TEvent>(message, Guid.NewGuid(), _identity.Identity);
         _fabric.Send(typeof(TEvent).FullName!, _identity.Chunk, envelope);
         _telemetry.Cause(new TransitionCause(
             tick: _currentContext.Tick,
@@ -148,7 +149,7 @@ public class ScopedShardTunnel: IScopedShardTunnel
         foreach (var requiredEvent in _requiredEvents)
         {
             var partition = _eventRepository.GetEventOrder(requiredEvent);
-            _fabric.Register<Tick>(typeof(Tick).FullName!, new Partition(partition), x => AdvanceTick(x.Message.Payload));
+            _fabric.Register<Tick>(typeof(Tick).FullName!, new Partition(partition), _identity.Identity, x => AdvanceTick(x.Message.Payload));
         }
     }
 }
