@@ -6,9 +6,8 @@ using HiveShard.Data;
 
 namespace HiveShard.Interface;
 
-public interface ISimpleFabric: IFabric
+public interface ISimpleFabric: IFabric, IIsolatedEntryPoint
 {
-    void Start(CancellationToken cancellationToken);
     void CompleteDeliveries(int deliveries);
     void Register<T>(string topic, EmitterIdentity consumer, Action<Consumption<IEnvelope<T>>> action) where T: IEvent;
     void Register<T>(string topic, Chunk chunk, EmitterIdentity consumer, Action<Consumption<IEnvelope<T>>> action) where T: IEvent;

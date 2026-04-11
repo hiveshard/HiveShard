@@ -27,9 +27,9 @@ public class HiveShardScenario: CompartmentalizedXceptoScenario
     protected override Task<IEnumerable<Compartment>> Setup()
     {
         Dictionary<string, Compartment> compartments = new();
-            
-            
-        var sharedServices = _environment.Outer
+
+        var outer = _environment.Outer;
+        var sharedServices = outer.Services
             .AddSingleton<ServiceEnvironment>(_environment)
             .AddSingleton<ILoggingProvider, HiveShardTestTelemetryProvider>();
             
@@ -40,7 +40,21 @@ public class HiveShardScenario: CompartmentalizedXceptoScenario
             compartmentBuilder.ExposeService(serviceDescriptor.ServiceType);
             compartmentBuilder.Identify(outerIdentification);
         }
-        compartments.Add(outerIdentification, compartmentBuilder.Build());
+
+        GenericEntryPoint outerEntryPoint = new GenericEntryPoint();
+        sharedServices.AddSingleton<GenericEntryPoint>(outerEntryPoint);
+        compartmentBuilder.SetEntryPoint(typeof(GenericEntryPoint));
+        var outerCompartment = compartmentBuilder.Build();
+        compartments.Add(outerIdentification, outerCompartment);
+        
+        outerEntryPoint.UpdateStartMethod(() =>
+        {
+            var requiredService =
+                outerCompartment.Services.GetRequiredService(_environment.Outer.EntryPointType);
+            if (requiredService is not IIsolatedEntryPoint isolatedEntryPoint)
+                throw new Exception("Incorrectly registered entryPoint");
+            return isolatedEntryPoint;
+        });
             
             
         foreach (var compartmentEnvironment in _environment.Inner)

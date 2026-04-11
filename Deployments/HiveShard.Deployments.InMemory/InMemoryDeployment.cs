@@ -39,13 +39,7 @@ namespace HiveShard.Deployments.InMemory;
 public class InMemoryDeployment: IDeployment
 {
     private readonly List<CompartmentEnvironment> _isolatedEnvironments = [];
-    private readonly List<(Type, CompartmentIdentifier)> _entryPointLocations = [];
 
-    private void AddEntryPoint<T>(CompartmentIdentifier compartmentIdentifier)
-    where T: class
-    {
-        _entryPointLocations.Add((typeof(T), compartmentIdentifier));
-    }
     
     public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk,
         IEnumerable<IsolatedEnvironment> workers,
@@ -77,7 +71,6 @@ public class InMemoryDeployment: IDeployment
             .AddSingleton<IEdgeTunnelServerEndpoint>(x => x.GetRequiredService<InMemoryEdgeFabric>())
             .AddSingleton<IAddressProvider, EdgeIdentityProvider>();
         
-        
         foreach (var isolatedEnvironment in workers)
             switch (isolatedEnvironment)
             {
@@ -101,7 +94,15 @@ public class InMemoryDeployment: IDeployment
                         $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
             }
 
-        return new ServiceEnvironment(globalChunkConfig, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable(), eventRepository);
+        var compartmentIdentifier = new CompartmentIdentifier(Guid.NewGuid(), CompartmentType.Root);
+        CompartmentEnvironment outer = new CompartmentEnvironment(
+            compartmentIdentifier, 
+            topLevelServices, 
+            [], 
+            typeof(ISimpleFabric)
+        );
+
+        return new ServiceEnvironment(globalChunkConfig, outer, _isolatedEnvironments, eventRepository);
     }
 
     private void BuildInitializationWorker(InitializerIsolatedEnvironment initializationIsolatedEnvironment)
@@ -210,8 +211,6 @@ public class InMemoryDeployment: IDeployment
             tickerAdditionRepository.RequestGlobalTickerAddition(globalTickerIsolatedEnvironment.GlobalTickerIdentity);
 
         var compartmentIdentifier = new CompartmentIdentifier(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, CompartmentType.TickerWorker);
-        AddEntryPoint<TickerWorker>(compartmentIdentifier);
-
         var compartmentEnvironment = new CompartmentEnvironment(
             compartmentIdentifier,
             serviceCollection,

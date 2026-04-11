@@ -6,5 +6,6 @@ public enum CompartmentType
     TickerWorker,
     EdgeWorker,
     Initializer,
-    Client
+    Client,
+    Root
 }

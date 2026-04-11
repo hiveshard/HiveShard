@@ -31,21 +31,20 @@ public class InMemorySimpleFabric: ISimpleFabric
         _scopedFabricLoggingProvider = loggingProvider;
     }
 
-    
-    public void Start(CancellationToken ct)
+    public Task Start()
     {
-        Task.Run(async () =>
+        return Task.Run(async () =>
         {
-            while (!ct.IsCancellationRequested)
+            while (true)
             {
                 var thisCycleActions = _actionQueue.ToArray();
                 foreach (var delayedConsumption in thisCycleActions)
                 {
                     CompleteDelivery(delayedConsumption);
                 }
-                await Task.Delay(50, ct);
+                await Task.Delay(50);
             }
-        }, ct);
+        });
     }
 
     private void CompleteDelivery(DelayedConsumption delayedConsumption)

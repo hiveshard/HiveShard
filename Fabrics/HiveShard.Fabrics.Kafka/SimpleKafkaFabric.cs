@@ -109,26 +109,28 @@ namespace HiveShard.Fabrics.Kafka
             throw new NotImplementedException();
         }
 
-        public void Start(CancellationToken cancellationToken)
+        public Task Start()
         {
-            Task.Run(async () =>
-            {
-                List<Task> tasks = new List<Task>();
-                tasks.Add(CreateAdminClient(cancellationToken));
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    if (_kafkaRegistrations.TryDequeue(out var kafkaRegistration)) tasks.Add(CreateConsumer(kafkaRegistration));
-
-                    if (_newProducers.TryDequeue(out var newProducer)) tasks.Add(CreateProducer(newProducer, cancellationToken));
-                    await Task.Delay(100, cancellationToken);
-                }
-                
-                // after cancellation, propagate
-                return Task.WhenAll(tasks);
-            }, cancellationToken);
+            throw new NotImplementedException();
+            // CancellationToken token = new CancellationToken();
+            // return Task.Run(async () =>
+            // {
+            //     List<Task> tasks = new List<Task>();
+            //     tasks.Add(CreateAdminClient());
+            //     while (!token.IsCancellationRequested)
+            //     {
+            //         if (_kafkaRegistrations.TryDequeue(out var kafkaRegistration)) tasks.Add(CreateConsumer(kafkaRegistration));
+            //
+            //         if (_newProducers.TryDequeue(out var newProducer)) tasks.Add(CreateProducer(newProducer, cancellationToken));
+            //         await Task.Delay(100);
+            //     }
+            //     
+            //     // after cancellation, propagate
+            //     return Task.WhenAll(tasks);
+            // }, token);
         }
 
-        private Task CreateAdminClient(CancellationToken cancellationToken)
+        private Task CreateAdminClient()
         {
             return Task.Run(async () =>
             {
@@ -146,7 +148,7 @@ namespace HiveShard.Fabrics.Kafka
                                 .Build();
                     }, "Create AdminClient", _ctsToken, _scopedLogger);
                 
-                while (!cancellationToken.IsCancellationRequested)
+                while (true)
                 {
                     var topicPartition = _ensureTopics.Take();
                     var topic = topicPartition.Prefixed(_environmentConfig);
@@ -159,7 +161,7 @@ namespace HiveShard.Fabrics.Kafka
                     });
                     _scopedLogger.LogDebug($"Created topic {topic} with partitions: 1-{count}");
                 }
-            }, cancellationToken);
+            });
         }
 
         private Task CreateProducer(TopicChunk topicChunk, CancellationToken cancellationToken)
