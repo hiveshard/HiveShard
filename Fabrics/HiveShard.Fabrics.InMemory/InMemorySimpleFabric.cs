@@ -50,9 +50,9 @@ public class InMemorySimpleFabric: ISimpleFabric
 
     private void CompleteDelivery(DelayedConsumption delayedConsumption)
     {
+        _scopedFabricLoggingProvider.LogDebug($"---\nConsuming({delayedConsumption.Topic}[partition: {delayedConsumption.Partition}, offset: {delayedConsumption.ConsumedOffset}])\n by {delayedConsumption.Consumer.EmitterIdentityString}");
         delayedConsumption.Action(delayedConsumption.Value);
         _consumerOffsets[delayedConsumption.Action] = delayedConsumption.NewOffset;
-        _scopedFabricLoggingProvider.LogDebug($"Consumed({delayedConsumption.Topic}[partition: {delayedConsumption.Partition}, offset: {delayedConsumption.ConsumedOffset}]) by {delayedConsumption.Consumer.EmitterIdentityString}");
     }
 
     public void CompleteDeliveries(int deliveries)
