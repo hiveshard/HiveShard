@@ -37,10 +37,11 @@ public class InMemorySimpleFabric: ISimpleFabric
         {
             while (true)
             {
-                var thisCycleActions = _actionQueue.ToArray();
-                foreach (var delayedConsumption in thisCycleActions)
+                var currentQueueLenght = _actionQueue.Count();
+                for(int i = 0; i < currentQueueLenght; i++)
                 {
-                    CompleteDelivery(delayedConsumption);
+                    if (_actionQueue.TryDequeue(out var delayedConsumption))
+                        CompleteDelivery(delayedConsumption);
                 }
                 await Task.Delay(50);
             }
