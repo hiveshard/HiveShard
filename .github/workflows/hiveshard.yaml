@@ -29,9 +29,9 @@ jobs:
       - name: run tests with coverage
         run: |
           dotnet test \
+            --settings coverlet.runsettings \
             --logger "trx;LogFileName=test-results.trx" \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=lcov
+            --collect:"XPlat Code Coverage"
         env:
           HIVESHARD_TELEMETRY_ENDPOINT: ${{ secrets.HIVESHARD_TELEMETRY_ENDPOINT }}
           HIVESHARD_TELEMETRY_TOKEN: ${{ secrets.HIVESHARD_TELEMETRY_TOKEN }}
@@ -44,6 +44,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: Tests/**/TestResults/**/coverage.cobertura.xml
 
       - name: Test Report
         uses: dorny/test-reporter@v2
