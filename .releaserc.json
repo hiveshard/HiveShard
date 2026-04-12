@@ -46,7 +46,7 @@
       "@semantic-release/exec",
       {
         "verifyConditionsCmd": "./verify.sh ./Workers HiveShard.Workers.Ticker",
-        "publishCmd": "./release.sh . HiveShard.Ticker ${nextRelease.version}"
+        "publishCmd": "./release.sh . HiveShard.Workers.Ticker ${nextRelease.version}"
       }
     ],
     [
