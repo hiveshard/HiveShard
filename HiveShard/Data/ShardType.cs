@@ -1,47 +1,45 @@
 using System;
 using HiveShard.Interface;
 
-namespace HiveShard.Data
+namespace HiveShard.Data;
+
+public class ShardType
 {
-    public class ShardType
+    private ShardType(string typeName)
     {
-        private ShardType(string typeName)
-        {
-            TypeName = typeName;
-        }
+        TypeName = typeName;
+    }
 
-        public static ShardType From<T>()
-            where T : class, IHiveShard
-        {
-            return new ShardType(typeof(T).AssemblyQualifiedName!);
-        }
+    public static ShardType From<T>()
+        where T : class, IHiveShard
+    {
+        return new ShardType(typeof(T).AssemblyQualifiedName!);
+    }
 
-        private string TypeName { get; }
+    public string TypeName { get; }
 
-        public Type GetShardType()
-        {
-            var shardType = Type.GetType(TypeName);
-            if (shardType is null)
-                throw new Exception($"Type not found: {TypeName}");
-            return shardType;
-        }
+    public Type GetShardType()
+    {
+        var shardType = Type.GetType(TypeName);
+        if (shardType is null)
+            throw new Exception($"Type not found: {TypeName}");
+        return shardType;
+    }
 
-        protected bool Equals(ShardType other)
-        {
-            return TypeName == other.TypeName;
-        }
+    private bool Equals(ShardType other)
+    {
+        return TypeName == other.TypeName;
+    }
 
-        public override bool Equals(object? obj)
-        {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((ShardType)obj);
-        }
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        return obj.GetType() == GetType() && Equals((ShardType)obj);
+    }
 
-        public override int GetHashCode()
-        {
-            return TypeName.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return TypeName.GetHashCode();
     }
 }

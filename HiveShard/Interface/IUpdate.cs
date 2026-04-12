@@ -1,7 +1,6 @@
-namespace HiveShard.Interface
+namespace HiveShard.Interface;
+
+public interface IUpdate
 {
-    public interface IUpdate
-    {
-        void ControlledUpdate(float time);
-    }
+    void ControlledUpdate(float time);
 }

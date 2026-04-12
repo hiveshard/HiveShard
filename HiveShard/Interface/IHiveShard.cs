@@ -1,8 +1,8 @@
-﻿namespace HiveShard.Interface
+﻿using HiveShard.Data;
+
+namespace HiveShard.Interface;
+
+public interface IHiveShard
 {
-    public interface IHiveShard
-    {
-        public void Process(float seconds);
-        public void Initialize();
-    }
+    public void Initialize(Chunk chunk);
 }

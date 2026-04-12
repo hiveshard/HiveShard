@@ -25,6 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\HiveShard.Edge\HiveShard.Edge.csproj" />
       <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
     </ItemGroup>
 

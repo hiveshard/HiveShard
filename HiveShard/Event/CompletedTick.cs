@@ -4,22 +4,30 @@ using HiveShard.Data;
 using HiveShard.Interface;
 using Newtonsoft.Json;
 
-namespace HiveShard.Event
-{
-    public class CompletedTick: IEvent
-    {
-        [JsonConstructor]
-        public CompletedTick(HiveShardIdentity hiveShardIdentity, long number, IEnumerable<TopicPartitionOffset> produceOffsets, DateTime lastTickTime)
-        {
-            HiveShardIdentity = hiveShardIdentity;
-            Number = number;
-            ProduceOffsets = produceOffsets;
-            LastTickTime = lastTickTime;
-        }
+namespace HiveShard.Event;
 
-        public HiveShardIdentity HiveShardIdentity { get; }
-        public long Number { get; }
-        public DateTime LastTickTime { get; }
-        public IEnumerable<TopicPartitionOffset> ProduceOffsets { get; }
+public class CompletedTick: ITickEvent
+{
+    [JsonConstructor]
+    public CompletedTick(EmitterIdentity emitterIdentity, long tick, string eventType,
+        IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
+    {
+        TopicPartitionOffsets = topicPartitionOffsets;
+        EmitterIdentity = emitterIdentity;
+        Tick = tick;
+        EventType = eventType;
     }
+
+    public static CompletedTick From(string eventType, IEventEmitterType emitter, long tick,
+        IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
+    {
+        if (emitter.InitializationTickOnly && tick > 1)
+            throw new InvalidOperationException();
+
+        return new CompletedTick(emitter.Identity, tick, eventType, topicPartitionOffsets);
+    }
+    public EmitterIdentity EmitterIdentity { get; }
+    public long Tick { get; }
+    public string EventType { get; }
+    public IEnumerable<TopicPartitionOffset> TopicPartitionOffsets { get; }
 }

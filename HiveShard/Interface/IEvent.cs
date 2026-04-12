@@ -1,8 +1,4 @@
-﻿using System;
+﻿
+namespace HiveShard.Interface;
 
-namespace HiveShard.Interface
-{
-    public interface IEvent
-    {
-    }
-}
+public interface IEvent;

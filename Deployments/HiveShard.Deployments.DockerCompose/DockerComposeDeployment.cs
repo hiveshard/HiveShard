@@ -1,11 +1,11 @@
 ﻿using HiveShard.Data;
 using HiveShard.Interface;
-
-namespace HiveShard.Deployments.DockerCompose;
+using HiveShard.Interface.Repository;namespace HiveShard.Deployments.DockerCompose;
 
 public class DockerComposeDeployment: IDeployment
 {
-    public ServiceEnvironment Build(int gridSize, IEnumerable<IsolatedEnvironment> workers)
+    public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, IEnumerable<IsolatedEnvironment> asEnumerable,
+        IEventRepository eventRepository, string environmentName)
     {
         throw new NotImplementedException();
     }

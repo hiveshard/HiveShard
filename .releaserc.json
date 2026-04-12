@@ -45,7 +45,7 @@
     [
       "@semantic-release/exec",
       {
-        "verifyConditionsCmd": "./verify.sh . HiveShard.Ticker",
+        "verifyConditionsCmd": "./verify.sh ./Workers HiveShard.Workers.Ticker",
         "publishCmd": "./release.sh . HiveShard.Ticker ${nextRelease.version}"
       }
     ],
@@ -89,6 +89,27 @@
       {
         "verifyConditionsCmd": "./verify.sh ./Util Xcepto.HiveShard",
         "publishCmd": "./release.sh ./Util Xcepto.HiveShard ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "verifyConditionsCmd": "./verify.sh ./Util HiveShard.Environment",
+        "publishCmd": "./release.sh ./Util HiveShard.Environment ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "verifyConditionsCmd": "./verify.sh ./Telemetry HiveShard.Telemetry.HiveShardEE",
+        "publishCmd": "./release.sh ./Telemetry HiveShard.Telemetry.HiveShardEE ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "verifyConditionsCmd": "./verify.sh ./Telemetry HiveShard.Telemetry.Console",
+        "publishCmd": "./release.sh ./Telemetry HiveShard.Telemetry.Console ${nextRelease.version}"
       }
     ]
   ]

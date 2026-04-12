@@ -26,10 +26,24 @@ jobs:
       - name: Await Kafka
         run: dotnet run --project ./Util/KafkaStartupAwaiter/KafkaStartupAwaiter.csproj
           
-      - name: run tests
-        run: dotnet test --logger "trx;LogFileName=test-results.trx"
+      - name: run tests with coverage
+        run: |
+          dotnet test \
+            --logger "trx;LogFileName=test-results.trx" \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=lcov
         env:
-          RABBITMQ_URL: localhost
+          HIVESHARD_TELEMETRY_ENDPOINT: ${{ secrets.HIVESHARD_TELEMETRY_ENDPOINT }}
+          HIVESHARD_TELEMETRY_TOKEN: ${{ secrets.HIVESHARD_TELEMETRY_TOKEN }}
+          HIVESHARD_TELEMETRY_ORGANIZATION: ${{ secrets.HIVESHARD_TELEMETRY_ORGANIZATION }}
+          HIVESHARD_TELEMETRY_PROJECT: ${{ secrets.HIVESHARD_TELEMETRY_PROJECT }}
+          HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE: ${{ secrets.HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE }}
+
+      - name: upload coverage
+        if: github.ref == 'refs/heads/main'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Test Report
         uses: dorny/test-reporter@v2

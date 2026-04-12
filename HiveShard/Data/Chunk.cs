@@ -1,70 +1,68 @@
 ﻿using System.Collections.Generic;
 
-namespace HiveShard.Data
+namespace HiveShard.Data;
+
+public class Chunk
 {
-    public class Chunk
+    public int XCoord { get; }
+    public int YCoord { get; }
+
+    public Chunk(int xCoord, int yCoord)
     {
-        public int XCoord { get; }
-        public int YCoord { get; }
+        XCoord = xCoord;
+        YCoord = yCoord;
+    }
 
-        public const int Size = 128;
-        public const int MaxChunks = MaxRow * MaxRow;
-        public const int MaxRow = 3;
+    public string Topic => $"{XCoord}-{YCoord}";
 
-        public Chunk(int xCoord, int yCoord)
+    public IEnumerable<Chunk> GetNeighboursAndSelf(GlobalChunkConfig globalChunkConfig)
+    {
+        for (var i = -1; i <= 1; i++)
+        for (var j = -1; j <= 1; j++)
         {
-            XCoord = xCoord;
-            YCoord = yCoord;
+            var x = XCoord + i;
+            var y = YCoord + j;
+
+            if (x < globalChunkConfig.MinChunk.XCoord ||
+                y < globalChunkConfig.MinChunk.YCoord ||
+                x > globalChunkConfig.MaxChunk.XCoord ||
+                y > globalChunkConfig.MaxChunk.YCoord)
+                continue;
+
+            yield return new Chunk(x, y);
         }
+    }
 
-        public string Topic => $"{XCoord}-{YCoord}";
+    protected bool Equals(Chunk other)
+    {
+        return XCoord == other.XCoord && YCoord == other.YCoord;
+    }
 
-        public IEnumerable<Chunk> GetNeighbours()
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        return obj.GetType() == GetType() && Equals((Chunk)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked
         {
-            List<Chunk> chunks = new List<Chunk>();
-            for (int i = -1; i <= 1; i++)
-            {
-                for (int j = -1; j <= 1; j++)
-                {
-                    Chunk chunk = new Chunk(XCoord + i, YCoord + j);
-                    if(chunk.XCoord < 0 ||chunk.YCoord < 0 || chunk.XCoord >= Chunk.MaxRow || chunk.YCoord >= Chunk.MaxRow)
-                        continue;
-                    chunks.Add(chunk);
-                }
-            }
-
-            return chunks;
+            return (XCoord * 397) ^ YCoord;
         }
+    }
 
-        protected bool Equals(Chunk other)
-        {
-            return XCoord == other.XCoord && YCoord == other.YCoord;
-        }
+    public Partition ToPartition(GlobalChunkConfig globalChunkConfig)
+    {
+        var max = globalChunkConfig.MaxChunk;
+        var min = globalChunkConfig.MinChunk;
+        var cols = max.YCoord - min.YCoord + 1;
+        return new Partition((XCoord - min.XCoord) * cols + (YCoord - min.YCoord));
+    }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((Chunk)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (XCoord * 397) ^ YCoord;
-            }
-        }
-
-        public int ToPartition()
-        {
-            return XCoord * MaxRow + YCoord;
-        }
-
-        public override string ToString()
-        {
-            return Topic;
-        }
+    public override string ToString()
+    {
+        return Topic;
     }
 }

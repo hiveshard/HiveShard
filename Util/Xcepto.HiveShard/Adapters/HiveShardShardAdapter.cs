@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using HiveShard.Data;
 using HiveShard.Interface;
 using Xcepto.Adapters;
@@ -9,11 +8,11 @@ namespace Xcepto.HiveShard.Adapters;
 
 public class HiveShardShardAdapter: XceptoAdapter
 {
-    private HiveShardIdentity _hiveShardIdentity;
-    private string _compartmentIdentifier;
-    public HiveShardShardAdapter(string worker, HiveShardIdentity hiveShardIdentity)
+    private readonly HiveShardIdentity _hiveShardIdentity;
+    private readonly CompartmentIdentifier _compartmentIdentifier;
+    public HiveShardShardAdapter(Guid id, HiveShardIdentity hiveShardIdentity)
     {
-        _compartmentIdentifier = $"shardWorker-{worker}";
+        _compartmentIdentifier = new CompartmentIdentifier(id, CompartmentType.ShardWorker);
         _hiveShardIdentity = hiveShardIdentity;
     }
     
@@ -25,6 +24,12 @@ public class HiveShardShardAdapter: XceptoAdapter
     public void ExpectEvent<TEvent>(Predicate<TEvent> expectation)
         where TEvent: IEvent
     {
-        AddStep(new ShardOnWorkerFabricExpectationState<TEvent>($"HiveShard {_compartmentIdentifier} expectation of type {typeof(TEvent)}", _compartmentIdentifier, _hiveShardIdentity, expectation));
+        AddStep(new ShardOnWorkerFabricExpectationState<TEvent>($"HiveShard {_compartmentIdentifier} event expectation of type {typeof(TEvent)}", _compartmentIdentifier, _hiveShardIdentity, expectation));
+    }
+
+    public void Except<TService>(Predicate<TService> expectation)
+    where TService: notnull
+    {
+        AddStep(new ShardOnWorkerServiceExpectationState<TService>($"HiveShard {_compartmentIdentifier} service expectation of type {typeof(TService)}", _compartmentIdentifier, _hiveShardIdentity, expectation));
     }
 }

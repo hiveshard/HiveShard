@@ -5,23 +5,23 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using HiveShard.Client.Interfaces;
 using HiveShard.Data;
-using HiveShard.Edge.events;
-using HiveShard.Fabric;
-using HiveShard.Fabric.Client;
 using HiveShard.Fabrics.Tcp.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
+using HiveShard.Interface.Providers;
 using HiveShard.Util;
+using HiveShard.Workers.Edge.Events;
 
 namespace HiveShard.Fabrics.Tcp
 {
     public class ClientTcpFabric: IEdgeTunnelClientEndpoint
     {
-        private TcpClient _tcpClient;
+        private readonly TcpClient _tcpClient;
 
-        public ClientTcpFabric(ISerializer serializer, INetworkConfiguration networkConfiguration, ICancellationProvider cancellationProvider, IFabricLoggingProvider fabricLoggingProvider, IIdentityConfig identityConfig)
+        public ClientTcpFabric(ISerializer serializer, INetworkConfiguration networkConfiguration, ICancellationProvider cancellationProvider, IHiveShardTelemetry fabricLoggingProvider, IIdentityConfig identityConfig)
         {
             _networkConfiguration = networkConfiguration;
             _cancellationProvider = cancellationProvider;
@@ -30,15 +30,15 @@ namespace HiveShard.Fabrics.Tcp
             _tcpClient = new TcpClient();
         }
         
-        private Dictionary<Type, ConcurrentQueue<object>> _messages = new Dictionary<Type, ConcurrentQueue<object>>();
-        private Dictionary<Type, ISet<Action<object>>> _handlers = new Dictionary<Type, ISet<Action<object>>>();
+        private readonly Dictionary<Type, ConcurrentQueue<object>> _messages = new();
+        private readonly Dictionary<Type, ISet<Action<object>>> _handlers = new();
         private NetworkStream _networkStream;
-        private ISerializer _serializer;
-        private ICancellationProvider _cancellationProvider;
+        private readonly ISerializer _serializer;
+        private readonly ICancellationProvider _cancellationProvider;
 
         private volatile int _ready;
-        private INetworkConfiguration _networkConfiguration;
-        private IScopedFabricLoggingProvider _scopedLogger;
+        private readonly INetworkConfiguration _networkConfiguration;
+        private readonly IHiveShardTelemetry _scopedLogger;
 
         public Task Start(CancellationToken cancellationToken)
         {
@@ -53,15 +53,8 @@ namespace HiveShard.Fabrics.Tcp
                         var queue = pair.Value;
 
                         while (!queue.IsEmpty)
-                        {
                             if (queue.TryDequeue(out object result))
-                            {
-                                foreach (var action in _handlers[type])
-                                {
-                                    action(result);
-                                }
-                            }
-                        }
+                                foreach (var action in _handlers[type]) action(result);
                     }
 
                     await Task.Delay(100);
@@ -72,10 +65,7 @@ namespace HiveShard.Fabrics.Tcp
         }
 
         public async Task WaitForReady() {
-            while (_ready < 1)
-            {
-                await Task.Delay(100);
-            }
+            while (_ready < 1) await Task.Delay(100);
         }
 
         private async Task SendTcpMessage(object message, Type messageType, NetworkStream stream)
@@ -131,7 +121,7 @@ namespace HiveShard.Fabrics.Tcp
             var receivedText = Encoding.UTF8.GetString(buffer, 0, totalRead);
             return _serializer.Deserialize<TcpMessage>(receivedText);
         } 
-        public async Task Connect(HiveShard.Data.HiveShardClient hiveShardClient)
+        public async Task Connect(HiveShardClient hiveShardClient)
         {
             await Resilience.Retry(async token =>
             {

@@ -29,14 +29,14 @@
       <ProjectReference Include="..\..\HiveShard.Client\HiveShard.Client.csproj" />
       <ProjectReference Include="..\..\HiveShard.Edge\HiveShard.Edge.csproj" />
       <ProjectReference Include="..\..\HiveShard.Shard\HiveShard.Shard.csproj" />
-      <ProjectReference Include="..\..\HiveShard.Ticker\HiveShard.Ticker.csproj" />
       <ProjectReference Include="..\..\HiveShard\HiveShard.csproj" />
+      <ProjectReference Include="..\..\Workers\HiveShard.Workers.Edge\HiveShard.Workers.Edge.csproj" />
       <ProjectReference Include="..\..\Workers\HiveShard.Workers.Shard\HiveShard.Workers.Shard.csproj" />
       <ProjectReference Include="..\..\Workers\HiveShard.Workers.Ticker\HiveShard.Workers.Ticker.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Xcepto" Version="[7.0.0,8.0.0)" />
+      <PackageReference Include="Xcepto" Version="10.4.1" />
     </ItemGroup>
 
 </Project>

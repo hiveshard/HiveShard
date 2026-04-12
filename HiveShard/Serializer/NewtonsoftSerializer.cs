@@ -2,23 +2,22 @@
 using HiveShard.Interface;
 using Newtonsoft.Json;
 
-namespace HiveShard.Serializer
+namespace HiveShard.Serializer;
+
+public class NewtonsoftSerializer : ISerializer
 {
-    public class NewtonsoftSerializer : ISerializer
+    public string Serialize<T>(T obj)
     {
-        public string Serialize<T>(T obj)
-        {
-            return JsonConvert.SerializeObject(obj);
-        }
+        return JsonConvert.SerializeObject(obj, Formatting.Indented);
+    }
 
-        public T Deserialize<T>(string serializedObj)
-        {
-            return JsonConvert.DeserializeObject<T>(serializedObj);
-        }
+    public T Deserialize<T>(string serializedObj)
+    {
+        return JsonConvert.DeserializeObject<T>(serializedObj);
+    }
 
-        public object Deserialize(string tcpMessagePayload, Type type)
-        {
-            return JsonConvert.DeserializeObject(tcpMessagePayload, type);
-        }
+    public object Deserialize(string tcpMessagePayload, Type type)
+    {
+        return JsonConvert.DeserializeObject(tcpMessagePayload, type);
     }
 }

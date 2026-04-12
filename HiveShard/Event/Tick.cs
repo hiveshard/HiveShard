@@ -4,22 +4,23 @@ using HiveShard.Data;
 using HiveShard.Interface;
 using Newtonsoft.Json;
 
-namespace HiveShard.Event
-{
-    public class Tick: IEvent
-    {
-        [JsonConstructor]
-        public Tick(long tickNumber, float delta, IEnumerable<TopicPartitionOffset> chunkOffsets, DateTime tickDateTime)
-        {
-            TickNumber = tickNumber;
-            Delta = delta;
-            ChunkOffsets = chunkOffsets;
-            TickDateTime = tickDateTime;
-        }
+namespace HiveShard.Event;
 
-        public long TickNumber { get; }
-        public float Delta { get; }
-        public DateTime TickDateTime { get; }
-        public IEnumerable<TopicPartitionOffset> ChunkOffsets { get; }
+public class Tick: ITickEvent
+{
+    [JsonConstructor]
+    public Tick(long tickNumber, IEnumerable<TopicPartitionOffset> chunkOffsets, DateTime tickDateTime, string tickEventType, EmitterIdentity emitter)
+    {
+        TickNumber = tickNumber;
+        ChunkOffsets = chunkOffsets;
+        TickDateTime = tickDateTime;
+        TickEventType = tickEventType;
+        Emitter = emitter;
     }
+    
+    public long TickNumber { get; }
+    public DateTime TickDateTime { get; }
+    public IEnumerable<TopicPartitionOffset> ChunkOffsets { get; }
+    public string TickEventType { get; }
+    public EmitterIdentity Emitter { get; }
 }

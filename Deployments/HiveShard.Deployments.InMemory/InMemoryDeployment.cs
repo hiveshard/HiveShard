@@ -3,25 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using HiveShard.Client;
 using HiveShard.Client.Data;
-using HiveShard.Client.Interface;
+using HiveShard.Client.Interfaces;
 using HiveShard.Config;
 using HiveShard.Data;
-using HiveShard.Deployments.InMemory.Providers;
 using HiveShard.Edge;
-using HiveShard.Fabric.Client;
-using HiveShard.Fabric.Edge;
-using HiveShard.Fabric.Ticker;
+using HiveShard.Edge.Interfaces;
+using HiveShard.Environment;
 using HiveShard.Fabrics.InMemory;
 using HiveShard.Interface;
 using HiveShard.Interface.Config;
 using HiveShard.Interface.Logging;
+using HiveShard.Interface.Providers;
+using HiveShard.Interface.Repository;
 using HiveShard.Provider;
-using HiveShard.Provider.Logging;
 using HiveShard.Repository;
 using HiveShard.Serializer;
+using HiveShard.Telemetry.Console;
+using HiveShard.Telemetry.HiveShardEE;
 using HiveShard.Util;
 using HiveShard.Workers.Edge;
 using HiveShard.Workers.Edge.Data;
+using HiveShard.Workers.Initializer;
+using HiveShard.Workers.Initializer.Data;
+using HiveShard.Workers.Initializer.Repositories;
 using HiveShard.Workers.Shard;
 using HiveShard.Workers.Shard.Data;
 using HiveShard.Workers.Shard.Repositories;
@@ -34,80 +38,119 @@ namespace HiveShard.Deployments.InMemory;
 
 public class InMemoryDeployment: IDeployment
 {
-    private readonly List<CompartmentEnvironment> _isolatedEnvironments = new();
-    private readonly List<(string, Type, string)> _entryPointLocations = new();
-    private int _gridSize;
+    private readonly List<CompartmentEnvironment> _isolatedEnvironments = [];
 
-    private void AddEntryPoint<T>(string compartment, string compartmentType)
-    where T: class
+    
+    public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk,
+        IEnumerable<IsolatedEnvironment> workers,
+        IEventRepository eventRepository, string environmentName)
     {
-        _entryPointLocations.Add((compartment, typeof(T), compartmentType));
-    }
-
-    public ServiceEnvironment Build(int gridSize, IEnumerable<IsolatedEnvironment> workers)
-    {
-        _gridSize = gridSize;
+        TelemetryConfig telemetryConfig = new TelemetryConfig(
+            new Uri(HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENDPOINT")),
+            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_TOKEN"),
+            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ORGANIZATION"),
+            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_PROJECT"),
+            $"{HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE")}_{environmentName}"
+        );
+        
+        var globalChunkConfig = new GlobalChunkConfig(minChunk, maxChunk);
         CancellationProvider cancellationProvider = new CancellationProvider();
         IServiceCollection topLevelServices = new ServiceCollection()
+            .AddSingleton<GlobalChunkConfig>(globalChunkConfig)
+            .AddSingleton<IEventRepository>(eventRepository)
             .AddSingleton<IIdentityConfig>(new IdentityConfig(Guid.NewGuid(), "test"))
-            .AddSingleton<IHiveShardSimpleLoggingProvider, SimpleLoggingProvider>()
-            .AddSingleton<ITelemetryProvider, SimpleTelemetryProvider>()
-            .AddSingleton<IFabricLoggingProvider, FabricLoggingProvider>()
-            .AddSingleton<IShardRepository, ShardRepository>()
             .AddSingleton<ISerializer, NewtonsoftSerializer>()
             .AddSingleton<ITickRepository, TickRepository>()
             .AddSingleton<ICancellationProvider>(cancellationProvider)
             .AddSingleton(cancellationProvider)
-            .AddSingleton<IWorkerLoggingProvider, SimpleLoggingProvider>()
+            .AddSingleton<IHiveShardTelemetry, HiveShardEETelemetry>()
+            .AddSingleton<TelemetryConfig>(telemetryConfig)
             .AddSingleton<ISimpleFabric, InMemorySimpleFabric>()
-            .AddSingleton<IDebugLoggingProvider, SimpleLoggingProvider>()
             .AddSingleton<InMemoryEdgeFabric>()
             .AddSingleton<IEdgeTunnelClientEndpoint>(x => x.GetRequiredService<InMemoryEdgeFabric>())
             .AddSingleton<IEdgeTunnelServerEndpoint>(x => x.GetRequiredService<InMemoryEdgeFabric>())
             .AddSingleton<IAddressProvider, EdgeIdentityProvider>();
         
-        
         foreach (var isolatedEnvironment in workers)
-        {
-            if (isolatedEnvironment is EdgeWorkerIsolatedEnvironment edgeWorkerEnvironment)
-                BuildEdgeWorker(edgeWorkerEnvironment);
-            else if(isolatedEnvironment is ClientIsolatedEnvironment clientIsolatedEnvironment)
-                BuildClient(clientIsolatedEnvironment);
-            else if (isolatedEnvironment is TickerWorkerIsolatedEnvironment tickerWorkerIsolatedEnvironment)
-                BuildTickerWorker(tickerWorkerIsolatedEnvironment);
-            else if (isolatedEnvironment is ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment)
-                BuildShardWorker(shardWorkerIsolatedEnvironment);
-            else
-                throw new NotImplementedException(
-                    $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
-        }
+            switch (isolatedEnvironment)
+            {
+                case EdgeWorkerIsolatedEnvironment edgeWorkerEnvironment:
+                    BuildEdgeWorker(edgeWorkerEnvironment);
+                    break;
+                case ClientIsolatedEnvironment clientIsolatedEnvironment:
+                    BuildClient(clientIsolatedEnvironment);
+                    break;
+                case TickerWorkerIsolatedEnvironment tickerWorkerIsolatedEnvironment:
+                    BuildTickerWorker(tickerWorkerIsolatedEnvironment);
+                    break;
+                case ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment:
+                    BuildShardWorker(shardWorkerIsolatedEnvironment);
+                    break;
+                case InitializerIsolatedEnvironment initializationIsolatedEnvironment:
+                    BuildInitializationWorker(initializationIsolatedEnvironment);
+                    break;
+                default:
+                    throw new NotImplementedException(
+                        $"SubEnvironment of type {isolatedEnvironment.GetType()} not implemented");
+            }
 
-        return new ServiceEnvironment(gridSize, topLevelServices, _isolatedEnvironments, _entryPointLocations.AsEnumerable());
+        var compartmentIdentifier = new CompartmentIdentifier(Guid.NewGuid(), CompartmentType.Root);
+        CompartmentEnvironment outer = new CompartmentEnvironment(
+            compartmentIdentifier, 
+            topLevelServices, 
+            [], 
+            typeof(ISimpleFabric)
+        );
+
+        return new ServiceEnvironment(globalChunkConfig, outer, _isolatedEnvironments, eventRepository);
+    }
+
+    private void BuildInitializationWorker(InitializerIsolatedEnvironment initializationIsolatedEnvironment)
+    {
+        ServiceCollection serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton<Initialization>();
+        serviceCollection.AddSingleton<InitializationTunnel>();
+        InitializerAdditionRepository initializerAdditionRepository = new InitializerAdditionRepository();
+        serviceCollection.AddSingleton(initializerAdditionRepository);
+        
+        foreach (var initializer in initializationIsolatedEnvironment.Initializers) 
+            initializerAdditionRepository.AddInitializer(initializer);
+
+        var compartmentEnvironment = new CompartmentEnvironment(
+            new CompartmentIdentifier(Guid.NewGuid(), CompartmentType.Initializer), 
+            serviceCollection, 
+            new DependencyBuilder()
+                .Add<ISimpleFabric>()
+                .Add<GlobalChunkConfig>()
+                .Add<IEventRepository>()
+                .Build(),
+            typeof(Initialization)
+        );
+        _isolatedEnvironments.Add(compartmentEnvironment);
     }
 
     private void BuildShardWorker(ShardWorkerIsolatedEnvironment shardWorkerIsolatedEnvironment)
     {
         ServiceCollection serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton<ShardWorker>();
-        serviceCollection.AddSingleton<WorkerConfig>(new WorkerConfig(_gridSize));
         serviceCollection.AddSingleton<ITickRepository, TickRepository>();
         serviceCollection.AddSingleton<HiveShardRepository>();
         ShardAdditionRepository repository = new ShardAdditionRepository();
         serviceCollection.AddSingleton<ShardAdditionRepository>(repository);
         
-        foreach (var hiveShardIdentity in shardWorkerIsolatedEnvironment.HiveShards)
-        {
+        foreach (var hiveShardIdentity in shardWorkerIsolatedEnvironment.HiveShards) 
             repository.Add(new ShardAdditionRequest(hiveShardIdentity));
-        }
-        
+
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"shardWorker-{shardWorkerIsolatedEnvironment.Identifier}", 
+            new CompartmentIdentifier(shardWorkerIsolatedEnvironment.Identifier, CompartmentType.ShardWorker), 
             serviceCollection, 
             new DependencyBuilder()
                 .Add<ISimpleFabric>()
-                .Add<IWorkerLoggingProvider>()
+                .Add<IHiveShardTelemetry>()
                 .Add<ICancellationProvider>()
+                .Add<IEventRepository>()
                 .Add<ISerializer>()
+                .Add<GlobalChunkConfig>()
                 .Build(),
             typeof(ShardWorker)
         );
@@ -121,7 +164,7 @@ public class InMemoryDeployment: IDeployment
         serviceCollection.AddSingleton<EdgeWorker>();
         serviceCollection.AddSingleton<IEdgeTunnel, EdgeTunnel>();
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"edgeWorker-{edgeWorkerIsolatedEnvironment.Identifier}", 
+            new CompartmentIdentifier(edgeWorkerIsolatedEnvironment.Identifier, CompartmentType.EdgeWorker), 
             serviceCollection, 
             new DependencyBuilder()
                 .Add<CancellationProvider>()
@@ -141,14 +184,14 @@ public class InMemoryDeployment: IDeployment
 
         serviceCollection.AddSingleton<ClientTunnel>();
         serviceCollection.AddSingleton<IClientTunnel, ClientTunnel>(x => x.GetRequiredService<ClientTunnel>());
-        serviceCollection.AddSingleton<HiveShardClient>(new HiveShardClient(clientIsolatedEnvironment.Username));
+        serviceCollection.AddSingleton<HiveShardClient>(clientIsolatedEnvironment.User);
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"client-{clientIsolatedEnvironment.Username}", 
+            new CompartmentIdentifier(clientIsolatedEnvironment.User.UserId, CompartmentType.Client), 
             serviceCollection, 
             new DependencyBuilder()
                 .Add<IEdgeTunnelClientEndpoint>()
                 .Add<ICancellationProvider>()
-                .Add<IDebugLoggingProvider>()
+                .Add<IHiveShardTelemetry>()
                 .Build(),
             typeof(ClientTunnel)
         );
@@ -162,20 +205,20 @@ public class InMemoryDeployment: IDeployment
         serviceCollection.AddSingleton<TickerRepository>();
         var tickerAdditionRepository = new TickerAdditionRepository();
         serviceCollection.AddSingleton<TickerAdditionRepository>(tickerAdditionRepository);
-        foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers)
-        {
-            tickerAdditionRepository.RequestAddition(tickerIsolatedEnvironment.EventType);
-        }
-        AddEntryPoint<TickerWorker>(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, "tickerWorker");
+        foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers) 
+            tickerAdditionRepository.RequestEventTickerAddition(tickerIsolatedEnvironment.Identity);
+        foreach (var globalTickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.GlobalTickers) 
+            tickerAdditionRepository.RequestGlobalTickerAddition(globalTickerIsolatedEnvironment.GlobalTickerIdentity);
 
+        var compartmentIdentifier = new CompartmentIdentifier(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, CompartmentType.TickerWorker);
         var compartmentEnvironment = new CompartmentEnvironment(
-            $"tickerWorker-{tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier}",
+            compartmentIdentifier,
             serviceCollection,
             new DependencyBuilder()
                 .Add<ICancellationProvider>()
                 .Add<ISimpleFabric>()
-                .Add<IWorkerLoggingProvider>()
-                .Add<IShardRepository>()
+                .Add<IEventRepository>()
+                .Add<IHiveShardTelemetry>()
                 .Add<ServiceEnvironment>()
                 .Build(),
             typeof(TickerWorker)

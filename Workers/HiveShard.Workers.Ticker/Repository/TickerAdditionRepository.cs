@@ -1,19 +1,30 @@
-using System;
 using System.Collections.Concurrent;
+using HiveShard.Workers.Ticker.Data;
 
 namespace HiveShard.Workers.Ticker.Repository;
 
 public class TickerAdditionRepository
 {
-    private ConcurrentQueue<Type> _tickersToBeAdded = new();
+    private readonly ConcurrentQueue<DistributedTickerIdentity> _eventTickersToBeAdded = new();
+    private readonly ConcurrentQueue<GlobalTickerIdentity> _globalTickersToBeAdded = new();
 
-    public void RequestAddition(Type type)
+    public void RequestEventTickerAddition(DistributedTickerIdentity type)
     {
-        _tickersToBeAdded.Enqueue(type);
+        _eventTickersToBeAdded.Enqueue(type);
     }
 
-    public bool TryConsumeRequest(out Type eventType)
+    public void RequestGlobalTickerAddition(GlobalTickerIdentity globalTickerIdentity)
     {
-        return _tickersToBeAdded.TryDequeue(out eventType);
+        _globalTickersToBeAdded.Enqueue(globalTickerIdentity);
+    }
+
+    public bool TryConsumeEventTickerRequest(out DistributedTickerIdentity eventType)
+    {
+        return _eventTickersToBeAdded.TryDequeue(out eventType);
+    }
+    
+    public bool TryConsumeGlobalTickerRequest(out GlobalTickerIdentity globalTickerIdentity)
+    {
+        return _globalTickersToBeAdded.TryDequeue(out globalTickerIdentity);
     }
 }

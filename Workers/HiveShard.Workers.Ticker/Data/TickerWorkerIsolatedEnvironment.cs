@@ -1,17 +1,22 @@
+using System;
 using System.Collections.Generic;
-using HiveShard.Ticker.Data;
 
-namespace HiveShard.Workers.Ticker.Data
+namespace HiveShard.Workers.Ticker.Data;
+
+public class TickerWorkerIsolatedEnvironment : IsolatedEnvironment
 {
-    public class TickerWorkerIsolatedEnvironment : IsolatedEnvironment
-    {
-        public string TickerWorkerIdentifier { get; }
-        public IEnumerable<TickerIsolatedEnvironment> Tickers { get; }
+    public IEnumerable<GlobalTickerIsolatedEnvironment> GlobalTickers { get; }
+    public Guid TickerWorkerIdentifier { get; }
+    public IEnumerable<TickerIsolatedEnvironment> Tickers { get; }
 
-        public TickerWorkerIsolatedEnvironment(string tickerWorkerIdentifier, IEnumerable<TickerIsolatedEnvironment> tickers)
-        {
-            TickerWorkerIdentifier = tickerWorkerIdentifier;
-            Tickers = tickers;
-        }
+    public TickerWorkerIsolatedEnvironment(Guid tickerWorkerIdentifier,
+        IEnumerable<TickerIsolatedEnvironment> tickers, 
+        IEnumerable<GlobalTickerIsolatedEnvironment> globalTickers)
+    {
+        GlobalTickers = globalTickers;
+        TickerWorkerIdentifier = tickerWorkerIdentifier;
+        Tickers = tickers;
     }
+
+    public override bool IsUnique => false;
 }

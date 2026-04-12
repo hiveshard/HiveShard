@@ -1,43 +1,50 @@
 ﻿using System;
 
-namespace HiveShard.Data
+namespace HiveShard.Data;
+
+[Serializable]
+public class HiveShardClient: IEquatable<HiveShardClient>
 {
-    [Serializable]
-    public class HiveShardClient
+
+    public HiveShardClient(string username, Guid userId)
     {
-        public HiveShardClient(string username)
-        {
-            Username = username;
-        }
+        UserId = userId;
+        Username = username;
+    }
 
-        public string Username { get; }
+    public string Username { get; }
+    public Guid UserId { get; }
 
-        protected bool Equals(HiveShardClient other)
-        {
-            return Username == other.Username;
-        }
+    public bool Equals(HiveShardClient? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Username == other.Username && UserId.Equals(other.UserId);
+    }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((HiveShardClient)obj);
-        }
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((HiveShardClient)obj);
+    }
 
-        public override int GetHashCode()
+    public override int GetHashCode()
+    {
+        unchecked
         {
-            return (Username != null ? Username.GetHashCode() : 0);
+            return (Username.GetHashCode() * 397) ^ UserId.GetHashCode();
         }
-        
-        public static bool operator ==(HiveShardClient a, HiveShardClient b)
-        {
-            throw new InvalidOperationException("Use .Equals instead of ==.");
-        }
+    }
 
-        public static bool operator !=(HiveShardClient a, HiveShardClient b)
-        {
-            throw new InvalidOperationException("Use .Equals instead of !=.");
-        }
+    public static bool operator ==(HiveShardClient a, HiveShardClient? b)
+    {
+        return a.Equals(b);
+    }
+
+    public static bool operator !=(HiveShardClient a, HiveShardClient b)
+    {
+        return !a.Equals(b);
     }
 }
