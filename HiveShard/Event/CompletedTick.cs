@@ -18,14 +18,6 @@ public class CompletedTick: ITickEvent
         EventType = eventType;
     }
 
-    public static CompletedTick From<T>(IEventEmitterType emitter, long tick, 
-        IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
-        where T : IEvent => From(typeof(T), emitter, tick, topicPartitionOffsets);
-        
-    public static CompletedTick From(Type eventType, IEventEmitterType emitter, long tick,
-        IEnumerable<TopicPartitionOffset> topicPartitionOffsets) =>
-        From(eventType.FullName!, emitter, tick, topicPartitionOffsets);
-        
     public static CompletedTick From(string eventType, IEventEmitterType emitter, long tick,
         IEnumerable<TopicPartitionOffset> topicPartitionOffsets)
     {

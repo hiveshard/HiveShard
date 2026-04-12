@@ -2,13 +2,11 @@ using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Shard.Interfaces;
 using HiveShard.Workers.Initialization.Tests.Events;
-using HiveShard.Workers.Initialization.Tests.Repositories;
 
 namespace HiveShard.Workers.Initialization.Tests.Shards;
 
 public class TestShard: IHiveShard
 {
-    private readonly TestRepository _testRepository = new();
     private readonly IScopedShardTunnel _scopedShardTunnel;
 
     public TestShard(IScopedShardTunnel scopedShardTunnel)
@@ -22,7 +20,7 @@ public class TestShard: IHiveShard
     {
         _scopedShardTunnel.Register<InitialDataEvent>(x =>
         {
-            _testRepository.AddInt(x.Payload.Value);
+            ReceivedIncrements += x.Payload.Value;
             _scopedShardTunnel.Send(new InitialDataResponse());
         });
     }

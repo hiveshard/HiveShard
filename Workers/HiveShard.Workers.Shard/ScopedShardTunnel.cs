@@ -88,6 +88,7 @@ public class ScopedShardTunnel: IScopedShardTunnel
                     results =>
                     {
                         List<TopicPartitionOffset> offsets = results.Offsets
+                            .Where(x => x.Key.Topic == topic)
                             .Select(x => new TopicPartitionOffset(
                                 x.Key.Topic, 
                                 x.Key.Partition.ToChunk(_globalChunkConfig), 

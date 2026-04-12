@@ -15,5 +15,7 @@ public class ConcurrentHashSet<T>
     public bool Add(T item) => _dict.TryAdd(item, 0);
     public bool Remove(T item) => _dict.TryRemove(item, out _);
     public bool Contains(T item) => _dict.ContainsKey(item);
+
+    public IEnumerable<T> All() => _dict.Keys;
     public int Count => _dict.Count;
 }

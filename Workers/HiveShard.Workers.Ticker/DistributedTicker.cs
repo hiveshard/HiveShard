@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using HiveShard.Data;
 using HiveShard.Event;
 using HiveShard.Interface;
@@ -31,6 +32,7 @@ public class DistributedTicker
     }
 
     private readonly ConcurrentDictionary<long, ConcurrentHashSet<EmitterIdentity>> _completedEventTicks = new();
+    private readonly ConcurrentDictionary<Chunk, long> _offsets = new();
 
     private readonly bool _currentRoundOngoing = false;
     
@@ -53,9 +55,11 @@ public class DistributedTicker
         {
             _currentTick += 1;
             var eventPartition = new Partition(_eventRepository.GetEventOrder(_config.EventType));
+            var offsets = _offsets
+                .Select(x => new TopicPartitionOffset(_config.EventType.FullName!, x.Key, x.Value));
             _simpleFabric.Send(typeof(Tick).FullName!, eventPartition,
                 new Envelope<Tick>(
-                    new Tick(_currentTick, [], DateTime.Now, _config.EventType.FullName!, _config.EmitterType.Identity),
+                    new Tick(_currentTick, offsets, DateTime.Now, _config.EventType.FullName!, _config.EmitterType.Identity),
                     Guid.NewGuid(),
                     _config.EmitterType.Identity
                 )
@@ -78,6 +82,14 @@ public class DistributedTicker
             return;
         
         hashSet.Add(completedTick.EmitterIdentity);
+        
+        foreach (var offset in completedTick.TopicPartitionOffsets)
+        {
+            if (offset.Topic != _config.EventType.FullName!)
+                throw new Exception("offset did not match ticker event type");
+            _offsets.AddOrUpdate(offset.Partition, offset.Offset, (chunk, oldOffset)
+                => offset.Offset > oldOffset ? offset.Offset : oldOffset);
+        }
 
         foreach (var eventEmitterType in _eventRepository.GetEmitters(_config.EventType.FullName!))
         {
