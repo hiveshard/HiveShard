@@ -15,6 +15,9 @@ Each HiveShard instance holds its own state in memory and Information is exchang
 HiveShard clients are only connected to nearby chunks via multiple stateful TCP connections.
 Server-side client endpoints (called Edges) can be scaled up horizontally as they are separated from the core simulation.
 
+## Message Cycle
+![HiveShard message cycle](./media/cycles.svg)
+
 ## FAQs
 Can a single client stall the simulation for others?
 No. Edge components send server-authoritative state to the simulation and control what client input goes into that state.

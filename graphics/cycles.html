@@ -1,0 +1,118 @@
+<div id="diagram">
+    <div id="dag" style="width: 2200px; height: 900px;"></div>
+</div>
+
+<script src="https://unpkg.com/cytoscape@3.27.0/dist/cytoscape.min.js"></script>
+<script src="https://unpkg.com/elkjs@0.11.0/lib/elk.bundled.js"></script>
+<script src="https://unpkg.com/cytoscape-elk@2.3.0/dist/cytoscape-elk.js"></script>
+<script src="https://unpkg.com/cytoscape-svg/cytoscape-svg.js"></script>
+<script>
+    const elements = [
+        // cycle 0
+        { data: { id: "ticker0", label: "Ticker", layer: 0 }, classes: "service start" },
+        { data: { id: "tick0", label: "tick0", layer: 1 }, classes: "event" },
+
+        { data: { id: "ticker_event0", label: "Ticker(Event)", layer: 2 }, classes: "service" },
+        { data: { id: "tick0_event", label: "tick0(Event)", layer: 3 }, classes: "event" },
+
+        { data: { id: "shard0", label: "Shard", layer: 4 }, classes: "service" },
+
+        { data: { id: "completed_event0", label: "Completed0(Event)", layer: 5 }, classes: "event" },
+        { data: { id: "completed0", label: "Completed0", layer: 6 }, classes: "service" },
+
+        // cycle 1
+        { data: { id: "ticker1", label: "Ticker", layer: 7 }, classes: "service" },
+        { data: { id: "tick1", label: "tick1", layer: 8 }, classes: "event" },
+
+        { data: { id: "ticker_event1", label: "Ticker(Event)", layer: 9 }, classes: "service" },
+        { data: { id: "tick1_event", label: "tick1(Event)", layer: 10 }, classes: "event" },
+
+        { data: { id: "shard1", label: "Shard", layer: 11 }, classes: "service" },
+
+        { data: { id: "completed_event1", label: "Completed1(Event)", layer: 12 }, classes: "event" },
+        { data: { id: "completed1", label: "Completed1", layer: 13 }, classes: "service" },
+
+        // edges
+        { data: { id: "e1", source: "ticker0", target: "tick0" } },
+        { data: { id: "e2", source: "tick0", target: "ticker_event0" } },
+        { data: { id: "e3", source: "ticker_event0", target: "tick0_event" } },
+        { data: { id: "e4", source: "tick0_event", target: "shard0" } },
+        { data: { id: "e5", source: "shard0", target: "completed_event0" } },
+        { data: { id: "e6", source: "completed_event0", target: "completed0" } },
+        { data: { id: "e7", source: "completed0", target: "ticker1" } },
+
+        { data: { id: "e8", source: "ticker1", target: "tick1" } },
+        { data: { id: "e9", source: "tick1", target: "ticker_event1" } },
+        { data: { id: "e10", source: "ticker_event1", target: "tick1_event" } },
+        { data: { id: "e11", source: "tick1_event", target: "shard1" } },
+        { data: { id: "e12", source: "shard1", target: "completed_event1" } },
+        { data: { id: "e13", source: "completed_event1", target: "completed1" } }
+    ];
+
+    cytoscape.use(cytoscapeElk);
+
+    window.layoutDone = false;
+    const cy = cytoscape({
+        container: document.getElementById('dag'),
+        elements: elements,
+
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    label: 'data(label)',
+                    'text-valign': 'center',
+                    'background-color': '#2E86DE',
+                    color: '#fff'
+                }
+            },
+            {
+                selector: '.service',
+                style: {
+                    shape: 'rectangle',
+                    width: 200,
+                    height: 40
+                }
+            },
+            {
+                selector: '.event',
+                style: {
+                    shape: 'ellipse',
+                    width: 200,
+                    height: 80,
+                    'background-color': '#27AE60'
+                }
+            },
+            {
+                selector: '.start',
+                style: {
+                    shape: 'ellipse',
+                    width: 120,
+                    height: 60,
+                    'background-color': '#ae9327'
+                }
+            },
+        ],
+
+        layout: {
+            name: 'elk',
+
+            elk: {
+                algorithm: 'layered',
+                'elk.direction': 'DOWN',
+                'elk.spacing.nodeNode': 40,
+                'elk.layered.nodePlacement.strategy': 'BRANDES_KOEPF',
+                'elk.layered.nodePlacement.bk.fixedAlignment': 'BALANCED'
+            },
+            transform: (node, pos) => {
+                return { x: pos.x, y: node.data('layer') * 100 };
+            }
+        }
+
+    });
+    window.cy = cy;
+
+    cy.on('layoutstop', () => {
+        window.layoutDone = true;
+    });
+</script>
