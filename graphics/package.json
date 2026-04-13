@@ -1,0 +1,11 @@
+{
+  "name": "html-to-svg",
+  "type": "module",
+  "dependencies": {
+    "dom-to-svg": "^0.12.2",
+    "puppeteer": "^22.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  }
+}
