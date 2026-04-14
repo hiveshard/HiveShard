@@ -5,13 +5,13 @@ using HiveShard.Shard.Interfaces;
 
 namespace HiveShard.Propagation.Tests.Shards;
 
-public class NeighbourPropagationShardA: IHiveShard
+public class DirectNeighbourPropagationShardA: IHiveShard
 {
     private Chunk? _chunk;
     private IScopedShardTunnel _tunnel;
     public int ReceivedSecret { get; private set; }
 
-    public NeighbourPropagationShardA(IScopedShardTunnel tunnel)
+    public DirectNeighbourPropagationShardA(IScopedShardTunnel tunnel)
     {
         _tunnel = tunnel;
     }
