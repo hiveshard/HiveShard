@@ -25,43 +25,51 @@ public class MultiChunkPropagationTests
         int secret = 7;
 
         Guid shardWorkerId = Guid.NewGuid();
-        var firstChunk = new Chunk(0, 0);
-        var secondChunk = new Chunk(1, 0);
-
         var propagationShardType = ShardType.From<NeighbourPropagationShardA>();
-        var firstPropagationShard = new HiveShardIdentity(firstChunk, propagationShardType, Guid.NewGuid());
-        var secondPropagationShard = new HiveShardIdentity(secondChunk, propagationShardType, Guid.NewGuid());
+        var firstPropagationShard = new HiveShardIdentity(new Chunk(0, 0), propagationShardType, Guid.NewGuid());
+        var secondPropagationShard = new HiveShardIdentity(new Chunk(1, 0), propagationShardType, Guid.NewGuid());
+        var thirdPropagationShard = new HiveShardIdentity(new Chunk(2, 0), propagationShardType, Guid.NewGuid());
 
         var initializer = new InitializerEmitterIdentity(new EmitterIdentity("initializer"));
 
         var serviceEnvironment = HiveShardFactory.Create<InMemoryDeployment>(builder => builder
-            .SetGridSize(firstChunk, secondChunk)
+            .SetGridSize(firstPropagationShard.Chunk, thirdPropagationShard.Chunk)
             .Events(eventBuilder => eventBuilder
                 .RegisterEvent<InitializingEvent>(initializer)
+                
+                // every shard has to produce something
+                .RegisterEvent<DummyEventA>(firstPropagationShard)
+                .RegisterEvent<DummyEventA>(secondPropagationShard)
+                .RegisterEvent<DummyEventA>(thirdPropagationShard)
             )
             .Initialize(initializationBuilder => initializationBuilder
                 .AddInitializer<SingleChunkInitializer>(initializer,initializerBuilder => initializerBuilder
-                    .WithDependency(new SingleChunkInitializerConfig(secret, firstChunk))
+                    // start propagation at first chunk, second chunk should get it, third shouldn't
+                    .WithDependency(new SingleChunkInitializerConfig(secret, firstPropagationShard.Chunk))
                 )
             )
             .ShardWorker(shardWorker => shardWorker
                 .Identify(shardWorkerId)
-                .AddShard<NeighbourPropagationShardA>(firstChunk, firstPropagationShard.Id)
-                .AddShard<NeighbourPropagationShardA>(secondChunk, secondPropagationShard.Id)
+                .AddShard<NeighbourPropagationShardA>(firstPropagationShard.Chunk, firstPropagationShard.Id)
+                .AddShard<NeighbourPropagationShardA>(secondPropagationShard.Chunk, secondPropagationShard.Id)
+                .AddShard<NeighbourPropagationShardA>(thirdPropagationShard.Chunk, thirdPropagationShard.Id)
             )
             .TickerWorker(tickerWorkerBuilder => tickerWorkerBuilder
                 .GlobalTicker()
                 .Ticker<InitializingEvent>()
+                .Ticker<DummyEventA>()
             )
         );
         await HiveShardTest.Given(serviceEnvironment, builder =>
         {
             var firstShard = builder.RegisterAdapter(new HiveShardShardAdapter(shardWorkerId, firstPropagationShard));
             var secondShard = builder.RegisterAdapter(new HiveShardShardAdapter(shardWorkerId, secondPropagationShard));
+            var thirdShard = builder.RegisterAdapter(new HiveShardShardAdapter(shardWorkerId, thirdPropagationShard));
             
             
             firstShard.Except<NeighbourPropagationShardA>(shard => shard.ReceivedSecret == secret);
             secondShard.Except<NeighbourPropagationShardA>(shard => shard.ReceivedSecret == secret);
+            thirdShard.Except<NeighbourPropagationShardA>(shard => shard.ReceivedSecret != secret);
         });
     }
 }

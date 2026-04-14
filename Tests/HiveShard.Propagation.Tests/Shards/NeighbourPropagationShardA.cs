@@ -24,9 +24,7 @@ public class NeighbourPropagationShardA: IHiveShard
 
     private void HandleInitializingEvent(Message<InitializingEvent> message)
     {
-        if(!message.Chunk.Equals(_chunk))
-            return;
-
         ReceivedSecret = message.Payload.Secret;
+        _tunnel.Send(new DummyEventA());
     }
 }
