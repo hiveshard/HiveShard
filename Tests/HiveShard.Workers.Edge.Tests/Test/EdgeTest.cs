@@ -23,6 +23,7 @@ where T: IDeployment, new()
         Guid edgeWorker = Guid.NewGuid();
 
         var environment = HiveShardFactory.Create<T>(builder => builder
+            .SetValidationMode(ValidationMode.None)
             .EdgeWorker(edgeBuilder => edgeBuilder
                 .Identify(edgeWorker)
                 .AddEdge<TestEdge>()
@@ -62,6 +63,7 @@ where T: IDeployment, new()
         var credentials = new HiveShardClient("test", Guid.NewGuid());
 
         var environment = HiveShardFactory.Create<T>(builder => builder
+            .SetValidationMode(ValidationMode.None)
             .EdgeWorker(edgeBuilder => edgeBuilder
                 .Identify(edgeWorker)
                 .AddEdge<TestEdge>()

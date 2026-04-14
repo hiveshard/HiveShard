@@ -7,5 +7,5 @@ namespace HiveShard.Interface;
 public interface IDeployment
 {
     ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, IEnumerable<IsolatedEnvironment> asEnumerable,
-        IEventRepository eventRepository, string environmentName);
+        IEventRepository eventRepository, string environmentName, ValidationMode validationMode);
 }

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using HiveShard.Builder;
 using HiveShard.Data;
+using HiveShard.Exceptions;
 using HiveShard.Interface;
 
 namespace HiveShard.Factory;
@@ -18,8 +19,50 @@ public static class HiveShardFactory
         environmentName ??= DetermineEnvironmentName();
         var builderInstance = new DecentralizedHiveShardBuilder(new TDeployment());
         builder(builderInstance);
-        
-        return builderInstance.Build(environmentName);
+
+        var serviceEnvironment = builderInstance.Build(environmentName);
+        ValidateEnvironment(serviceEnvironment);
+        return serviceEnvironment;
+    }
+
+    private static void ValidateEnvironment(ServiceEnvironment serviceEnvironment)
+    {
+        switch (serviceEnvironment.ValidationMode)
+        {
+            case ValidationMode.Full:
+                ValidateEventRegistrations(serviceEnvironment);
+                ValidateEmitters(serviceEnvironment);
+                break;
+            case ValidationMode.None:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private static void ValidateEventRegistrations(ServiceEnvironment serviceEnvironment)
+    {
+        var events = serviceEnvironment.EventRepository;
+        if (events.GetTotalOrder().Length <= 0)
+            throw new HiveShardValidationException("No events registered!", HiveShardValidationExceptionCase.NoEvents);
+    }
+    private static void ValidateEmitters(ServiceEnvironment serviceEnvironment)
+    {
+        var events = serviceEnvironment.EventRepository;
+        foreach (var emitter in serviceEnvironment.Inner
+                     // ignore ticker components from this validation
+                     .Where(x=>x.Identifier.CompartmentType != CompartmentType.TickerWorker)
+                     .SelectMany(x=>x.ContainedEmitters))
+        {
+            var topicsOfEmitter = events.GetTopicsOfEmitter(emitter);
+            if (topicsOfEmitter.Length == 0)
+            {
+                throw new HiveShardValidationException(
+                    $"Emitter {emitter.EmitterIdentityString} does not emit any events!",
+                    HiveShardValidationExceptionCase.EmitterWithoutEvents
+                );
+            }
+        }
     }
 
     private static MethodBase? FindExternalCaller()

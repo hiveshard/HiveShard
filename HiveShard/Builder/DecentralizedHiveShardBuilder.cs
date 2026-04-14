@@ -10,6 +10,7 @@ namespace HiveShard.Builder;
 
 public class DecentralizedHiveShardBuilder
 {
+    private ValidationMode _validationMode = ValidationMode.Full;
     private readonly IDeployment _deployment;
     private Chunk _minChunk = new(0,0);
     private Chunk _maxChunk = new(0,0);
@@ -32,7 +33,7 @@ public class DecentralizedHiveShardBuilder
     }
     internal ServiceEnvironment Build(string environmentName)
     {
-        return _deployment.Build(_minChunk, _maxChunk, _workers.AsEnumerable(), _eventRepository, environmentName);
+        return _deployment.Build(_minChunk, _maxChunk, _workers.AsEnumerable(), _eventRepository, environmentName, _validationMode);
     }
 
     private readonly ISet<Type> _isolatedEnvironment = new HashSet<Type>();
@@ -50,6 +51,12 @@ public class DecentralizedHiveShardBuilder
     public DecentralizedHiveShardBuilder Events(Func<EventBuilder, EventBuilder> eventBuilder)
     {
         eventBuilder(new EventBuilder(_eventRepository));
+        return this;
+    }
+
+    public DecentralizedHiveShardBuilder SetValidationMode(ValidationMode validationMode)
+    {
+        _validationMode = validationMode;
         return this;
     }
 }

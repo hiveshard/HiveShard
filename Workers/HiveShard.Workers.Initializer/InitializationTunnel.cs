@@ -79,8 +79,7 @@ public class InitializationTunnel: IInitializationTunnel
                     {
                         var chunk = new Chunk(x,y);
                         if (!_offsets.TryGetValue((topic, chunk), out var offset))
-                            throw new Exception(
-                                $"Initializer {_initializerInstance.GetType().FullName!} did not initialize {topic}[chunk: {chunk}]");
+                            offset = 0;
                         
                         _simpleFabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)),
                             new Envelope<CompletedTick>(
