@@ -99,7 +99,8 @@ public class InMemoryDeployment: IDeployment
             compartmentIdentifier, 
             topLevelServices, 
             [], 
-            typeof(ISimpleFabric)
+            typeof(ISimpleFabric),
+            []
         );
 
         return new ServiceEnvironment(globalChunkConfig, outer, _isolatedEnvironments, eventRepository);
@@ -124,7 +125,8 @@ public class InMemoryDeployment: IDeployment
                 .Add<GlobalChunkConfig>()
                 .Add<IEventRepository>()
                 .Build(),
-            typeof(Initialization)
+            typeof(Initialization),
+            initializationIsolatedEnvironment.Initializers.Select(x=>x.EmitterIdentity.Identity)
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }
@@ -152,7 +154,8 @@ public class InMemoryDeployment: IDeployment
                 .Add<ISerializer>()
                 .Add<GlobalChunkConfig>()
                 .Build(),
-            typeof(ShardWorker)
+            typeof(ShardWorker),
+            shardWorkerIsolatedEnvironment.HiveShards.Select(x=>x.Identity)
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }
@@ -173,7 +176,8 @@ public class InMemoryDeployment: IDeployment
                 .Add<IIdentityConfig>()
                 .Add<IEdgeTunnelServerEndpoint>()
                 .Build(),
-            typeof(EdgeWorker)
+            typeof(EdgeWorker),
+            []
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }
@@ -193,7 +197,8 @@ public class InMemoryDeployment: IDeployment
                 .Add<ICancellationProvider>()
                 .Add<IHiveShardTelemetry>()
                 .Build(),
-            typeof(ClientTunnel)
+            typeof(ClientTunnel),
+            []
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }
@@ -205,10 +210,19 @@ public class InMemoryDeployment: IDeployment
         serviceCollection.AddSingleton<TickerRepository>();
         var tickerAdditionRepository = new TickerAdditionRepository();
         serviceCollection.AddSingleton<TickerAdditionRepository>(tickerAdditionRepository);
-        foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers) 
+
+        List<EmitterIdentity> emitters = new List<EmitterIdentity>();
+        
+        foreach (var tickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.Tickers)
+        {
             tickerAdditionRepository.RequestEventTickerAddition(tickerIsolatedEnvironment.Identity);
-        foreach (var globalTickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.GlobalTickers) 
+            emitters.Add(tickerIsolatedEnvironment.Identity.ToEmitterIdentity());
+        }
+        foreach (var globalTickerIsolatedEnvironment in tickerWorkerIsolatedEnvironment.GlobalTickers)
+        {
             tickerAdditionRepository.RequestGlobalTickerAddition(globalTickerIsolatedEnvironment.GlobalTickerIdentity);
+            emitters.Add(globalTickerIsolatedEnvironment.GlobalTickerIdentity.ToEmitterType());
+        }
 
         var compartmentIdentifier = new CompartmentIdentifier(tickerWorkerIsolatedEnvironment.TickerWorkerIdentifier, CompartmentType.TickerWorker);
         var compartmentEnvironment = new CompartmentEnvironment(
@@ -221,7 +235,8 @@ public class InMemoryDeployment: IDeployment
                 .Add<IHiveShardTelemetry>()
                 .Add<ServiceEnvironment>()
                 .Build(),
-            typeof(TickerWorker)
+            typeof(TickerWorker),
+            emitters
         );
         _isolatedEnvironments.Add(compartmentEnvironment);
     }

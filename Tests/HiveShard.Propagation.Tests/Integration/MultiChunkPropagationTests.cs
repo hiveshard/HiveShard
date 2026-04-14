@@ -1,5 +1,6 @@
 ﻿using HiveShard.Data;
 using HiveShard.Deployments.InMemory;
+using HiveShard.Exceptions;
 using HiveShard.Factory;
 using HiveShard.Propagation.Tests.Config;
 using HiveShard.Propagation.Tests.Data;
