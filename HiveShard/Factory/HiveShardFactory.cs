@@ -27,8 +27,17 @@ public static class HiveShardFactory
 
     private static void ValidateEnvironment(ServiceEnvironment serviceEnvironment)
     {
-        ValidateEventRegistrations(serviceEnvironment);
-        ValidateEmitters(serviceEnvironment);
+        switch (serviceEnvironment.ValidationMode)
+        {
+            case ValidationMode.Full:
+                ValidateEventRegistrations(serviceEnvironment);
+                ValidateEmitters(serviceEnvironment);
+                break;
+            case ValidationMode.None:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private static void ValidateEventRegistrations(ServiceEnvironment serviceEnvironment)
@@ -40,7 +49,10 @@ public static class HiveShardFactory
     private static void ValidateEmitters(ServiceEnvironment serviceEnvironment)
     {
         var events = serviceEnvironment.EventRepository;
-        foreach (var emitter in serviceEnvironment.Inner.SelectMany(x=>x.ContainedEmitters))
+        foreach (var emitter in serviceEnvironment.Inner
+                     // ignore ticker components from this validation
+                     .Where(x=>x.Identifier.CompartmentType != CompartmentType.TickerWorker)
+                     .SelectMany(x=>x.ContainedEmitters))
         {
             var topicsOfEmitter = events.GetTopicsOfEmitter(emitter);
             if (topicsOfEmitter.Length == 0)

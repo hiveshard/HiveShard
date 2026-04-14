@@ -43,7 +43,7 @@ public class InMemoryDeployment: IDeployment
     
     public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk,
         IEnumerable<IsolatedEnvironment> workers,
-        IEventRepository eventRepository, string environmentName)
+        IEventRepository eventRepository, string environmentName, ValidationMode validationMode)
     {
         TelemetryConfig telemetryConfig = new TelemetryConfig(
             new Uri(HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENDPOINT")),
@@ -103,7 +103,7 @@ public class InMemoryDeployment: IDeployment
             []
         );
 
-        return new ServiceEnvironment(globalChunkConfig, outer, _isolatedEnvironments, eventRepository);
+        return new ServiceEnvironment(globalChunkConfig, outer, _isolatedEnvironments, eventRepository, validationMode);
     }
 
     private void BuildInitializationWorker(InitializerIsolatedEnvironment initializationIsolatedEnvironment)

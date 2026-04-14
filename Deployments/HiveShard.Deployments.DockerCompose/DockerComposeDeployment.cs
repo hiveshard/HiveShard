@@ -5,7 +5,7 @@ using HiveShard.Interface.Repository;namespace HiveShard.Deployments.DockerCompo
 public class DockerComposeDeployment: IDeployment
 {
     public ServiceEnvironment Build(Chunk minChunk, Chunk maxChunk, IEnumerable<IsolatedEnvironment> asEnumerable,
-        IEventRepository eventRepository, string environmentName)
+        IEventRepository eventRepository, string environmentName, ValidationMode validationMode)
     {
         throw new NotImplementedException();
     }
