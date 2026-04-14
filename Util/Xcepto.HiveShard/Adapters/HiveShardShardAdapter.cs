@@ -10,9 +10,9 @@ public class HiveShardShardAdapter: XceptoAdapter
 {
     private readonly HiveShardIdentity _hiveShardIdentity;
     private readonly CompartmentIdentifier _compartmentIdentifier;
-    public HiveShardShardAdapter(Guid id, HiveShardIdentity hiveShardIdentity)
+    public HiveShardShardAdapter(Guid compartment, HiveShardIdentity hiveShardIdentity)
     {
-        _compartmentIdentifier = new CompartmentIdentifier(id, CompartmentType.ShardWorker);
+        _compartmentIdentifier = new CompartmentIdentifier(compartment, CompartmentType.ShardWorker);
         _hiveShardIdentity = hiveShardIdentity;
     }
     

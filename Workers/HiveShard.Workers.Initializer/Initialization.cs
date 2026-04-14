@@ -31,7 +31,7 @@ public class Initialization : IIsolatedEntryPoint
             InitializationTunnel initializationTunnel = new InitializationTunnel(_fabric, _eventRepository, _globalChunkConfig);
             
             ServiceCollection initializerCollection = new ServiceCollection();
-            initializerCollection.AddSingleton(typeof(IInitializer),request.Type);
+            initializerCollection.AddSingleton(typeof(IInitializer), request.Type);
             initializerCollection.AddSingleton(_globalChunkConfig);
             initializerCollection.AddSingleton<IInitializationTunnel>(initializationTunnel);
 
