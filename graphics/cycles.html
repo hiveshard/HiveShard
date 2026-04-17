@@ -9,44 +9,116 @@
 <script>
     const elements = [
         // cycle 0
-        { data: { id: "ticker0", label: "Ticker", layer: 0 }, classes: "service start" },
-        { data: { id: "tick0", label: "tick0", layer: 1 }, classes: "event" },
+        { data: { id: "ticker0_div", label: "Ticker (Global)", layer: 0 }, classes: "ticker" },
+        { data: { id: "tick0", label: "Tick 0 (Global)", layer: 1 }, classes: "event" },
 
-        { data: { id: "ticker_event0", label: "Ticker(Event)", layer: 2 }, classes: "service" },
-        { data: { id: "tick0_event", label: "tick0(Event)", layer: 3 }, classes: "event" },
+        { data: { id: "ticker_eventX0_div", label: "Ticker \n(Event X)", layer: 2 }, classes: "dticker" },
+        { data: { id: "ticker_eventY0_div", label: "Ticker \n(Event Y)", layer: 2 }, classes: "dticker" },
+        { data: { id: "ticker_eventZ0_div", label: "Ticker \n(Event Z)", layer: 2 }, classes: "dticker" },
+        { data: { id: "tick0_eventX", label: "Tick 0 \n(Event X)", layer: 3 }, classes: "event" },
+        { data: { id: "tick0_eventY", label: "Tick 0 \n(Event Y)", layer: 3 }, classes: "event" },
+        { data: { id: "tick0_eventZ", label: "Tick 0 \n(Event Z)", layer: 3 }, classes: "event" },
 
-        { data: { id: "shard0", label: "Shard", layer: 4 }, classes: "service" },
+        { data: { id: "shard0a", label: "Shard Group A", layer: 4 }, classes: "service" },
+        { data: { id: "shard0b", label: "Shard Group B", layer: 4 }, classes: "service" },
 
-        { data: { id: "completed_event0", label: "Completed0(Event)", layer: 5 }, classes: "event" },
-        { data: { id: "completed0", label: "Completed0", layer: 6 }, classes: "service" },
+        { data: { id: "completed_eventX0", label: "Completed 0 \n(Event X)", layer: 5 }, classes: "event" },
+        { data: { id: "completed_eventY_1_0", label: "Completed 0 \n(Event Y)", layer: 5 }, classes: "event" },
+        { data: { id: "completed_eventY_2_0", label: "Completed 0 \n(Event Y)", layer: 5 }, classes: "event" },
+        { data: { id: "completed_eventZ0", label: "Completed 0 \n(Event Z)", layer: 5 }, classes: "event" },
+
+        { data: { id: "ticker_eventX0_conv", label: "Ticker \n(Event X)", layer: 6 }, classes: "dticker" },
+        { data: { id: "ticker_eventY0_conv", label: "Ticker \n(Event Y)", layer: 6 }, classes: "dticker" },
+        { data: { id: "ticker_eventZ0_conv", label: "Ticker \n(Event Z)", layer: 6 }, classes: "dticker" },
+
+        { data: { id: "completed0X", label: "Completed 0 (Global)", layer: 7 }, classes: "event" },
+        { data: { id: "completed0Y", label: "Completed 0 (Global)", layer: 7 }, classes: "event" },
+        { data: { id: "completed0Z", label: "Completed 0 (Global)", layer: 7 }, classes: "event" },
+        
+        { data: { id: "ticker0_conv", label: "Ticker (Global)", layer: 8 }, classes: "ticker" },
 
         // cycle 1
-        { data: { id: "ticker1", label: "Ticker", layer: 7 }, classes: "service" },
-        { data: { id: "tick1", label: "tick1", layer: 8 }, classes: "event" },
+        { data: { id: "tick1", label: "Tick 1 (Global)", layer: 10 }, classes: "event" },
 
-        { data: { id: "ticker_event1", label: "Ticker(Event)", layer: 9 }, classes: "service" },
-        { data: { id: "tick1_event", label: "tick1(Event)", layer: 10 }, classes: "event" },
+        { data: { id: "ticker_eventX1_div", label: "Ticker \n(Event X)", layer: 11 }, classes: "dticker" },
+        { data: { id: "ticker_eventY1_div", label: "Ticker \n(Event Y)", layer: 11 }, classes: "dticker" },
+        { data: { id: "ticker_eventZ1_div", label: "Ticker \n(Event Z)", layer: 11 }, classes: "dticker" },
+        { data: { id: "tick1_eventX", label: "Tick 1 \n(Event X)", layer: 12 }, classes: "event" },
+        { data: { id: "tick1_eventY", label: "Tick 1 \n(Event Y)", layer: 12 }, classes: "event" },
+        { data: { id: "tick1_eventZ", label: "Tick 1 \n(Event Z)", layer: 12 }, classes: "event" },
 
-        { data: { id: "shard1", label: "Shard", layer: 11 }, classes: "service" },
+        { data: { id: "shard1a", label: "Shard Group A", layer: 13 }, classes: "service" },
+        { data: { id: "shard1b", label: "Shard Group B", layer: 13 }, classes: "service" },
 
-        { data: { id: "completed_event1", label: "Completed1(Event)", layer: 12 }, classes: "event" },
-        { data: { id: "completed1", label: "Completed1", layer: 13 }, classes: "service" },
+        { data: { id: "completed_eventX1", label: "Completed 1 \n(Event X)", layer: 14 }, classes: "event" },
+        { data: { id: "completed_eventY_1_1", label: "Completed 1 \n(Event Y)", layer: 14 }, classes: "event" },
+        { data: { id: "completed_eventY_2_1", label: "Completed 1 \n(Event Y)", layer: 14 }, classes: "event" },
+        { data: { id: "completed_eventZ1", label: "Completed 1 \n(Event Z)", layer: 14 }, classes: "event" },
+
+        { data: { id: "ticker_eventX1_conv", label: "Ticker \n(Event X)", layer: 15 }, classes: "dticker" },
+        { data: { id: "ticker_eventY1_conv", label: "Ticker \n(Event Y)", layer: 15 }, classes: "dticker" },
+        { data: { id: "ticker_eventZ1_conv", label: "Ticker \n(Event Z)", layer: 15 }, classes: "dticker" },
+
+        { data: { id: "completed1X", label: "Completed 1 (Global)", layer: 16 }, classes: "event" },
+        { data: { id: "completed1Y", label: "Completed 1 (Global)", layer: 16 }, classes: "event" },
+        { data: { id: "completed1Z", label: "Completed 1 (Global)", layer: 16 }, classes: "event" },
+
+        { data: { id: "ticker1_conv", label: "Ticker (Global)", layer: 17 }, classes: "ticker" },
+
 
         // edges
-        { data: { id: "e1", source: "ticker0", target: "tick0" } },
-        { data: { id: "e2", source: "tick0", target: "ticker_event0" } },
-        { data: { id: "e3", source: "ticker_event0", target: "tick0_event" } },
-        { data: { id: "e4", source: "tick0_event", target: "shard0" } },
-        { data: { id: "e5", source: "shard0", target: "completed_event0" } },
-        { data: { id: "e6", source: "completed_event0", target: "completed0" } },
-        { data: { id: "e7", source: "completed0", target: "ticker1" } },
+        { data: { id: "e1", source: "ticker0_div", target: "tick0" } },
+        { data: { id: "e2", source: "tick0", target: "ticker_eventX0_div" } },
+        { data: { id: "e22", source: "tick0", target: "ticker_eventY0_div" } },
+        { data: { id: "e222", source: "tick0", target: "ticker_eventZ0_div" } },
+        { data: { id: "e3", source: "ticker_eventX0_div", target: "tick0_eventX" } },
+        { data: { id: "e33", source: "ticker_eventY0_div", target: "tick0_eventY" } },
+        { data: { id: "e333", source: "ticker_eventZ0_div", target: "tick0_eventZ" } },
+        { data: { id: "e4", source: "tick0_eventX", target: "shard0a" } },
+        { data: { id: "e44", source: "tick0_eventY", target: "shard0a" } },
+        { data: { id: "e444", source: "tick0_eventY", target: "shard0b" } },
+        { data: { id: "e4444", source: "tick0_eventZ", target: "shard0b" } },
+        { data: { id: "e5", source: "shard0a", target: "completed_eventX0" } },
+        { data: { id: "e55", source: "shard0a", target: "completed_eventY_1_0" } },
+        { data: { id: "e555", source: "shard0b", target: "completed_eventY_2_0" } },
+        { data: { id: "e5555", source: "shard0b", target: "completed_eventZ0" } },
+        { data: { id: "e6", source: "completed_eventX0", target: "ticker_eventX0_conv" } },
+        { data: { id: "e66", source: "completed_eventY_1_0", target: "ticker_eventY0_conv" } },
+        { data: { id: "e666", source: "completed_eventY_2_0", target: "ticker_eventY0_conv" } },
+        { data: { id: "e6666", source: "completed_eventZ0", target: "ticker_eventZ0_conv" } },
+        { data: { id: "e7", source: "ticker_eventX0_conv", target: "completed0X" } },
+        { data: { id: "e77", source: "ticker_eventY0_conv", target: "completed0Y" } },
+        { data: { id: "e777", source: "ticker_eventZ0_conv", target: "completed0Z" } },
+        { data: { id: "e8", source: "completed0X", target: "ticker0_conv" } },
+        { data: { id: "e88", source: "completed0Y", target: "ticker0_conv" } },
+        { data: { id: "e888", source: "completed0Z", target: "ticker0_conv" } },
 
-        { data: { id: "e8", source: "ticker1", target: "tick1" } },
-        { data: { id: "e9", source: "tick1", target: "ticker_event1" } },
-        { data: { id: "e10", source: "ticker_event1", target: "tick1_event" } },
-        { data: { id: "e11", source: "tick1_event", target: "shard1" } },
-        { data: { id: "e12", source: "shard1", target: "completed_event1" } },
-        { data: { id: "e13", source: "completed_event1", target: "completed1" } }
+        // edges
+        { data: { id: "e1_1", source: "ticker0_conv", target: "tick1" } },
+        { data: { id: "e2_1", source: "tick1", target: "ticker_eventX1_div" } },
+        { data: { id: "e22_1", source: "tick1", target: "ticker_eventY1_div" } },
+        { data: { id: "e222_1", source: "tick1", target: "ticker_eventZ1_div" } },
+        { data: { id: "e3_1", source: "ticker_eventX1_div", target: "tick1_eventX" } },
+        { data: { id: "e33_1", source: "ticker_eventY1_div", target: "tick1_eventY" } },
+        { data: { id: "e333_1", source: "ticker_eventZ1_div", target: "tick1_eventZ" } },
+        { data: { id: "e4_1", source: "tick1_eventX", target: "shard1a" } },
+        { data: { id: "e44_1", source: "tick1_eventY", target: "shard1a" } },
+        { data: { id: "e444_1", source: "tick1_eventY", target: "shard1b" } },
+        { data: { id: "e4444_1", source: "tick1_eventZ", target: "shard1b" } },
+        { data: { id: "e5_1", source: "shard1a", target: "completed_eventX1" } },
+        { data: { id: "e55_1", source: "shard1a", target: "completed_eventY_1_1" } },
+        { data: { id: "e555_1", source: "shard1b", target: "completed_eventY_2_1" } },
+        { data: { id: "e5555_1", source: "shard1b", target: "completed_eventZ1" } },
+        { data: { id: "e6_1", source: "completed_eventX1", target: "ticker_eventX1_conv" } },
+        { data: { id: "e66_1", source: "completed_eventY_1_1", target: "ticker_eventY1_conv" } },
+        { data: { id: "e666_1", source: "completed_eventY_2_1", target: "ticker_eventY1_conv" } },
+        { data: { id: "e6666_1", source: "completed_eventZ1", target: "ticker_eventZ1_conv" } },
+        { data: { id: "e7_1", source: "ticker_eventX1_conv", target: "completed1X" } },
+        { data: { id: "e77_1", source: "ticker_eventY1_conv", target: "completed1Y" } },
+        { data: { id: "e777_1", source: "ticker_eventZ1_conv", target: "completed1Z" } },
+        { data: { id: "e8_1", source: "completed1X", target: "ticker1_conv" } },
+        { data: { id: "e88_1", source: "completed1Y", target: "ticker1_conv" } },
+        { data: { id: "e888_1", source: "completed1Z", target: "ticker1_conv" } },
     ];
 
     cytoscape.use(cytoscapeElk);
@@ -62,36 +134,75 @@
                 style: {
                     label: 'data(label)',
                     'text-valign': 'center',
-                    'background-color': '#2E86DE',
-                    color: '#fff'
+                    'text-halign': 'center',
+                    'font-size': 18,
+                    'font-family': 'Segoe UI, sans-serif',
+                    'border-width': 0,
+                    'background-color': '#252526',
+                    'text-wrap': 'wrap',
+                    'text-max-width': 180,
+                    'color': '#0D1117',
+                    'fill': "#0D1117",
+                    'font-weight': "500",
+                    'letter-spacing': "0.02em",
                 }
             },
+
+            // SERVICES → neutral, minimal
             {
                 selector: '.service',
                 style: {
-                    shape: 'rectangle',
+                    shape: 'round-rectangle',
                     width: 200,
-                    height: 40
+                    height: 40,
+                    'background-color': '#FF7B72',
                 }
             },
+
+            // EVENTS → clean green accent (not saturated garbage)
             {
                 selector: '.event',
                 style: {
                     shape: 'ellipse',
                     width: 200,
                     height: 80,
-                    'background-color': '#27AE60'
+                    'background-color': '#F2CC60',
                 }
             },
+
+            // DTICKER → soft purple accent
             {
-                selector: '.start',
+                selector: '.dticker',
                 style: {
-                    shape: 'ellipse',
-                    width: 120,
+                    shape: 'round-rectangle',
+                    width: 160,
                     height: 60,
-                    'background-color': '#ae9327'
+                    'background-color': '#7EE787',
                 }
             },
+
+            // GLOBAL TICKER → primary blue (clean, not loud)
+            {
+                selector: '.ticker',
+                style: {
+                    shape: 'round-rectangle',
+                    width: 160,
+                    height: 60,
+                    'background-color': '#58A6FF',
+                }
+            },
+
+            // EDGES → minimal, modern
+            {
+                selector: 'edge',
+                style: {
+                    width: 1.5,
+                    'line-color': '#5a5a5a',
+                    'target-arrow-color': '#5a5a5a',
+                    'target-arrow-shape': 'triangle',
+                    'curve-style': 'bezier'
+                }
+            }
         ],
 
         layout: {
