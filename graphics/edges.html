@@ -1,0 +1,124 @@
+<div id="diagram">
+    <div id="dag" style="width: 2200px; height: 900px;"></div>
+</div>
+
+<script src="https://unpkg.com/cytoscape@3.27.0/dist/cytoscape.min.js"></script>
+<script src="https://unpkg.com/elkjs@0.11.0/lib/elk.bundled.js"></script>
+<script src="https://unpkg.com/cytoscape-elk@2.3.0/dist/cytoscape-elk.js"></script>
+<script src="https://unpkg.com/cytoscape-svg/cytoscape-svg.js"></script>
+<script>
+    const elements = [
+        // clients
+        { data: { id: "c1", label: "Client 1", layer: 0 }, classes: "client" },
+        { data: { id: "c2", label: "Client 2", layer: 0 }, classes: "client" },
+        { data: { id: "c3", label: "Client 3", layer: 0 }, classes: "client" },
+        { data: { id: "c4", label: "Client 4", layer: 0 }, classes: "client" },
+
+        // edge chunks replica 1
+        { data: { id: "ec_00_r1", label: "EdgeChunk (0,0)\nreplica 1", layer: 2 }, classes: "edge" },
+        { data: { id: "ec_01_r1", label: "EdgeChunk (0,1)\nreplica 1", layer: 2 }, classes: "edge" },
+
+        // edge chunks replica 2
+        { data: { id: "ec_00_r2", label: "EdgeChunk (0,0)\nreplica 2", layer: 2 }, classes: "edge" },
+        { data: { id: "ec_01_r2", label: "EdgeChunk (0,1)\nreplica 2", layer: 2 }, classes: "edge" },
+
+        // simulation
+        { data: { id: "sim", label: "Simulation", layer: 4 }, classes: "simulation" },
+
+        // client -> edge chunk connections
+        { data: { source: "c1", target: "ec_00_r1" } },
+        { data: { source: "c1", target: "ec_01_r1" } },
+
+        { data: { source: "c2", target: "ec_00_r1" } },
+        { data: { source: "c2", target: "ec_01_r1" } },
+
+        { data: { source: "c3", target: "ec_00_r2" } },
+        { data: { source: "c3", target: "ec_01_r2" } },
+
+        { data: { source: "c4", target: "ec_00_r2" } },
+        { data: { source: "c4", target: "ec_01_r2" } },
+
+        // edge chunk -> simulation
+        { data: { source: "ec_00_r1", target: "sim" } },
+        { data: { source: "ec_01_r1", target: "sim" } },
+        { data: { source: "ec_00_r2", target: "sim" } },
+        { data: { source: "ec_01_r2", target: "sim" } }
+    ];
+
+    cytoscape.use(cytoscapeElk);
+
+    window.layoutDone = false;
+    const cy = cytoscape({
+        container: document.getElementById('dag'),
+        elements: elements,
+
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    label: 'data(label)',
+                    'text-valign': 'center',
+                    'text-halign': 'center',
+                    'font-size': 18,
+                    'font-family': 'Segoe UI, sans-serif',
+                    'border-width': 0,
+                    'background-color': '#252526',
+                    'text-wrap': 'wrap',
+                    'text-max-width': 180,
+                    'color': '#0D1117',
+                    'fill': "#0D1117",
+                    'font-weight': "500",
+                    'letter-spacing': "0.02em",
+                }
+            },
+            {
+                selector: ".client",
+                style: {
+                    "background-color": "#0ea5e9",
+                    shape: 'ellipse',
+                    width: 140,
+                    height: 60
+                }
+            },
+            {
+                selector: ".edge",
+                style: {
+                    "background-color": "#22c55e",
+                    shape: "round-rectangle",
+                    width: 200,
+                    height: 80
+                }
+            },
+            {
+                selector: ".simulation",
+                style: {
+                    "background-color": "#f59e0b",
+                    shape: "ellipse",
+                    width: 240,
+                    height: 160
+                }
+            }
+        ],
+
+        layout: {
+            name: 'elk',
+
+            elk: {
+                algorithm: 'layered',
+                'elk.direction': 'DOWN',
+                'elk.spacing.nodeNode': 40,
+                'elk.layered.nodePlacement.strategy': 'BRANDES_KOEPF',
+                'elk.layered.nodePlacement.bk.fixedAlignment': 'BALANCED'
+            },
+            transform: (node, pos) => {
+                return { x: pos.x, y: node.data('layer') * 100 };
+            }
+        }
+
+    });
+    window.cy = cy;
+
+    cy.on('layoutstop', () => {
+        window.layoutDone = true;
+    });
+</script>
