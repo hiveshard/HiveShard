@@ -1,4 +1,4 @@
-<div id="diagram" class="diagram">
+<body id="diagram" class="diagram">
     <div class="top">
         <div>HiveShard simulation</div>
     </div>
@@ -193,7 +193,7 @@
             <div>Obstactle</div>
         </div>
     </div>
-</div>
+</body>
 
 
 <style>
@@ -204,6 +204,7 @@
         
         display: flex;
         flex-direction: column;
+        margin: 0;
     }
     .center {
         display: flex;
@@ -625,11 +626,10 @@
 
                 const cell = document.getElementById(`(${nx},${ny})`);
                 const viewCell = document.getElementById(`${client}_(${dx},${dy})`);
-                viewCell.style.backgroundColor = cell.style.backgroundColor;
-                viewCell.children[0].style.backgroundColor = cell.children[0].style.backgroundColor;
+                viewCell.style.background = cell.style.background;
+                viewCell.children[0].style.background = cell.children[0].style.background;
                 viewCell.children[0].textContent = cell.children[0].textContent;
-                viewCell.children[1].children[0].style.backgroundColor = cell.children[1].children[0].style.backgroundColor;
-                // viewCell.children[1].children[1].style.backgroundColor = cell.children[1].children[1].style.backgroundColor;
+                viewCell.children[1].children[0].style.background = cell.children[1].children[0].style.background;
             }
         }
     }
@@ -685,5 +685,8 @@
 
     applyToClientActorView("client1", actor1)
     applyToClientActorView("client2", actor2)
-    
+
+
+    const diagram = document.getElementById("diagram");
+    diagram.dataset.rendered = "true";
 </script>
