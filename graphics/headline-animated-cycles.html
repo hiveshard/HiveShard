@@ -19,16 +19,23 @@
             return "highlighted"
         return ""
     }
+
+    function dynamicBorderColor() {
+        if(window.step === 0 || window.step === 2 || window.step === 6)
+            return "rgb(2,143,171)"
+        if(window.step === 1 || window.step === 3 || window.step === 5 || window.step === 7)
+            return "rgb(157,45,45)"
+        return "rgb(148,0,49)"
+    }
     
     const elements = [
-        // nodes (one per layer)
-        { data: { id: "ticker_global_in", label: "Ticker (Global)", layer: 0 }, classes: "ticker " + dynamicHighlight(0) },
+        { data: { id: "ticker_global_in", label: "Ticker (Global)", layer: 0 }, classes: "dticker " + dynamicHighlight(0) },
         { data: { id: "tick_global", label: "Tick " + window.tick + " (Global)", layer: 1 }, classes: "event " + dynamicHighlight(1) },
 
         { data: { id: "ticker_events_in", label: "Ticker (Events)", layer: 2 }, classes: "dticker " + dynamicHighlight(2) },
         { data: { id: "tick_events", label: "Tick " + window.tick + " (Events)", layer: 3 }, classes: "event " + dynamicHighlight(3) },
 
-        { data: { id: "shards", label: "Shard Groups", layer: 4 }, classes: "service " + dynamicHighlight(4) },
+        { data: { id: "shards", label: "Shards", layer: 4 }, classes: "service " + dynamicHighlight(4) },
 
         { data: { id: "completed_events", label: "Completed " + window.tick + " (Events)", layer: 5 }, classes: "event " + dynamicHighlight(5) },
 
@@ -36,9 +43,7 @@
 
         { data: { id: "completed_global", label: "Completed " + window.tick + " (Global)", layer: 7 }, classes: "event " + dynamicHighlight(7) },
 
-        { data: { id: "ticker_global_out", label: "Ticker (Global)", layer: 8 }, classes: "ticker " + dynamicHighlight(8) },
 
-        // edges (pure vertical chain)
         { data: { id: "e1", source: "ticker_global_in", target: "tick_global" } },
         { data: { id: "e2", source: "tick_global", target: "ticker_events_in" } },
         { data: { id: "e3", source: "ticker_events_in", target: "tick_events" } },
@@ -46,7 +51,6 @@
         { data: { id: "e5", source: "shards", target: "completed_events" } },
         { data: { id: "e6", source: "completed_events", target: "ticker_events_out" } },
         { data: { id: "e7", source: "ticker_events_out", target: "completed_global" } },
-        { data: { id: "e8", source: "completed_global", target: "ticker_global_out" } },
     ];
 
     cytoscape.use(cytoscapeElk);
@@ -75,19 +79,18 @@
                     'letter-spacing': "0.02em",
                 }
             },
-
-            // SERVICES → neutral, minimal
             {
                 selector: '.service',
                 style: {
                     shape: 'round-rectangle',
                     width: 200,
                     height: 40,
-                    'background-color': '#FF7B72',
+                    'background-color': '#3d0d2a',
+                    color: "white",
+                    'border-width': 3,
+                    'border-color': 'rgb(128,0,40)',
                 }
             },
-
-            // EVENTS → clean green accent (not saturated garbage)
             {
                 selector: '.event',
                 style: {
@@ -95,16 +98,14 @@
                     width: 200,
                     height: 80,
                     color: 'white',
-                    'background-color': '#330000', // Dark red base
-                    'border-width': 2,
-                    'border-color': '#ff4d4d',    // Bright red border
+                    'background-color': '#330000',
+                    'border-width': 3,
+                    'border-color': 'rgb(126,37,37)',
                     'shadow-blur': 15,
                     'shadow-color': '#ff4d4d',
                     'shadow-opacity': 0.8
                 }
             },
-
-            // DTICKER → soft purple accent
             {
                 selector: '.dticker',
                 style: {
@@ -112,8 +113,8 @@
                     width: 160,
                     height: 60,
                     'background-color': '#001a33',
-                    'border-width': 2,
-                    'border-color': '#00d4ff',
+                    'border-width': 3,
+                    'border-color': 'rgb(1,109,131)',
                     'color': '#ffffff',
                     'shadow-blur': 15,
                     'shadow-color': '#00d4ff',
@@ -121,26 +122,6 @@
                     'shadow-offset-y': 0
                 }
             },
-
-            // GLOBAL TICKER → primary blue (clean, not loud)
-            {
-                selector: '.ticker',
-                style: {
-                    shape: 'round-rectangle',
-                    width: 160,
-                    height: 60,
-                    'background-color': '#001a33',
-                    'border-width': 2,
-                    'border-color': '#00d4ff', 
-                    'color': '#ffffff', 
-                    'shadow-blur': 15, 
-                    'shadow-color': '#00d4ff',
-                    'shadow-opacity': 0.8,
-                    'shadow-offset-y': 0
-                }
-            },
-
-            // EDGES → minimal, modern
             {
                 selector: 'edge',
                 style: {
@@ -151,13 +132,11 @@
                     'curve-style': 'bezier'
                 }
             },
-            
             // HIGHLIGHTS
             {
                 selector: '.highlighted',
                 style: {
-                    'border-color': '#f13fe2',
-                    'border-style': 'solid'
+                    'border-color': dynamicBorderColor()
                 }
             }
         ],

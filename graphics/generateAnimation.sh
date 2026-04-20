@@ -25,3 +25,13 @@ done
 
 ffmpeg -framerate 8 -i ../media/animation/frame_%03d.png \
   -c:v libx264 -pix_fmt yuv420p ../media/animation/out.mp4
+  
+ffmpeg -framerate 8 -i ../media/animation/frame_%03d.png \
+  -vf "fps=8,scale=960:-1:flags=lanczos,palettegen" \
+  ./temp/palette.png
+  
+ffmpeg -framerate 8 -i ../media/animation/frame_%03d.png \
+  -i ./temp/palette.png \
+  -loop 0 \
+  -lavfi "fps=8,scale=960:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer" \
+  ../media/animation/out.gif

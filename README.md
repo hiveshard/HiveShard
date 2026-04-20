@@ -3,8 +3,9 @@
 [![codecov](https://codecov.io/gh/hiveshard/HiveShard/graph/badge.svg?token=KOI7AGCISI)](https://codecov.io/gh/hiveshard/HiveShard)
 
 HiveShard is a distributed runtime for deterministic simulations that require partitioning of 2D space.
-The goal is to support 100M human actors simultaneously (connected via client endpoints)
-AND billions of simulated entities in ONE consistent 2D world.
+The goal is to support **100M** clients simultaneously and **billions** of simulated agents in **one** consistent 2D world.
+
+![HiveShard simulation animation](./media/readme-animation.gif)
 
 ## Status
 
