@@ -163,8 +163,7 @@
             <div class="cell" id="(3,4)"><div class="title" id="content_(3,4)"></div><div class="bars"><span id="A_(3,4)"></span><span id="B_(3,4)"></span></div></div>
             <div class="cell" id="(4,4)"><div class="title" id="content_(4,4)"></div><div class="bars"><span id="A_(4,4)"></span><span id="B_(4,4)"></span></div></div>
         </div>
-        <div class="graph">
-            <img src="../media/cycles.svg" alt="event graph" height="800px">
+        <div id="graph" class="graph">
         </div>
     </div>
     <div class="bottom">
@@ -635,111 +634,150 @@
             }
         }
     }
+    
+    function attachGraph(svg){
+
+        const diagram = document.getElementById("diagram");
+        const parent = document.getElementById("graph");
+
+        const img = new Image(800);
+
+        img.id = "graphImage";
+        img.alt = "event graph";
+
+        img.onload = () => {
+            diagram.dataset.imageRendered = "true";
+        };
+
+        img.onerror = () => {
+            console.error("image failed to load");
+            diagram.dataset.imageRendered = "error";
+        };
+
+        img.src = svg;
+        console.log("svg image (" + svg +") attached to image");
+        
+        parent.appendChild(img);
+    }
 
 
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("DOM READY");
 
-    attachCellMouseHandlers();
-    
-    if(!window.tick)
-        window.tick = 0;
-    
-    client1 = "(-5,-5)"
-    client2 = "(-5,-5)"
-    agent1 = "(-5,-5)"
-    agent2 = "(-5,-5)"
-    agent3 = "(-5,-5)"
-    agent4 = "(-5,-5)"
-    
-    if(window.tick === 0){
-        client1 = "(-1,-2)"
-        client2 = "(3,3)"
-        agent1 = "(-4,7)"
-        agent2 = "(3,-3)"
-        agent3 = "(-4,-4)"
-        agent4 = "(2,2)"
-    }
-    if(window.tick === 1){
-        client1 = "(-1,-1)"
-        client2 = "(2,3)"
-        agent1 = "(-4,5)"
-        agent2 = "(3,-2)"
-        agent3 = "(-4,-3)"
-        agent4 = "(2,3)"
-    }
-    if(window.tick === 2){
-        client1 = "(-1,0)"
-        client2 = "(2,2)"
-        agent1 = "(-4,4)"
-        agent2 = "(3,-1)"
-        agent3 = "(-4,-2)"
-        agent4 = "(2,4)"
-    }
-    if(window.tick === 3){
-        client1 = "(-1,1)"
-        client2 = "(2,1)"
-        agent1 = "(-4,3)"
-        agent2 = "(4,-1)"
-        agent3 = "(-4,-1)"
-        agent4 = "(1,4)"
-    }
-    if(window.tick === 4){
-        client1 = "(0,1)"
-        client2 = "(3,1)"
-        agent1 = "(-4,2)"
-        agent2 = "(4,0)"
-        agent3 = "(-3,-1)"
-        agent4 = "(0,4)"
-    }
-    if(window.tick === 5){
-        client1 = "(1,1)"
-        client2 = "(3,1)"
-        agent1 = "(-3,2)"
-        agent2 = "(4,0)"
-        agent3 = "(-3,-1)"
-        agent4 = "(-1,4)"
-    }
-    if(window.tick === 6){
-        client1 = "(2,1)"
-        client2 = "(2,1)"
-        agent1 = "(-2,2)"
-        agent2 = "(4,0)"
+        attachCellMouseHandlers();
+
+        if(!window.frame)
+            window.frame = 0;
+
+
+        if(window.attachGraphDynamically === 1){
+            attachGraph(window.imgPath)
+        }
+
+        if(!window.step)
+            window.step = 0;
+
+        if(!window.tick)
+            window.tick = 0;
+
+        client1 = "(-5,-5)"
+        client2 = "(-5,-5)"
+        agent1 = "(-5,-5)"
+        agent2 = "(-5,-5)"
         agent3 = "(-5,-5)"
-        agent4 = "(-2,4)"
-    }
-    if(window.tick === 7){
-        client1 = "(2,0)"
-        client2 = "(1,1)"
-        agent1 = "(-1,2)"
-        agent2 = "(4,0)"
-        agent4 = "(-2,3)"
-    }
-    if(window.tick === 8){
-        client1 = "(2,-1)"
-        client2 = "(0,1)"
-        agent1 = "(0,2)"
-        agent2 = "(4,0)"
-        agent4 = "(-2,2)"
-    }
+        agent4 = "(-5,-5)"
+
+        if(window.tick === 0){
+            client1 = "(-1,-2)"
+            client2 = "(3,3)"
+            agent1 = "(-4,7)"
+            agent2 = "(3,-3)"
+            agent3 = "(-4,-4)"
+            agent4 = "(2,2)"
+        }
+        if(window.tick === 1){
+            client1 = "(-1,-1)"
+            client2 = "(2,3)"
+            agent1 = "(-4,5)"
+            agent2 = "(3,-2)"
+            agent3 = "(-4,-3)"
+            agent4 = "(2,3)"
+        }
+        if(window.tick === 2){
+            client1 = "(-1,0)"
+            client2 = "(2,2)"
+            agent1 = "(-4,4)"
+            agent2 = "(3,-1)"
+            agent3 = "(-4,-2)"
+            agent4 = "(2,4)"
+        }
+        if(window.tick === 3){
+            client1 = "(-1,1)"
+            client2 = "(2,1)"
+            agent1 = "(-4,3)"
+            agent2 = "(4,-1)"
+            agent3 = "(-4,-1)"
+            agent4 = "(1,4)"
+        }
+        if(window.tick === 4){
+            client1 = "(0,1)"
+            client2 = "(3,1)"
+            agent1 = "(-4,2)"
+            agent2 = "(4,0)"
+            agent3 = "(-3,-1)"
+            agent4 = "(0,4)"
+        }
+        if(window.tick === 5){
+            client1 = "(1,1)"
+            client2 = "(3,1)"
+            agent1 = "(-3,2)"
+            agent2 = "(4,0)"
+            agent3 = "(-3,-1)"
+            agent4 = "(-1,4)"
+        }
+        if(window.tick === 6){
+            client1 = "(2,1)"
+            client2 = "(2,1)"
+            agent1 = "(-2,2)"
+            agent2 = "(4,0)"
+            agent3 = "(-5,-5)"
+            agent4 = "(-2,4)"
+        }
+        if(window.tick === 7){
+            client1 = "(2,0)"
+            client2 = "(1,1)"
+            agent1 = "(-1,2)"
+            agent2 = "(4,0)"
+            agent4 = "(-2,3)"
+        }
+        if(window.tick === 8){
+            client1 = "(2,-1)"
+            client2 = "(0,1)"
+            agent1 = "(0,2)"
+            agent2 = "(4,0)"
+            agent4 = "(-2,2)"
+        }
 
 
 
-    placeActor(client1, "Client 1")
-    paintNeighboursB(`${client1}`);
+        placeActor(client1, "Client 1")
+        paintNeighboursB(`${client1}`);
 
-    placeActor(client2, "Client 2")
-    paintNeighboursB(`${client2}`);
+        placeActor(client2, "Client 2")
+        paintNeighboursB(`${client2}`);
 
-    placeActor(agent1, "Agent 1")
-    placeActor(agent2, "Agent 2")
-    placeActor(agent3, "Agent 3")
-    placeActor(agent4, "Agent 4")
+        placeActor(agent1, "Agent 1")
+        placeActor(agent2, "Agent 2")
+        placeActor(agent3, "Agent 3")
+        placeActor(agent4, "Agent 4")
 
-    paintPrimeCells();
+        paintPrimeCells();
 
-    applyToClientActorView("client1", client1)
-    applyToClientActorView("client2", client2)
+        applyToClientActorView("client1", client1)
+        applyToClientActorView("client2", client2)
 
 
-    const diagram = document.getElementById("diagram");
-    diagram.dataset.rendered = "true";
+        const diagram = document.getElementById("diagram");
+        diagram.dataset.jsRan = "true";
+    });
 </script>

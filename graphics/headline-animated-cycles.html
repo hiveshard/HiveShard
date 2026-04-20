@@ -1,0 +1,174 @@
+<div id="diagram">
+    <div id="dag" style="width: 2200px; height: 900px;"></div>
+</div>
+
+<script src="https://unpkg.com/cytoscape@3.27.0/dist/cytoscape.min.js"></script>
+<script src="https://unpkg.com/elkjs@0.11.0/lib/elk.bundled.js"></script>
+<script src="https://unpkg.com/cytoscape-elk@2.3.0/dist/cytoscape-elk.js"></script>
+<script src="https://unpkg.com/cytoscape-svg/cytoscape-svg.js"></script>
+<script>
+    const elements = [
+        // cycle 0
+        { data: { id: "ticker0_div", label: "Ticker (Global)", layer: 0 }, classes: "ticker" },
+        { data: { id: "tick0", label: "Tick 0 (Global)", layer: 1 }, classes: "event" },
+
+        { data: { id: "ticker_eventX0_div", label: "Ticker \n(Event X)", layer: 2 }, classes: "dticker" },
+        { data: { id: "ticker_eventY0_div", label: "Ticker \n(Event Y)", layer: 2 }, classes: "dticker" },
+        { data: { id: "ticker_eventZ0_div", label: "Ticker \n(Event Z)", layer: 2 }, classes: "dticker" },
+        { data: { id: "tick0_eventX", label: "Tick 0 \n(Event X)", layer: 3 }, classes: "event" },
+        { data: { id: "tick0_eventY", label: "Tick 0 \n(Event Y)", layer: 3 }, classes: "event" },
+        { data: { id: "tick0_eventZ", label: "Tick 0 \n(Event Z)", layer: 3 }, classes: "event" },
+
+        { data: { id: "shard0a", label: "Shard Group A", layer: 4 }, classes: "service" },
+        { data: { id: "shard0b", label: "Shard Group B", layer: 4 }, classes: "service" },
+
+        { data: { id: "completed_eventX0", label: "Completed 0 \n(Event X)", layer: 5 }, classes: "event" },
+        { data: { id: "completed_eventY_1_0", label: "Completed 0 \n(Event Y)", layer: 5 }, classes: "event" },
+        { data: { id: "completed_eventY_2_0", label: "Completed 0 \n(Event Y)", layer: 5 }, classes: "event" },
+        { data: { id: "completed_eventZ0", label: "Completed 0 \n(Event Z)", layer: 5 }, classes: "event" },
+
+        { data: { id: "ticker_eventX0_conv", label: "Ticker \n(Event X)", layer: 6 }, classes: "dticker" },
+        { data: { id: "ticker_eventY0_conv", label: "Ticker \n(Event Y)", layer: 6 }, classes: "dticker" },
+        { data: { id: "ticker_eventZ0_conv", label: "Ticker \n(Event Z)", layer: 6 }, classes: "dticker" },
+
+        { data: { id: "completed0X", label: "Completed 0 (Global)", layer: 7 }, classes: "event" },
+        { data: { id: "completed0Y", label: "Completed 0 (Global)", layer: 7 }, classes: "event" },
+        { data: { id: "completed0Z", label: "Completed 0 (Global)", layer: 7 }, classes: "event" },
+        
+        { data: { id: "ticker0_conv", label: "Ticker (Global)", layer: 8 }, classes: "ticker" },
+
+        // edges
+        { data: { id: "e1", source: "ticker0_div", target: "tick0" } },
+        { data: { id: "e2", source: "tick0", target: "ticker_eventX0_div" } },
+        { data: { id: "e22", source: "tick0", target: "ticker_eventY0_div" } },
+        { data: { id: "e222", source: "tick0", target: "ticker_eventZ0_div" } },
+        { data: { id: "e3", source: "ticker_eventX0_div", target: "tick0_eventX" } },
+        { data: { id: "e33", source: "ticker_eventY0_div", target: "tick0_eventY" } },
+        { data: { id: "e333", source: "ticker_eventZ0_div", target: "tick0_eventZ" } },
+        { data: { id: "e4", source: "tick0_eventX", target: "shard0a" } },
+        { data: { id: "e44", source: "tick0_eventY", target: "shard0a" } },
+        { data: { id: "e444", source: "tick0_eventY", target: "shard0b" } },
+        { data: { id: "e4444", source: "tick0_eventZ", target: "shard0b" } },
+        { data: { id: "e5", source: "shard0a", target: "completed_eventX0" } },
+        { data: { id: "e55", source: "shard0a", target: "completed_eventY_1_0" } },
+        { data: { id: "e555", source: "shard0b", target: "completed_eventY_2_0" } },
+        { data: { id: "e5555", source: "shard0b", target: "completed_eventZ0" } },
+        { data: { id: "e6", source: "completed_eventX0", target: "ticker_eventX0_conv" } },
+        { data: { id: "e66", source: "completed_eventY_1_0", target: "ticker_eventY0_conv" } },
+        { data: { id: "e666", source: "completed_eventY_2_0", target: "ticker_eventY0_conv" } },
+        { data: { id: "e6666", source: "completed_eventZ0", target: "ticker_eventZ0_conv" } },
+        { data: { id: "e7", source: "ticker_eventX0_conv", target: "completed0X" } },
+        { data: { id: "e77", source: "ticker_eventY0_conv", target: "completed0Y" } },
+        { data: { id: "e777", source: "ticker_eventZ0_conv", target: "completed0Z" } },
+        { data: { id: "e8", source: "completed0X", target: "ticker0_conv" } },
+        { data: { id: "e88", source: "completed0Y", target: "ticker0_conv" } },
+        { data: { id: "e888", source: "completed0Z", target: "ticker0_conv" } },
+
+    ];
+
+    cytoscape.use(cytoscapeElk);
+
+    window.layoutDone = false;
+    const cy = cytoscape({
+        container: document.getElementById('dag'),
+        elements: elements,
+
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    label: 'data(label)',
+                    'text-valign': 'center',
+                    'text-halign': 'center',
+                    'font-size': 18,
+                    'font-family': 'Segoe UI, sans-serif',
+                    'border-width': 0,
+                    'background-color': '#252526',
+                    'text-wrap': 'wrap',
+                    'text-max-width': 180,
+                    'color': '#0D1117',
+                    'fill': "#0D1117",
+                    'font-weight': "500",
+                    'letter-spacing': "0.02em",
+                }
+            },
+
+            // SERVICES → neutral, minimal
+            {
+                selector: '.service',
+                style: {
+                    shape: 'round-rectangle',
+                    width: 200,
+                    height: 40,
+                    'background-color': '#FF7B72',
+                }
+            },
+
+            // EVENTS → clean green accent (not saturated garbage)
+            {
+                selector: '.event',
+                style: {
+                    shape: 'ellipse',
+                    width: 200,
+                    height: 80,
+                    'background-color': '#F2CC60',
+                }
+            },
+
+            // DTICKER → soft purple accent
+            {
+                selector: '.dticker',
+                style: {
+                    shape: 'round-rectangle',
+                    width: 160,
+                    height: 60,
+                    'background-color': '#7EE787',
+                }
+            },
+
+            // GLOBAL TICKER → primary blue (clean, not loud)
+            {
+                selector: '.ticker',
+                style: {
+                    shape: 'round-rectangle',
+                    width: 160,
+                    height: 60,
+                    'background-color': '#58A6FF',
+                }
+            },
+
+            // EDGES → minimal, modern
+            {
+                selector: 'edge',
+                style: {
+                    width: 1.5,
+                    'line-color': '#5a5a5a',
+                    'target-arrow-color': '#5a5a5a',
+                    'target-arrow-shape': 'triangle',
+                    'curve-style': 'bezier'
+                }
+            }
+        ],
+
+        layout: {
+            name: 'elk',
+
+            elk: {
+                algorithm: 'layered',
+                'elk.direction': 'DOWN',
+                'elk.spacing.nodeNode': 40,
+                'elk.layered.nodePlacement.strategy': 'BRANDES_KOEPF',
+                'elk.layered.nodePlacement.bk.fixedAlignment': 'BALANCED'
+            },
+            transform: (node, pos) => {
+                return { x: pos.x, y: node.data('layer') * 100 };
+            }
+        }
+
+    });
+    window.cy = cy;
+
+    cy.on('layoutstop', () => {
+        window.layoutDone = true;
+    });
+</script>

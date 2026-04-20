@@ -9,6 +9,8 @@ if [[ -z "$MAX_TICK" || -z "$MAX_STEP" ]]; then
 fi
 
 rm -f ../media/animation/frame_*
+rm -f ../media/animation/*.mp4
+rm -f temp/graph_*
 
 FRAME=0
 for ((t=0; t<MAX_TICK; t++)); do
@@ -16,7 +18,7 @@ for ((t=0; t<MAX_TICK; t++)); do
     printf -v PAD "%03d" $FRAME
     echo "Rendering tick=$t step=$s → frame=$PAD"
     PUPPETEER_EXECUTABLE_PATH=$(which chromium) \
-    node renderAnimationFrame.js headline-animation-canvas.html "$t" "$s" "$PAD"
+    node renderAnimationFrame.js "$t" "$s" "$PAD"
     ((FRAME++))
   done
 done
