@@ -178,17 +178,17 @@
         </div>
 
         <div class="visual-mapping">
-            <div class="cell"><div class="title"></div><div class="bars"><span></span><span style="background: blue"></span></div></div>
+            <div class="cell" style="border: solid blue 3px"><div class="title"></div><div class="bars"><span></span><span ></span></div></div>
             <div>Observed proximity</div>
         </div>
 
         <div class="visual-mapping">
-            <div class="cell" style="width: 100px; height: 84px"><div class="title"></div><div class="bars"><span style="background: red"></span><span></span></div></div>
+            <div class="cell" style="background: #FF000055"><div class="title"></div><div class="bars"><span ></span><span></span></div></div>
             <div>Propagated event</div>
         </div>
 
         <div class="visual-mapping">
-            <div class="cell" style="width: 100px; height: 84px; background: black"><div class="title" style="background: black"></div><div class="bars"><span></span><span></span></div></div>
+            <div class="cell" style="background: black"><div class="title" style="background: black"></div><div class="bars"><span></span><span></span></div></div>
             <div>Obstactle</div>
         </div>
     </div>
@@ -206,8 +206,9 @@
         margin: 0;
     }
     .center {
-        display: flex;
-        flex-direction: row;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
     }
     
     .top {
@@ -237,13 +238,14 @@
     }
     
     .clients {
+        justify-self: start;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
-        height: 100%;
     }
     
     .graph {
+        justify-self: end;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -277,11 +279,10 @@
     }
     
     .map {
-        flex: 10;
+        justify-self: center;
         display: grid;
-        grid-template-columns: repeat(9, 100px);
+        grid-template-columns: repeat(9, 80px);
         gap: 10px 10px;
-        width: max-content;
         padding: 24px;
         font: 600 20px/1.2 system-ui, sans-serif;
     }
@@ -299,25 +300,25 @@
     
     .client-view-content {
         display: grid;
-        grid-template-columns: repeat(3, 100px);
-        gap: 10px 10px;
+        grid-template-columns: repeat(3, 80px);
+        gap: 5px 5px;
         padding: 24px;
     }
 
     .cell {
-        width: 100px; 
-        height: 84px;
+        width: 80px; 
+        height: 80px;
         overflow: hidden;
         box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
         text-align: center;
+        border: solid 3px #00000000;
     }
 
     .title {
         display: grid;
+        height: 100%;
         place-items: center;
-        height: 40px;
         color: #334155;
-        background: #f1f5f9;
     }
 
     .bars {
@@ -522,16 +523,46 @@
 
         const [x, y] = coords;
 
+        const highlightedBorder = "solid 3px blue";
         for (let dy = -1; dy <= 1; dy++) {
             for (let dx = -1; dx <= 1; dx++) {
                 const nx = x + dx;
                 const ny = y + dy;
 
-                const B = document.getElementById(`B_(${nx},${ny})`);
-                if (!B) 
+                const cell = document.getElementById(`(${nx},${ny})`);
+                if (!cell) 
                     continue;
 
-                B.style.background = "blue";
+                if(dx === -1 && dy === -1){
+                    cell.style.borderTop = highlightedBorder
+                    cell.style.borderLeft = highlightedBorder   
+                }
+                if(dx === 0 && dy === -1){
+                    cell.style.borderTop = highlightedBorder
+                }
+                if(dx === 1 && dy === -1){
+                    cell.style.borderTop = highlightedBorder
+                    cell.style.borderRight = highlightedBorder
+                }
+
+                if(dx === -1 && dy === 0){
+                    cell.style.borderLeft = highlightedBorder
+                }
+                if(dx === 1 && dy === 0){
+                    cell.style.borderRight = highlightedBorder
+                }
+
+                if(dx === -1 && dy === 1){
+                    cell.style.borderBottom = highlightedBorder
+                    cell.style.borderLeft = highlightedBorder
+                }
+                if(dx === 0 && dy === 1){
+                    cell.style.borderBottom = highlightedBorder
+                }
+                if(dx === 1 && dy === 1){
+                    cell.style.borderBottom = highlightedBorder
+                    cell.style.borderRight = highlightedBorder
+                }
             }
         }
     }
@@ -582,25 +613,14 @@
         const cells = document.querySelectorAll("#diagram .cell");
 
         cells.forEach(cell => {
-            const a = cell.querySelector(".bars span:nth-child(1)");
-            const b = cell.querySelector(".bars span:nth-child(2)");
 
             // left click → toggle A (red)
             cell.addEventListener("click", (e) => {
                 if (e.button !== 0) return;
-                if (!a) return;
+                if (!cell) return;
 
-                a.style.background =
-                    a.style.background === "red" ? "" : "red";
-            });
-
-            // right click → toggle B (blue)
-            cell.addEventListener("contextmenu", (e) => {
-                e.preventDefault();
-                if (!b) return;
-
-                b.style.background =
-                    b.style.background === "blue" ? "" : "blue";
+                cell.style.background =
+                    cell.style.background === "#FF000055" ? "" : "#FF000055";
             });
         });
     }
