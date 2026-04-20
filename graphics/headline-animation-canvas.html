@@ -184,12 +184,12 @@
         </div>
 
         <div class="visual-mapping">
-            <div class="cell" style="background: #FF000055"><div class="title"></div><div class="bars"><span ></span><span></span></div></div>
+            <div class="cell" style="background: rgba(255, 0, 80, 0.35); box-shadow: 0 0 18px rgba(255, 0, 80, 0.8)"><div class="title"></div><div class="bars"><span ></span><span></span></div></div>
             <div>Propagated event</div>
         </div>
 
         <div class="visual-mapping">
-            <div class="cell" style="background: black"><div class="title" style="background: black"></div><div class="bars"><span></span><span></span></div></div>
+            <div class="cell" style="background: #585b75; box-shadow: inset 0 0 12px black"><div class="title" style="background: #020617"></div><div class="bars"><span></span><span></span></div></div>
             <div>Obstactle</div>
         </div>
     </div>
@@ -200,8 +200,7 @@
     .diagram {
         width: 1920px;
         height: 1080px;
-        background: lightgray;
-        
+        background: radial-gradient(circle at 30% 30%, #0f172a, #020617);
         display: flex;
         flex-direction: column;
         margin: 0;
@@ -230,6 +229,11 @@
         justify-content: space-around;
         align-items: center;
         font-size: 25px;
+    }
+
+    .top, .bottom {
+        border-color: rgba(59,130,246,0.2);
+        color: #e2e8f0;
     }
     
     .visual-mapping {
@@ -263,6 +267,7 @@
         text-align: center;
         font-size: 34px;
         font-weight: bold;
+        color: white;
     }
     
     .client-phone-title {
@@ -291,7 +296,7 @@
     
     
     .client-view {
-        background: lightgray;
+        background: radial-gradient(circle, #16204d, #020617);
         width: 100%;
         height: 100%;
         display: flex;
@@ -311,16 +316,34 @@
         width: 80px; 
         height: 80px;
         overflow: hidden;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
         text-align: center;
-        border: solid 3px #00000000;
+
+        background: radial-gradient(circle at 50% 50%, rgba(30, 58, 138, 0.25), rgba(2,6,23,0.9));
+
+        border: 1px solid rgba(59,130,246,0.15);
+
+        box-shadow:
+                inset 0 0 12px rgba(59,130,246,0.15),
+                0 0 0px rgba(0,0,0,0);
+    }
+
+    .cell::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 4px;
+
+        opacity: 0;
+        pointer-events: none;
+
+        transition: opacity 0.2s ease;
     }
 
     .title {
         display: grid;
         height: 100%;
         place-items: center;
-        color: #334155;
+        color: #e2e8f0;
     }
 
     .bars {
@@ -332,7 +355,7 @@
     .bars span {
         display: grid;
         place-items: center;
-        color: #0f172a;
+        color: #94a3b8;
     }
 
     .bars span:last-child {
@@ -519,13 +542,18 @@
         return match ? [parseInt(match[1]), parseInt(match[2])] : null;
     }
 
-    function paintNeighboursB(cellId) {
+    function paintNeighboursB(cellId, clientNumber) {
         const coords = getCoords(cellId);
         if (!coords) return;
 
         const [x, y] = coords;
 
-        const highlightedBorder = "solid 3px blue";
+        const clientColor = clientNumber === 1 
+            ? "#38bdf8" 
+            : "#FF22AA";
+        
+        let highlightedBorder = "solid 2px "+ clientColor;
+        
         for (let dy = -1; dy <= 1; dy++) {
             for (let dx = -1; dx <= 1; dx++) {
                 const nx = x + dx;
@@ -534,6 +562,7 @@
                 const cell = document.getElementById(`(${nx},${ny})`);
                 if (!cell) 
                     continue;
+                cell.style.boxShadow = "0 0 12px " + clientColor;
 
                 if(dx === -1 && dy === -1){
                     cell.style.borderTop = highlightedBorder
@@ -599,13 +628,13 @@
             const index = (y - minY) * width + (x - minX);
 
             if (isPrime(index)) {
-                cell.style.background = "black";
+                cell.style.background = "#4b0d0d";
+                cell.style.boxShadow = "inset 0 0 12px black";
                 cell.style.color = "white";
 
-                // also hit children explicitly if needed
                 cell.querySelectorAll("*").forEach(el => {
-                    el.style.background = "black";
-                    el.style.color = "white";
+                    cell.style.background = "#4b0d0d";
+                    cell.style.boxShadow = "inset 0 0 12px black";
                 });
             }
         });
@@ -621,8 +650,8 @@
                 if (e.button !== 0) return;
                 if (!cell) return;
 
-                cell.style.background =
-                    cell.style.background === "#FF000055" ? "" : "#FF000055";
+                cell.style.background = "rgba(255, 0, 80, 0.35)"
+                cell.style.boxShadow = "0 0 18px rgba(255, 0, 80, 0.8)"
             });
         });
     }
@@ -649,6 +678,12 @@
 
                 const cell = document.getElementById(`(${nx},${ny})`);
                 const viewCell = document.getElementById(`${client}_(${dx},${dy})`);
+                viewCell.style.borderTop = cell.style.borderTop;
+                viewCell.style.borderBottom = cell.style.borderBottom;
+                viewCell.style.borderLeft = cell.style.borderLeft;
+                viewCell.style.borderRight = cell.style.borderRight;
+                viewCell.style.borderWidth = 3
+                viewCell.style.boxShadow = cell.style.boxShadow;
                 viewCell.style.background = cell.style.background;
                 viewCell.children[0].style.background = cell.children[0].style.background;
                 viewCell.children[0].textContent = cell.children[0].textContent;
@@ -785,10 +820,10 @@
 
 
         placeActor(client1, "Client 1")
-        paintNeighboursB(`${client1}`);
+        paintNeighboursB(client1, 1);
 
         placeActor(client2, "Client 2")
-        paintNeighboursB(`${client2}`);
+        paintNeighboursB(client2, 2);
 
         placeActor(agent1, "Agent 1")
         placeActor(agent2, "Agent 2")
