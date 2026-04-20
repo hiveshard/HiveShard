@@ -164,6 +164,7 @@
             <div class="cell" id="(4,4)"><div class="title" id="content_(4,4)"></div><div class="bars"><span id="A_(4,4)"></span><span id="B_(4,4)"></span></div></div>
         </div>
         <div id="graph" class="graph">
+            
         </div>
     </div>
     <div class="bottom">
@@ -242,6 +243,7 @@
         display: flex;
         flex-direction: column;
         justify-content: space-around;
+        margin-left: 80px;
     }
     
     .graph {
@@ -250,7 +252,7 @@
         justify-content: center;
         align-items: center;
         padding: 15px;
-        margin-right: 30px;
+        margin-right: 150px;
     }
     
     .client {
@@ -674,10 +676,12 @@
             diagram.dataset.imageRendered = "error";
         };
 
+        img.style.height = "800px";
+        img.style.width="200px";
         img.src = svg;
-        console.log("svg image (" + svg +") attached to image");
         
         parent.appendChild(img);
+        console.log("svg image (" + svg +") attached to image");
     }
 
 
