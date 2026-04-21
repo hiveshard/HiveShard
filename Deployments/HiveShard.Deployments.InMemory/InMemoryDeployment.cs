@@ -45,13 +45,24 @@ public class InMemoryDeployment: IDeployment
         IEnumerable<IsolatedEnvironment> workers,
         IEventRepository eventRepository, string environmentName, ValidationMode validationMode)
     {
-        TelemetryConfig telemetryConfig = new TelemetryConfig(
-            new Uri(HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENDPOINT")),
-            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_TOKEN"),
-            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ORGANIZATION"),
-            HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_PROJECT"),
-            $"{HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE")}_{environmentName}"
-        );
+        TelemetryConfig telemetryConfig;
+        try
+        {
+            telemetryConfig = new TelemetryConfig(
+                new Uri(HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENDPOINT")),
+                HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_TOKEN"),
+                HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ORGANIZATION"),
+                HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_PROJECT"),
+                $"{HiveShardEnv.GetEnv("HIVESHARD_TELEMETRY_ENVIRONMENT_TYPE")}_{environmentName}"
+            );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("[Telemetry WARNING]: optional telemetry not possible: "+ e.Message);
+            // dummy object
+            telemetryConfig = new TelemetryConfig(new Uri("https://hiveshard.massivecreationlab.com"), "", "", "", "");
+        }
+
         
         var globalChunkConfig = new GlobalChunkConfig(minChunk, maxChunk);
         CancellationProvider cancellationProvider = new CancellationProvider();

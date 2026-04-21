@@ -98,14 +98,22 @@ namespace HiveShard.Telemetry.HiveShardEE
             if (_environment is null)
             {
                 _environment = await CreateEnvironment();
-                await PushInfrastructure(_environment.Value);
+
+                if (_environment is not null)
+                {
+                    await PushInfrastructure(_environment.Value);
+                }
+                else
+                {
+                    Console.WriteLine("[Telemetry WARNING] Environment not available. Skipping remote push.");
+                }
             }
 
-            await PushLogs(_environment.Value);
-            await PushCauses(_environment.Value);
+            await PushLogs(_environment);
+            await PushCauses(_environment);
         }
 
-        private async Task PushLogs(int instance)
+        private async Task PushLogs(int? instance)
         {
             List<SystemLog> logs = [];
             while (_messages.TryDequeue(out var log))
@@ -114,6 +122,8 @@ namespace HiveShard.Telemetry.HiveShardEE
                 logs.Add(log);
             }
 
+            if (instance is null)
+                return;
             for (int i = 0; i < 10; i++)
             {
                 try
@@ -135,12 +145,20 @@ namespace HiveShard.Telemetry.HiveShardEE
 
         public void Dispose()
         {
-            Flush().GetAwaiter().GetResult();
+            try
+            {
+                Flush().GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[Telemetry WARNING] Flush failed: {e}");
+            }
         }
         
-        private async Task<int> CreateEnvironment()
+        private async Task<int?> CreateEnvironment()
         {
             var content = "";
+            Exception? lastException = null;
             for (int i = 0; i < 10; i++)
             {
                 try
@@ -156,16 +174,32 @@ namespace HiveShard.Telemetry.HiveShardEE
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    lastException = e;
                 }
                 await Task.Delay(200);
             }
             
-            
-            
-            var createEnvironmentResponse = _serializer.Deserialize<CreateEnvironmentResponse>(content);
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                if (lastException is not null)
+                {
+                    Console.WriteLine($"[Telemetry WARNING]: {lastException.Message}");
+                }
 
-            return createEnvironmentResponse.EnvInstance;
+                Console.WriteLine("[Telemetry WARNING] Environment creation failed (no response).");
+                return null;
+            }
+
+            try
+            {
+                var createEnvironmentResponse = _serializer.Deserialize<CreateEnvironmentResponse>(content);
+                return createEnvironmentResponse?.EnvInstance;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[Telemetry WARNING] Failed to parse environment response: {e.Message}");
+                return null;
+            }
         }
 
         private async Task PushInfrastructure(int instance)
@@ -181,7 +215,7 @@ namespace HiveShard.Telemetry.HiveShardEE
             shardWorkerResponse.EnsureSuccessStatusCode();
         }
 
-        private async Task PushCauses(int instance)
+        private async Task PushCauses(int? instance)
         {
             List<Cause> causes = [];
             while (_causes.TryDequeue(out var cause))
@@ -189,6 +223,9 @@ namespace HiveShard.Telemetry.HiveShardEE
                 Console.WriteLine($"[Cause] {cause.InboundEventType} => {cause.ShardType} => {cause.OutboundEventType}");
                 causes.Add(cause);
             }
+
+            if (instance is null)
+                return;
 
             for (int i = 0; i < 10; i++)
             {
