@@ -23,34 +23,46 @@ This release is intended for **early adopters and downstream experimentation**, 
 
 ## Getting Started
 
+**Requirement:** .NET 9 SDK
+
 **Before you begin:**
 
-This system is built around four core components — *Shard*, *Ticker*, *Edge*, and *Client*.
+This system is built around five core components.
 You must understand their roles and interactions before writing any code.
 Please have a look at the individual sections for more detail.
 
 - **Shard** → distributed state per chunk  
+- **Initializer** → sends intial events **only** on tick 1
 - **Ticker** → deterministic time progression  
 - **Edge** → client ↔ simulation boundary  
 - **Client** → external actor interacting with the system  
 
-### The Environment
 
 You can declare your environment using a fluent interface.
-You supply your own class via generic type parameters.
+You supply your own classes here.
+Each component runs on a worker (actual deployed service, here: InMemory variant). For now, declaration is strictly explicit.
 
 ```CSharp
-var environment = HiveShardFactory.Create<T>(builder => builder
+// injected identities
+var shardIdentity = new HiveShardIdentity(
+    new Chunk(0, 0), 
+    ShardType.From<TestShard>(), 
+    Guid.NewGuid()
+);
+var initializerIdentity = InitializerEmitterIdentity.From<TestShardInitializer>();
+
+var environment = HiveShardFactory.Create<InMemoryDeployment>(builder => builder
+    // who emits what
     .Events(eventBuilder => eventBuilder
-        .RegisterEvent<InitialDataEvent>()
-        .RegisterEvent<InitialDataResponse>()
+        .RegisterEvent<InitialDataEvent>(initializerIdentity)
+        .RegisterEvent<InitialDataResponse>(shardIdentity)
     )
+    // declare components here
     .ShardWorker(workerBuilder => workerBuilder
-        .Identify(shardWorker)
-        .AddShard<TestShard>()
+        .AddShard(shardIdentity)
     )
     .Initialize(initializationBuilder => initializationBuilder
-        .AddInitializer<TestShardInitializer>()
+        .AddInitializer<TestShardInitializer>(initializerIdentity)
     )
     .TickerWorker(tickerWorker => tickerWorker
         .GlobalTicker()
