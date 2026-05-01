@@ -34,6 +34,11 @@ public class Initialization : IIsolatedEntryPoint
             initializerCollection.AddSingleton(typeof(IInitializer), request.Type);
             initializerCollection.AddSingleton(_globalChunkConfig);
             initializerCollection.AddSingleton<IInitializationTunnel>(initializationTunnel);
+            
+            foreach (var dependency in request.InitializerDependencies)
+            {
+                initializerCollection.AddSingleton(dependency.Type, dependency.Instance);
+            }
 
             var serviceProvider = initializerCollection.BuildServiceProvider();
 
