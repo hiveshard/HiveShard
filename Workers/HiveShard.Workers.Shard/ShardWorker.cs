@@ -26,6 +26,10 @@ public class ShardWorker: IIsolatedEntryPoint
     private readonly IEventRepository _eventRepository;
         
     private readonly Dictionary<HiveShardIdentity, IScopedShardTunnel> _tunnels = new();
+    private readonly Dictionary<HiveShardIdentity, IHiveShard> _shards = new();
+
+    public IEnumerable<IHiveShard> ManagedShards => _shards.Values;
+    public bool Initialized { get; private set; }
 
     public ShardWorker(
         ISimpleFabric fabric, 
@@ -74,6 +78,7 @@ public class ShardWorker: IIsolatedEntryPoint
             _tunnels.Add(request.ShardIdentity, tunnel);
         }
 
+        Initialized = true;
         return Task.CompletedTask;
     }
 }

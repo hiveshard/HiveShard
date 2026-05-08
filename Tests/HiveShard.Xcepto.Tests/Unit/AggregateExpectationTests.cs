@@ -20,7 +20,7 @@ public class AggregateExpectationTests
     {
         var expectation = AggregateExpectation.For<Person>()
             .Where(x => x.Age > 40)
-            .Drill(x => x.Age)
+            .Select(x => x.Age)
             .None(Are.EqualTo(21));
         
         expectation.Evaluate(_people);
@@ -31,7 +31,7 @@ public class AggregateExpectationTests
     {
         var expectation = AggregateExpectation.For<Person>()
             .Where(x => x.Age > 40)
-            .Drill(x => x.Age)
+            .Select(x => x.Age)
             .None(Are.EqualTo(41));
         
         Assert.That(() => expectation.Evaluate(_people), Throws.Exception);
@@ -42,7 +42,7 @@ public class AggregateExpectationTests
     {
         var expectation = AggregateExpectation.For<Person>()
             .Where(x => x.Age > 40)
-            .Drill(x => x.Age)
+            .Select(x => x.Age)
             .Any(Are.EqualTo(41));
         
         expectation.Evaluate(_people);
@@ -53,7 +53,7 @@ public class AggregateExpectationTests
     {
         var expectation = AggregateExpectation.For<Person>()
             .Where(x => x.Age > 40)
-            .Drill(x => x.Age)
+            .Select(x => x.Age)
             .Any(Are.GreaterThan(50));
         
         expectation.Evaluate(_people);
@@ -64,7 +64,7 @@ public class AggregateExpectationTests
     {
         var expectation = AggregateExpectation.For<Person>()
             .Where(x => x.Age > 40)
-            .Drill(x => x.Age)
+            .Select(x => x.Age)
             .Any(Are.LessThan(40));
         Assert.That(() => expectation.Evaluate(_people), Throws.Exception);
     }
@@ -74,7 +74,7 @@ public class AggregateExpectationTests
     {
         var expectation = AggregateExpectation.For<Person>()
             .Where(x => x.Age > 40)
-            .Drill(x => x.Age)
+            .Select(x => x.Age)
             .All(Are.GreaterThan(40));
         expectation.Evaluate(_people);
     }
@@ -84,7 +84,7 @@ public class AggregateExpectationTests
     {
         var expectation = AggregateExpectation.For<Person>()
             .Where(x => x.Age > 40)
-            .Drill(x => x.Age)
+            .Select(x => x.Age)
             .All(Are.GreaterThan(50));
         Assert.That(() => expectation.Evaluate(_people), Throws.Exception);
     }

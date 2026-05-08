@@ -32,7 +32,7 @@ public class AggregateExpectationBuilder<TRoot, TCurrent>
             items => _transformation(items).Where(compiled));
     }
 
-    public AggregateExpectationBuilder<TRoot, TNext> Drill<TNext>(Expression<Func<TCurrent, TNext>> selector)
+    public AggregateExpectationBuilder<TRoot, TNext> Select<TNext>(Expression<Func<TCurrent, TNext>> selector)
     {
         var compiled = selector.Compile();
 
@@ -220,8 +220,8 @@ public class test
         var aggregateExpectation = AggregateExpectation
             .For<ShardWorker>()
             .Where(x => x.ManagedShards.Any())
-            .Drill(x => x.GetType())
-            .Drill(x =>x.FullName!.Length)
+            .Select(x => x.GetType())
+            .Select(x =>x.FullName!.Length)
             .All(Are.GreaterThan(5));
 
         aggregateExpectation.Evaluate([]);
