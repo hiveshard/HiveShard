@@ -55,7 +55,7 @@ public class ShardAggregateStateTests
     
     
     [Test]
-    public async Task AllAggregate_Succeeds()
+    public async Task MultiChunkAllAggregate_Succeeds()
     {
         Chunk minChunk = new Chunk(-1, 0);
         Chunk maxChunk = new Chunk(1, 0);
@@ -85,8 +85,7 @@ public class ShardAggregateStateTests
                 return workerBuilder;
             });
 
-            InitializerEmitterIdentity initializerIdentity =
-                new InitializerEmitterIdentity(new EmitterIdentity("initializer"));
+            InitializerEmitterIdentity initializerIdentity = new InitializerEmitterIdentity(new EmitterIdentity("initializer"));
             builder.Initialize(initializationBuilder => initializationBuilder
                 .AddInitializer<StateShardAllInitializer>(initializerIdentity)
             );

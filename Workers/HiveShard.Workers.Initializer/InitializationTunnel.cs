@@ -75,7 +75,7 @@ public class InitializationTunnel: IInitializationTunnel
             {
                 for (int x = _globalChunkConfig.MinChunk.XCoord; x <= _globalChunkConfig.MaxChunk.XCoord; x++)
                 {
-                    for (int y = _globalChunkConfig.MinChunk.XCoord; y <= _globalChunkConfig.MaxChunk.XCoord; y++)
+                    for (int y = _globalChunkConfig.MinChunk.YCoord; y <= _globalChunkConfig.MaxChunk.YCoord; y++)
                     {
                         var chunk = new Chunk(x,y);
                         if (!_offsets.TryGetValue((topic, chunk), out var offset))
