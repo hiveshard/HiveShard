@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Interface.Providers;
 using HiveShard.Interface.Repository;
@@ -15,15 +16,17 @@ public class TickerWorker: IIsolatedEntryPoint
     private readonly ICancellationProvider _cancellationProvider;
     private readonly ISimpleFabric _simpleFabric;
     private readonly IEventRepository _eventRepository;
+    private readonly GlobalChunkConfig _globalChunkConfig;
 
     public TickerWorker(
         TickerRepository tickerRepository, 
         TickerAdditionRepository tickerAdditionRepository, 
         ICancellationProvider cancellationProvider,
-        ISimpleFabric simpleFabric, IEventRepository eventRepository)
+        ISimpleFabric simpleFabric, IEventRepository eventRepository, GlobalChunkConfig globalChunkConfig)
     {
         _simpleFabric = simpleFabric;
         _eventRepository = eventRepository;
+        _globalChunkConfig = globalChunkConfig;
         _tickerRepository = tickerRepository;
         _tickerAdditionRepository = tickerAdditionRepository;
         _cancellationProvider = cancellationProvider;
@@ -42,7 +45,9 @@ public class TickerWorker: IIsolatedEntryPoint
                 var eventTicker = new DistributedTicker(
                     new DistributedTickerConfig(identity.EventType, tickerEmitterType),
                     _simpleFabric,
-                    _eventRepository);
+                    _eventRepository, 
+                    _globalChunkConfig
+                );
 
                 eventTicker.Initialize();
                 _tickerRepository.AddTicker(identity.EventType, eventTicker);

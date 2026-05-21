@@ -8,6 +8,7 @@ namespace HiveShard.Event;
 
 public class CompletedTick: ITickEvent
 {
+
     [JsonConstructor]
     public CompletedTick(EmitterIdentity emitterIdentity, long tick, string eventType,
         IEnumerable<TopicPartitionOffset> topicPartitionOffsets)

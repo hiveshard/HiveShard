@@ -67,7 +67,7 @@ namespace HiveShard.Fabrics.Kafka
             _kafkaRegistrations.Enqueue(new KafkaRegistration(new TopicChunk(topic, chunk), (json, offset) =>
             {
                 var message = _serializer.Deserialize<IEnvelope<T>>(json);
-                action(new Consumption<IEnvelope<T>>(message, offset));
+                action(new Consumption<IEnvelope<T>>(message, offset, chunk.ToPartition(_globalChunkConfig)));
             }));
         }
 

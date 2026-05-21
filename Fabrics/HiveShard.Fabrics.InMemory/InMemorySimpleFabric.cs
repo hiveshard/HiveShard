@@ -77,7 +77,7 @@ public class InMemorySimpleFabric: ISimpleFabric
         InitTopic(index);
 
         Action<Consumption<IEnvelope<object>>> castedAction = o => action(
-            new Consumption<IEnvelope<T>>(new Envelope<T>((T)o.Message.Payload, o.Message.MessageId, o.Message.Emitter), o.Offset)
+            new Consumption<IEnvelope<T>>(new Envelope<T>((T)o.Message.Payload, o.Message.MessageId, o.Message.Emitter), o.Offset, partition)
         );
         _consumers[index].Add(new ConsumerRegistration(castedAction, consumer));
         _consumerOffsets[castedAction] = 0;
@@ -118,7 +118,7 @@ public class InMemorySimpleFabric: ISimpleFabric
         IEnvelope<T> actualMessage = messageBuilder(new BatchedOffsetResults(offsets));
             
         var currentOffset = _topicMaxOffsets[index];
-        var consumption = new Consumption<IEnvelope<object>>(new Envelope<object>(actualMessage.Payload, actualMessage.MessageId, actualMessage.Emitter), currentOffset);
+        var consumption = new Consumption<IEnvelope<object>>(new Envelope<object>(actualMessage.Payload, actualMessage.MessageId, actualMessage.Emitter), currentOffset, partition);
         _topics[index].TryAdd(currentOffset, consumption);
             
         _scopedFabricLoggingProvider.LogDebug($"Produced({topic}[partition: {partition.Value}, offset: {currentOffset}]) with {_serializer.Serialize(actualMessage)}");

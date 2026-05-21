@@ -9,6 +9,7 @@ using HiveShard.Workers.Ticker.Extensions;
 using HiveShard.Xcepto.Tests.Event;
 using HiveShard.Xcepto.Tests.Initializer;
 using HiveShard.Xcepto.Tests.Shards;
+using Xcepto.Config;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Builders;
 using Xcepto.HiveShard.Extensions;
@@ -109,7 +110,7 @@ public class ShardAggregateStateTests
             );
         });
 
-        await HiveShardTest.Given(serviceEnvironment, builder =>
+        await HiveShardTest.Given(serviceEnvironment, TimeoutConfig.FromSeconds(10), builder =>
         {
             builder.ExpectShards<StateShard>(shards => shards
                 .Select(x => x.Initialized)

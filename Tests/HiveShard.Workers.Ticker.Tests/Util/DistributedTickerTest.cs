@@ -33,7 +33,7 @@ public class DistributedTickerTest
         var emitter = new TickerEmitterType(new EmitterIdentity("ticker"));
         _config = new DistributedTickerConfig(typeof(TestEvent), emitter);
 
-        _ticker = new DistributedTicker(_config, _fabric, _repository);
+        _ticker = new DistributedTicker(_config, _fabric, _repository, chunkConfig);
         _ticker.Initialize();
     }
 
