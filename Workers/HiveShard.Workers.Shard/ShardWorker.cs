@@ -76,6 +76,7 @@ public class ShardWorker: IIsolatedEntryPoint
                 var hiveShard = (IHiveShard)shardServiceProvider.GetRequiredService(shardType);
                 tunnel.Initialize(hiveShard, request.ShardIdentity);
                 _hiveShardRepository.AddHiveShard(request.ShardIdentity, shardServiceProvider);
+                _shards.Add(request.ShardIdentity, hiveShard);
                 _tunnels.Add(request.ShardIdentity, tunnel);
             }
             Initialized = true;
