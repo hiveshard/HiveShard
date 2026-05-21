@@ -118,4 +118,42 @@ public class ShardAggregateStateTests
             );
         });
     }
+    
+    
+    [Test]
+    public async Task SingleChunkAnyAggregate_Succeeds()
+    {
+        Chunk chunk = new Chunk(0, 0);
+        HiveShardIdentity onlyShard = new HiveShardIdentity(chunk, ShardType.From<StateShard>(), Guid.NewGuid());
+        InitializerEmitterIdentity initializerIdentity = new InitializerEmitterIdentity(new EmitterIdentity("initializer"));
+
+        var serviceEnvironment = HiveShardFactory.Create<InMemoryDeployment>(builder => builder
+            .SetGridSize(chunk, chunk)
+            .ShardWorker(workerBuilder => workerBuilder
+                .AddShard(onlyShard)
+            )
+            .Initialize(initializationBuilder => initializationBuilder
+                .AddInitializer<StateSpecificShardInitializer>(initializerIdentity, dependencies  => dependencies
+                    .WithDependency(chunk)
+                )
+            )
+            .Events(eventBuilder => eventBuilder
+                .RegisterEvent<InitializationEvent>(initializerIdentity)
+                .RegisterEvent<DummyEvent>(onlyShard)
+            )
+            .TickerWorker(tickerWorkerBuilder => tickerWorkerBuilder
+                .GlobalTicker()
+                .Ticker<DummyEvent>()
+                .Ticker<InitializationEvent>()
+            )
+        );
+
+        await HiveShardTest.Given(serviceEnvironment, builder =>
+        {
+            builder.ExpectShards<StateShard>(shards => shards
+                .Select(x => x.Initialized)
+                .Any(Are.EqualTo(true))
+            );
+        });
+    }
 }

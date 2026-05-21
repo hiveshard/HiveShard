@@ -6,6 +6,7 @@ using HiveShard.Data;
 using HiveShard.Interface;
 using HiveShard.Workers.Shard;
 using Microsoft.Extensions.DependencyInjection;
+using Xcepto.Data;
 using Xcepto.Repositories;
 using Xcepto.States;
 using Xcepto.HiveShard.Builders;
@@ -41,7 +42,17 @@ where THiveShard: IHiveShard
             .Where(x => x.GetType() == typeof(THiveShard))
             .Cast<THiveShard>();
 
-        return Task.FromResult(_expectation.Evaluate(shards));
+        bool evaluation;
+        try
+        {
+            evaluation = _expectation.Evaluate(shards);
+        }
+        catch (Exception e)
+        {
+            MostRecentFailingResult = new ConditionResult(shards, e.Message);
+            evaluation = false;
+        }
+        return Task.FromResult(evaluation);
     }
 
     public override Task OnEnter(IServiceProvider serviceProvider) => Task.CompletedTask;
