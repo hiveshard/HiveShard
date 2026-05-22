@@ -11,6 +11,7 @@ using HiveShard.Xcepto.Tests.Event;
 using HiveShard.Xcepto.Tests.Initializer;
 using HiveShard.Xcepto.Tests.Shards;
 using Xcepto.Config;
+using Xcepto.Exceptions;
 using Xcepto.HiveShard;
 using Xcepto.HiveShard.Builders;
 using Xcepto.HiveShard.Extensions;
@@ -84,7 +85,9 @@ public class ShardAggregateStateTests
 
             InitializerEmitterIdentity initializerIdentity = new InitializerEmitterIdentity(new EmitterIdentity(typeof(TInitializer).FullName!));
             builder.Initialize(initializationBuilder => initializationBuilder
-                .AddInitializer<TInitializer>(initializerIdentity)
+                .AddInitializer<TInitializer>(initializerIdentity, dependencies => dependencies
+                    .WithDependency(minChunk)
+                )
             );
 
             builder.Events(eventBuilder =>
@@ -138,7 +141,7 @@ public class ShardAggregateStateTests
     public async Task MultiChunkAllAggregate_Succeeds()
     {
         var environment = GetMultiChunkEnvironment<AllTargetShardInitializer>();
-        await HiveShardTest.Given(environment, TimeoutConfig.FromSeconds(10), builder =>
+        await HiveShardTest.Given(environment, builder =>
         {
             builder.ExpectShards<StateShard>(shards => shards
                 .Select(x => x.Initialized)
@@ -147,4 +150,53 @@ public class ShardAggregateStateTests
         });
     }
     
+    [Test]
+    public void MultiChunkAllAggregate_Fails()
+    {
+        Assert.ThatAsync(async () =>
+        {
+            var environment = GetMultiChunkEnvironment<SpecificTargetShardInitializer>();
+            await HiveShardTest.Given(environment, builder =>
+            {
+                builder.ExpectShards<StateShard>(shards => shards
+                    .Select(x => x.Initialized)
+                    .All(Are.EqualTo(true))
+                );
+            });
+        }, Throws.Exception.Message.Contains("Expected: All are equal to True")
+            .And.Message.Contains("But was: [true,false,false]")
+        );
+    }
+    
+    [Test]
+    public async Task MultiChunkAnyAggregate_Succeeds()
+    {
+        var environment = GetMultiChunkEnvironment<SpecificTargetShardInitializer>();
+        await HiveShardTest.Given(environment, builder =>
+        {
+            builder.ExpectShards<StateShard>(shards => shards
+                .Select(x => x.Initialized)
+                .Any(Are.EqualTo(true))
+            );
+        }); 
+    }
+    
+    
+    [Test]
+    public void MultiChunkAnyAggregate_Fails()
+    {
+        Assert.ThatAsync(async () =>
+            {
+                var environment = GetMultiChunkEnvironment<NoTargetShardInitializer>();
+                await HiveShardTest.Given(environment, builder =>
+                {
+                    builder.ExpectShards<StateShard>(shards => shards
+                        .Select(x => x.Initialized)
+                        .Any(Are.EqualTo(true))
+                    );
+                });
+            }, Throws.Exception.Message.Contains("Expected: Any are equal to True")
+                .And.Message.Contains("But was: [false,false,false]")
+        );
+    }
 }
