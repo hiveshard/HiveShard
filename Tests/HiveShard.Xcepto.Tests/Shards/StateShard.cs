@@ -13,6 +13,7 @@ public class StateShard: IHiveShard
     }
 
     public Chunk? Chunk { get; private set; }
+    public bool GotMessage { get; private set; }
     public bool Initialized { get; private set; }
     
     private IScopedShardTunnel _tunnel;
@@ -25,6 +26,8 @@ public class StateShard: IHiveShard
 
     private void HandleAllInitializationEvent(Message<InitializationEvent> message)
     {
+        GotMessage = true;
+        
         if(!message.Payload.Target.Equals(Chunk))
             return;
 
