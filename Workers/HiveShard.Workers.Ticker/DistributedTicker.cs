@@ -14,11 +14,13 @@ public class DistributedTicker
     private readonly DistributedTickerConfig _config;
     private readonly ISimpleFabric _simpleFabric;
     private readonly IEventRepository _eventRepository;
-    public DistributedTicker(DistributedTickerConfig config, ISimpleFabric simpleFabric, IEventRepository eventRepository)
+    private readonly GlobalChunkConfig _globalChunkConfig;
+    public DistributedTicker(DistributedTickerConfig config, ISimpleFabric simpleFabric, IEventRepository eventRepository, GlobalChunkConfig globalChunkConfig)
     {
         _config = config;
         _simpleFabric = simpleFabric;
         _eventRepository = eventRepository;
+        _globalChunkConfig = globalChunkConfig;
     }
 
     public EmitterIdentity Identity => _config.EmitterType.Identity;
@@ -31,6 +33,7 @@ public class DistributedTicker
             HandleEventSpecificCompletedTick);
     }
 
+    private readonly ConcurrentDictionary<EmitterIdentity, ConcurrentHashSet<Chunk>> _initializerCompletedTickPartitions = new();
     private readonly ConcurrentDictionary<long, ConcurrentHashSet<EmitterIdentity>> _completedEventTicks = new();
     private readonly ConcurrentDictionary<Chunk, long> _offsets = new();
 

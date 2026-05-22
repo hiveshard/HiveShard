@@ -26,6 +26,10 @@ public class ShardWorker: IIsolatedEntryPoint
     private readonly IEventRepository _eventRepository;
         
     private readonly Dictionary<HiveShardIdentity, IScopedShardTunnel> _tunnels = new();
+    private readonly Dictionary<HiveShardIdentity, IHiveShard> _shards = new();
+
+    public IEnumerable<IHiveShard> ManagedShards => _shards.Values;
+    public bool Initialized { get; private set; }
 
     public ShardWorker(
         ISimpleFabric fabric, 
@@ -49,31 +53,34 @@ public class ShardWorker: IIsolatedEntryPoint
     public Task Start()
     {
         while (!_cancellationProvider.GetToken().IsCancellationRequested)
-        while (_shardAdditionRepository.TryRetrieve(out ShardAdditionRequest request))
         {
-            var shardType = request.ShardIdentity.ShardType.GetShardType();
-            var shardChunk = request.ShardIdentity.Chunk;
-            var shardServiceProvider = new ServiceCollection()
-                .AddSingleton(shardType)
-                .AddSingleton<Chunk>(shardChunk)
-                .AddSingleton<IEventRepository>(_eventRepository)
-                .AddSingleton<GlobalChunkConfig>(_globalChunkConfig)
-                .AddSingleton<IScopedShardTunnel, ScopedShardTunnel>()
-                .AddSingleton<ICancellationProvider>(_cancellationProvider)
-                .AddSingleton<ISimpleFabric>(_fabric)
-                .AddSingleton<ITickRepository>(_tickRepository)
-                .AddSingleton<ISerializer>(_serializer)
-                .AddSingleton<HiveShardIdentity>(request.ShardIdentity)
-                .AddSingleton<IHiveShardTelemetry>(_loggingProvider)
-                .BuildServiceProvider();
+            while (_shardAdditionRepository.TryRetrieve(out ShardAdditionRequest request))
+            {
+                var shardType = request.ShardIdentity.ShardType.GetShardType();
+                var shardChunk = request.ShardIdentity.Chunk;
+                var shardServiceProvider = new ServiceCollection()
+                    .AddSingleton(shardType)
+                    .AddSingleton<Chunk>(shardChunk)
+                    .AddSingleton<IEventRepository>(_eventRepository)
+                    .AddSingleton<GlobalChunkConfig>(_globalChunkConfig)
+                    .AddSingleton<IScopedShardTunnel, ScopedShardTunnel>()
+                    .AddSingleton<ICancellationProvider>(_cancellationProvider)
+                    .AddSingleton<ISimpleFabric>(_fabric)
+                    .AddSingleton<ITickRepository>(_tickRepository)
+                    .AddSingleton<ISerializer>(_serializer)
+                    .AddSingleton<HiveShardIdentity>(request.ShardIdentity)
+                    .AddSingleton<IHiveShardTelemetry>(_loggingProvider)
+                    .BuildServiceProvider();
 
-            ScopedShardTunnel tunnel = (ScopedShardTunnel)shardServiceProvider.GetRequiredService<IScopedShardTunnel>();
-            var hiveShard = (IHiveShard)shardServiceProvider.GetRequiredService(shardType);
-            tunnel.Initialize(hiveShard, request.ShardIdentity);
-            _hiveShardRepository.AddHiveShard(request.ShardIdentity, shardServiceProvider);
-            _tunnels.Add(request.ShardIdentity, tunnel);
+                ScopedShardTunnel tunnel = (ScopedShardTunnel)shardServiceProvider.GetRequiredService<IScopedShardTunnel>();
+                var hiveShard = (IHiveShard)shardServiceProvider.GetRequiredService(shardType);
+                tunnel.Initialize(hiveShard, request.ShardIdentity);
+                _hiveShardRepository.AddHiveShard(request.ShardIdentity, shardServiceProvider);
+                _shards.Add(request.ShardIdentity, hiveShard);
+                _tunnels.Add(request.ShardIdentity, tunnel);
+            }
+            Initialized = true;
         }
-
         return Task.CompletedTask;
     }
 }

@@ -245,6 +245,7 @@ public class InMemoryDeployment: IDeployment
                 .Add<IEventRepository>()
                 .Add<IHiveShardTelemetry>()
                 .Add<ServiceEnvironment>()
+                .Add<GlobalChunkConfig>()
                 .Build(),
             typeof(TickerWorker),
             emitters

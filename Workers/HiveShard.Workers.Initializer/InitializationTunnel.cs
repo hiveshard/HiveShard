@@ -73,26 +73,20 @@ public class InitializationTunnel: IInitializationTunnel
             _initializerInstance.Initialize(this);
             foreach (var topic in _eventRepository.GetTopicsOfEmitter(_emitterIdentity.Identity))
             {
-                for (int x = _globalChunkConfig.MinChunk.XCoord; x <= _globalChunkConfig.MaxChunk.XCoord; x++)
+                List<TopicPartitionOffset> offsets = new List<TopicPartitionOffset>();
+                foreach (var chunk in _globalChunkConfig.AllChunks)
                 {
-                    for (int y = _globalChunkConfig.MinChunk.XCoord; y <= _globalChunkConfig.MaxChunk.XCoord; y++)
-                    {
-                        var chunk = new Chunk(x,y);
-                        if (!_offsets.TryGetValue((topic, chunk), out var offset))
-                            offset = 0;
-                        
-                        _simpleFabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)),
-                            new Envelope<CompletedTick>(
-                                CompletedTick.From(topic, _emitterIdentity, 1, 
-                                [
-                                    new TopicPartitionOffset(topic, chunk, offset)
-                                ]),
-                                Guid.NewGuid(),
-                                _emitterIdentity.Identity
-                            )
-                        );
-                    }
+                    if (!_offsets.TryGetValue((topic, chunk), out var offset))
+                        offset = 0;
+                    offsets.Add(new TopicPartitionOffset(topic, chunk, offset));
                 }
+                _simpleFabric.Send(typeof(CompletedTick).FullName!, new Partition(_eventRepository.GetEventOrder(topic)),
+                    new Envelope<CompletedTick>(
+                        CompletedTick.From(topic, _emitterIdentity, 1, offsets),
+                        Guid.NewGuid(),
+                        _emitterIdentity.Identity
+                    )
+                );
             }
         }
     }
