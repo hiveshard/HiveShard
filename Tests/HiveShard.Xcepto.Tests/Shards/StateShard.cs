@@ -20,10 +20,10 @@ public class StateShard: IHiveShard
     public void Initialize(Chunk chunk)
     {
         Chunk = chunk;
-        _tunnel.Register<InitializationEvent>(HandleInitializationEvent);
+        _tunnel.Register<InitializationEvent>(HandleAllInitializationEvent);
     }
 
-    private void HandleInitializationEvent(Message<InitializationEvent> message)
+    private void HandleAllInitializationEvent(Message<InitializationEvent> message)
     {
         if(!message.Payload.Target.Equals(Chunk))
             return;

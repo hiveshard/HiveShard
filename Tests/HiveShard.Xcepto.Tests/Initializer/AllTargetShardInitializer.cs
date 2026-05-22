@@ -4,11 +4,11 @@ using HiveShard.Xcepto.Tests.Event;
 
 namespace HiveShard.Xcepto.Tests.Initializer;
 
-public class StateShardAllInitializer: IInitializer
+public class AllTargetShardInitializer: IInitializer
 {
     private readonly GlobalChunkConfig _config;
 
-    public StateShardAllInitializer(GlobalChunkConfig config)
+    public AllTargetShardInitializer(GlobalChunkConfig config)
     {
         _config = config;
     }

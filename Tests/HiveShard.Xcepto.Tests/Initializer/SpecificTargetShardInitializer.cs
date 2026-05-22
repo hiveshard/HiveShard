@@ -4,11 +4,11 @@ using HiveShard.Xcepto.Tests.Event;
 
 namespace HiveShard.Xcepto.Tests.Initializer;
 
-public class StateSpecificShardInitializer: IInitializer
+public class SpecificTargetShardInitializer: IInitializer
 {
     private Chunk _targetChunk;
 
-    public StateSpecificShardInitializer(Chunk targetChunk)
+    public SpecificTargetShardInitializer(Chunk targetChunk)
     {
         _targetChunk = targetChunk;
     }
