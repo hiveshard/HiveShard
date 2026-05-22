@@ -50,6 +50,62 @@ public class ShardAggregateStateTests
             )
         );
     }
+
+    private ServiceEnvironment GetMultiChunkEnvironment<TInitializer>()
+    where TInitializer : IInitializer
+    {
+        Chunk minChunk = new Chunk(-1, 0);
+        Chunk maxChunk = new Chunk(1, 0);
+        return HiveShardFactory.Create<InMemoryDeployment>(builder =>
+        {
+            builder.SetGridSize(minChunk, maxChunk);
+
+            var shards = new List<HiveShardIdentity>();
+            for (int x = minChunk.XCoord; x <= maxChunk.XCoord; x++)
+            {
+                for (int y = minChunk.YCoord; y <= maxChunk.YCoord; y++)
+                {
+                    Chunk chunk = new Chunk(x, y);
+                    var shardType = ShardType.From<StateShard>();
+                    HiveShardIdentity identity = new HiveShardIdentity(chunk, shardType, Guid.NewGuid());
+                    shards.Add(identity);
+                }
+            }
+
+            builder.ShardWorker(workerBuilder =>
+            {
+                foreach (var shard in shards)
+                {
+                    workerBuilder.AddShard(shard);
+                }
+
+                return workerBuilder;
+            });
+
+            InitializerEmitterIdentity initializerIdentity = new InitializerEmitterIdentity(new EmitterIdentity(typeof(TInitializer).FullName!));
+            builder.Initialize(initializationBuilder => initializationBuilder
+                .AddInitializer<TInitializer>(initializerIdentity)
+            );
+
+            builder.Events(eventBuilder =>
+            {
+                eventBuilder.RegisterEvent<InitializationEvent>(initializerIdentity);
+
+                foreach (var shard in shards)
+                {
+                    eventBuilder.RegisterEvent<DummyEvent>(shard);
+                }
+
+                return eventBuilder;
+            });
+
+            builder.TickerWorker(tickerWorkerBuilder => tickerWorkerBuilder
+                .GlobalTicker()
+                .Ticker<DummyEvent>()
+                .Ticker<InitializationEvent>()
+            );
+        });
+    }
     
     [Test]
     public async Task SingleChunkAllAggregate_Succeeds()
@@ -81,59 +137,8 @@ public class ShardAggregateStateTests
     [Test]
     public async Task MultiChunkAllAggregate_Succeeds()
     {
-        Chunk minChunk = new Chunk(-1, 0);
-        Chunk maxChunk = new Chunk(1, 0);
-        var serviceEnvironment = HiveShardFactory.Create<InMemoryDeployment>(builder =>
-        {
-            builder.SetGridSize(minChunk, maxChunk);
-
-            var shards = new List<HiveShardIdentity>();
-            for (int x = minChunk.XCoord; x <= maxChunk.XCoord; x++)
-            {
-                for (int y = minChunk.YCoord; y <= maxChunk.YCoord; y++)
-                {
-                    Chunk chunk = new Chunk(x, y);
-                    var shardType = ShardType.From<StateShard>();
-                    HiveShardIdentity identity = new HiveShardIdentity(chunk, shardType, Guid.NewGuid());
-                    shards.Add(identity);
-                }
-            }
-
-            builder.ShardWorker(workerBuilder =>
-            {
-                foreach (var shard in shards)
-                {
-                    workerBuilder.AddShard(shard);
-                }
-
-                return workerBuilder;
-            });
-
-            InitializerEmitterIdentity initializerIdentity = new InitializerEmitterIdentity(new EmitterIdentity("initializer"));
-            builder.Initialize(initializationBuilder => initializationBuilder
-                .AddInitializer<AllTargetShardInitializer>(initializerIdentity)
-            );
-
-            builder.Events(eventBuilder =>
-            {
-                eventBuilder.RegisterEvent<InitializationEvent>(initializerIdentity);
-
-                foreach (var shard in shards)
-                {
-                    eventBuilder.RegisterEvent<DummyEvent>(shard);
-                }
-
-                return eventBuilder;
-            });
-
-            builder.TickerWorker(tickerWorkerBuilder => tickerWorkerBuilder
-                .GlobalTicker()
-                .Ticker<DummyEvent>()
-                .Ticker<InitializationEvent>()
-            );
-        });
-
-        await HiveShardTest.Given(serviceEnvironment, TimeoutConfig.FromSeconds(10), builder =>
+        var environment = GetMultiChunkEnvironment<AllTargetShardInitializer>();
+        await HiveShardTest.Given(environment, TimeoutConfig.FromSeconds(10), builder =>
         {
             builder.ExpectShards<StateShard>(shards => shards
                 .Select(x => x.Initialized)
