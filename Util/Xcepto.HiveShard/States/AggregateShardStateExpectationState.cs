@@ -16,7 +16,10 @@ namespace Xcepto.HiveShard.States;
 public class AggregateShardStateExpectationState<THiveShard>: XceptoState
 where THiveShard: IHiveShard
 {
+    private static readonly TimeSpan StableFailureThreshold = TimeSpan.FromSeconds(1);
     private readonly AggregateExpectation<THiveShard> _expectation;
+    private DateTime? _currentFailureSinceUtc;
+    private string? _currentFailureDescription;
 
     public AggregateShardStateExpectationState(string name, AggregateExpectation<THiveShard> expectation) : base(name)
     {
@@ -46,10 +49,23 @@ where THiveShard: IHiveShard
         try
         {
             evaluation = _expectation.Evaluate(shards);
+            _currentFailureSinceUtc = null;
+            _currentFailureDescription = null;
         }
         catch (Exception e)
         {
             MostRecentFailingResult = new ConditionResult(shards, e.Message);
+            var now = DateTime.UtcNow;
+            if (_currentFailureDescription != e.Message)
+            {
+                _currentFailureDescription = e.Message;
+                _currentFailureSinceUtc = now;
+            }
+            else if (_currentFailureSinceUtc.HasValue && now - _currentFailureSinceUtc.Value >= StableFailureThreshold)
+            {
+                throw;
+            }
+
             evaluation = false;
         }
         return Task.FromResult(evaluation);

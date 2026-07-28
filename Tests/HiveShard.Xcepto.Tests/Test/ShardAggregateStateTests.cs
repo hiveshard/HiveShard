@@ -129,9 +129,9 @@ public class ShardAggregateStateTests
     }
     
     [Test]
-    public void SingleChunkAllAggregate_Fails()
+    public async Task SingleChunkAllAggregate_Fails()
     {
-        Assert.ThatAsync(async () =>
+        await Assert.ThatAsync(async () =>
             {
                 var environment = GetSingleChunkEnvironment<NoTargetShardInitializer>();
                 await HiveShardTest.Given(environment, builder =>
@@ -146,8 +146,8 @@ public class ShardAggregateStateTests
                         .All(Are.EqualTo(true))
                     );
                 });
-            }, Throws.Exception.Message.Contains("Expected: All are equal to True")
-                .And.Message.Contains("But was: [false]")
+            }, Throws.Exception.With.InnerException.Message.Contains("Expected: All are equal to True")
+                .And.InnerException.Message.Contains("But was: [false]")
         );
     }
     
@@ -170,9 +170,9 @@ public class ShardAggregateStateTests
     }
     
     [Test]
-    public void SingleChunkAnyAggregate_Fails()
+    public async Task SingleChunkAnyAggregate_Fails()
     {
-        Assert.ThatAsync(async () =>
+        await Assert.ThatAsync(async () =>
             {
                 var environment = GetSingleChunkEnvironment<NoTargetShardInitializer>();
                 await HiveShardTest.Given(environment, builder =>
@@ -187,8 +187,8 @@ public class ShardAggregateStateTests
                         .Any(Are.EqualTo(true))
                     );
                 });
-            }, Throws.Exception.Message.Contains("Expected: Any are equal to True")
-                .And.Message.Contains("But was: [false]")
+            }, Throws.Exception.With.InnerException.Message.Contains("Expected: Any are equal to True")
+                .And.InnerException.Message.Contains("But was: [false]")
         );
     }
     
@@ -211,9 +211,9 @@ public class ShardAggregateStateTests
     }
     
     [Test]
-    public void SingleChunkNoneAggregate_Fails()
+    public async Task SingleChunkNoneAggregate_Fails()
     {
-        Assert.ThatAsync(async () =>
+        await Assert.ThatAsync(async () =>
             {
                 var environment = GetSingleChunkEnvironment<AllTargetShardInitializer>();
                 await HiveShardTest.Given(environment, builder =>
@@ -228,8 +228,8 @@ public class ShardAggregateStateTests
                         .None(Are.EqualTo(true))
                     );
                 });
-            }, Throws.Exception.Message.Contains("Expected: None are equal to True")
-                .And.Message.Contains("But was: [true]")
+            }, Throws.Exception.With.InnerException.Message.Contains("Expected: None are equal to True")
+                .And.InnerException.Message.Contains("But was: [true]")
         );
     }
     
@@ -253,9 +253,9 @@ public class ShardAggregateStateTests
     }
     
     [Test]
-    public void MultiChunkAllAggregate_Fails()
+    public async Task MultiChunkAllAggregate_Fails()
     {
-        Assert.ThatAsync(async () =>
+        await Assert.ThatAsync(async () =>
         {
             var environment = GetMultiChunkEnvironment<SpecificTargetShardInitializer>();
             await HiveShardTest.Given(environment, builder =>
@@ -270,8 +270,8 @@ public class ShardAggregateStateTests
                     .All(Are.EqualTo(true))
                 );
             });
-        }, Throws.Exception.Message.Contains("Expected: All are equal to True")
-            .And.Message.Contains("But was: [true,false,false]")
+        }, Throws.Exception.With.InnerException.Message.Contains("Expected: All are equal to True")
+            .And.InnerException.Message.Contains("But was: [true,false,false]")
         );
     }
     
@@ -295,9 +295,9 @@ public class ShardAggregateStateTests
     
     
     [Test]
-    public void MultiChunkAnyAggregate_Fails()
+    public async Task MultiChunkAnyAggregate_Fails()
     {
-        Assert.ThatAsync(async () =>
+        await Assert.ThatAsync(async () =>
             {
                 var environment = GetMultiChunkEnvironment<NoTargetShardInitializer>();
                 await HiveShardTest.Given(environment, builder =>
@@ -312,8 +312,8 @@ public class ShardAggregateStateTests
                         .Any(Are.EqualTo(true))
                     );
                 });
-            }, Throws.Exception.Message.Contains("Expected: Any are equal to True")
-                .And.Message.Contains("But was: [false,false,false]")
+            }, Throws.Exception.With.InnerException.Message.Contains("Expected: Any are equal to True")
+                .And.InnerException.Message.Contains("But was: [false,false,false]")
         );
     }
     
@@ -336,9 +336,9 @@ public class ShardAggregateStateTests
     }
     
     [Test]
-    public void MultiChunkNoneAggregate_Fails()
+    public async Task MultiChunkNoneAggregate_Fails()
     {
-        Assert.ThatAsync(async () =>
+        await Assert.ThatAsync(async () =>
             {
                 var environment = GetMultiChunkEnvironment<AllTargetShardInitializer>();
                 await HiveShardTest.Given(environment, builder =>
@@ -353,8 +353,8 @@ public class ShardAggregateStateTests
                         .None(Are.EqualTo(true))
                     );
                 });
-            }, Throws.Exception.Message.Contains("Expected: None are equal to True")
-                .And.Message.Contains("But was: [true,true,true]")
+            }, Throws.Exception.With.InnerException.Message.Contains("Expected: None are equal to True")
+                .And.InnerException.Message.Contains("But was: [true,true,true]")
         );
     }
 }
